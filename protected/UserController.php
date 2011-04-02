@@ -22,26 +22,4 @@ class User_Controller extends ARGTech_Controller
 			readfile($site_root . 'protected/argtech_users/0');
 		}
 	}
-
-	/*
-	public function defaultAction($args)
-	{
-		require_once('classes/UserObject.php');
-		
-		$id = array_shift($args);
-		$user = new UserObject($id);
-		
-		if (!$user->isPublic()) {
-			$this->accessDenied();
-			return;
-		}
-		
-		$this->_smarty->display('header.tpl');
-		$this->_smarty->assign('user', $user);
-		$this->_smarty->display('user-bio-page.tpl');
-		$this->_smarty->display('footer.tpl');
-		
-		ActivityLog::log('userprofileviewed', $user, null, array());
-	}
-	*/
 }
