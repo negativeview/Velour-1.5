@@ -8,11 +8,13 @@ class ARGTech_Controller
 	public function __construct()
 	{
 		global $site_root;
+		global $phrase;
 		
 		require_once('includes/Smarty.class.php');
 		$this->_smarty = new Smarty();
 		$this->_smarty->template_dir = $site_root . 'protected/templates/';
 		$this->_smarty->compile_dir = $site_root . 'protected/templates_c/';
+		$this->_smarty->assign('phrase', $phrase);
 	}
 	
 	/**
@@ -28,9 +30,9 @@ class ARGTech_Controller
 	public function defaultAction($args)
 	{
 		require_once('classes/BaseObject.php');
-		$this->_smarty->display('header.tpl');
-
 		if (!count($args)) {
+			$this->_smarty->display('header.tpl');
+
 			$this->_smarty->assign('title', $this->_ownedType['name']);
 			$res = BaseObject::getAllByType($this->_ownedType['id']);
 			
@@ -40,8 +42,15 @@ class ARGTech_Controller
 			$this->_smarty->assign('per_page', 10);
 			$this->_smarty->assign('max_pages', ceil(count($res) / 10));
 			$this->_smarty->display('object-list.tpl');
-		}
 		
-		$this->_smarty->display('footer.tpl');
+			$this->_smarty->display('footer.tpl');
+		} else {
+			$this->details($args);
+		}
+	}
+	
+	public function details($args)
+	{
+		die("Need to override details.");
 	}
 }

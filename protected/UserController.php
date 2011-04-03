@@ -2,6 +2,7 @@
 
 require_once('ARGTechController.php');
 require_once('classes/ActivityLog.php');
+require_once('classes/UserObject.php');
 
 class User_Controller extends ARGTech_Controller
 {
@@ -21,5 +22,15 @@ class User_Controller extends ARGTech_Controller
 		} else {
 			readfile($site_root . 'protected/argtech_users/0');
 		}
+	}
+	
+	public function details($args)
+	{
+		$user_id = array_shift($args);
+		$user = UserObject::getById($user_id);
+		$this->_smarty->assign('user', $user);
+		$this->_smarty->display('header.tpl');
+		$this->_smarty->display('user-bio.tpl');
+		$this->_smarty->display('footer.tpl');
 	}
 }
