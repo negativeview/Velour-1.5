@@ -40,7 +40,7 @@ class UserObject extends BaseObject
 		$characters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890`~!@#$%^&*()-=_+[]\{}|;':,./<>?";
 		$salt = $characters[mt_rand(0, strlen($characters))] . $characters[mt_rand(0, strlen($characters))];
 		db_do("INSERT INTO user(email, passhash, signup, power, salt) VALUES('" . $username . "', '" .
-			MD5($salt . $passone) . "', NOW(), 1, '" . $salt . "')");
+			MD5($salt . $passone) . "', NOW(), 2, '" . $salt . "')");
 		$user_id = mysql_insert_id();
 		
 		db_do("INSERT INTO object_permissions(obj_type, obj_id, permission_type) VALUES(1, $user_id, 2)");
