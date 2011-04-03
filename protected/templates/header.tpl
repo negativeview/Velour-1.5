@@ -12,7 +12,7 @@
 		<link type="image/x-icon" rel="icon" href="/images/favicon-dark.png" />
 		{/if}
 
-		<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
+		<script type="text/javascript" src="/js/jquery.js"></script>
 		<script type="text/javascript" src="/js/jquery.mousewheel.js"></script>
 		<script type="text/javascript">
 			{literal}
@@ -26,12 +26,12 @@
 				var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
 				
 				var tmce = document.createElement('script'); tmce.type = 'text/javascript'; tmce.async = true;
-				tmce.src = 'http://www.argtechnologist.com/js/tiny_mce.js';
+				tmce.src = '/js/tiny_mce.js';
 				s.parentNode.insertBefore(tmce, s);
 				
 				$(tmce).load(function() {
 					var actions = document.createElement('script'); actions.type = 'text/javascript'; actions.async = true;
-					actions.src = 'http://www.argtechnologist.com/actions.php';
+					actions.src = '/js/actions.js';
 					s.parentNode.insertBefore(actions, s);					
 				});
 			})();
