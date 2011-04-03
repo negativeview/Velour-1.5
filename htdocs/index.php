@@ -34,12 +34,8 @@ switch(count($pieces)) {
 				$args = $pieces;
 				array_unshift($args, $id);
 			} else {
-				print_r($_SERVER);
-				die();
-				$action = $pieces[1];
-				for ($i = 2; $i < count($pieces); $i++) {
-					$args[] = $pieces[$i];
-				}
+				$action = array_shift($pieces);
+				$args = $pieces;
 			}
 		}
 }

@@ -40,16 +40,16 @@
 		<!-- This site is, and always will be, out of game for all client ARGs. That does not mean I can't use it for my own purposes. -->
 	</head>
 	<body>
+		<div id="loginout">
+			<a href="/login/">Login</a>
+			<a href="/signup/">Signup</a>
+		</div>
 		<div id="header">
 			<h1><a href="/"><img src="/logo.png" /></a></h1>
 			<h2>{$phrase}</h2>
 		</div>
 		<div id="wrapper">
-			{if isset($bubble_text)}
-				<div id="speechbubble"><div>
-				{$bubble_text}
-				</div></div>
-			{elseif rand(1, 200) == 42}
+			{if rand(1, 200) == 42}
 				<div id="speechbubble"><div>
 				Hello, my name is Percy. I'm here to help.
 				</div></div>
