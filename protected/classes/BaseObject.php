@@ -94,7 +94,7 @@ class BaseObject
 			return;
 		$this->_hasFetchedPermissions = true;
 		
-		$this->_permissionInfo = db_one("SELECT * FROM object_permissions WHERE obj_type = 1 AND obj_id = " . $this->_id);
+		$this->_permissionInfo = db_one("SELECT * FROM object_permissions WHERE obj_type = " . $this->_type . " AND obj_id = " . $this->_id);
 	}
 	
 	protected function _fetchType()
