@@ -16,9 +16,18 @@ class UserObject extends BaseObject
 	
 	public static function tryCreate($username, $passone, $passtwo, &$errors)
 	{
+		$username = trim($username);
+		if (!$username) {
+			$errors[] = 'Username cannot be blank.';
+		}
+		
 		$errors = array();
 		if ($passone != $passtwo) {
 			$errors[] = 'Passwords do not match.';
+		}
+		
+		if ($passone == '') {
+			$errors[] = 'Password cannot be an empty string.';
 		}
 		
 		$res = db_one("SELECT * FROM user WHERE email = '" . $username . "'");
@@ -33,6 +42,9 @@ class UserObject extends BaseObject
 		db_do("INSERT INTO user(email, passhash, signup, power, salt) VALUES('" . $username . "', '" .
 			MD5($salt . $passone) . "', NOW(), 1, '" . $salt . "')");
 		$user_id = mysql_insert_id();
+		
+		db_do("INSERT INTO object_permissions(obj_type, obj_id, permission_type) VALUES(1, $user_id, 2)");
+		
 		return UserObject::getById($user_id);
 	}
 	
@@ -63,11 +75,6 @@ class UserObject extends BaseObject
 	public function getImage()
 	{
 		return '<img src="/user/' . $this->_id . '/icon.png" />';
-	}
-	
-	public function isPublic()
-	{
-		return true;
 	}
 	
 	public function getName()

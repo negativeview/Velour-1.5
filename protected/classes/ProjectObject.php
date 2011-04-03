@@ -19,7 +19,6 @@ class ProjectObject extends BaseObject
 		return ProjectObject::$_projectsById['id' . $row['id']];
 	}
 	
-
 	public function __construct($id)
 	{
 		parent::__construct(2, $id, 'project');
@@ -34,11 +33,6 @@ class ProjectObject extends BaseObject
 	public function getImage()
 	{
 		return '<img src="/project/' . $this->_id . '/icon.png" />';
-	}
-	
-	public function isPublic()
-	{
-		return true;
 	}
 	
 	public function getName()

@@ -17,6 +17,8 @@ class BaseObject
 	protected $_tableName;
 	protected $_hasFetchedType = false;
 	protected $_typeInfo;
+	protected $_hasFetchedPermissions = false;
+	protected $_permissionInfo;
 	
 	public static function getAllByType($type)
 	{
@@ -86,6 +88,15 @@ class BaseObject
 		return '/' . $this->_typeInfo['slug'] . '/' . $this->_id . '/';
 	}
 	
+	protected function _fetchPermissions()
+	{
+		if ($this->_hasFetchedPermissions)
+			return;
+		$this->_hasFetchedPermissions = true;
+		
+		$this->_permissionInfo = db_one("SELECT * FROM object_permissions WHERE obj_type = 1 AND obj_id = " . $this->_id);
+	}
+	
 	protected function _fetchType()
 	{
 		if ($this->_hashFetchedType)
@@ -147,7 +158,8 @@ class BaseObject
 	 */
 	public function isPublic()
 	{
-		return false;
+		$this->_fetchPermissions();
+		return $this->_permissionInfo['permission_type'] == 1;
 	}
 	
 	/**
