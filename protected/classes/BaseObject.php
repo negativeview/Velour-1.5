@@ -97,6 +97,44 @@ class BaseObject
 		$this->_permissionInfo = db_one("SELECT * FROM object_permissions WHERE obj_type = " . $this->_type . " AND obj_id = " . $this->_id);
 	}
 	
+	public function getLogs()
+	{
+		require_once('LogEntry.php');
+		require_once('ProjectObject.php');
+		require_once('UserObject.php');
+		
+		$res = db_many(
+			"SELECT activity.*, activity_template.*, activity.id AS id " .
+			"FROM log_to_object " .
+			"LEFT JOIN activity ON (activity.id = log_to_object.log_id) " .
+			"LEFT JOIN activity_template ON (activity_template.id = activity.template) " . 
+			"WHERE obj_type = " . $this->_type . " AND obj_id = " . $this->_id);
+		$ret = array();
+		foreach ($res as $log) {
+			$can_see = false;
+
+			switch ($log['permission_type']) {
+				case 'user':
+					$user = UserObject::getById($log['user']);
+					if ($user->isPublic())
+						$can_see = true;
+					break;
+				case 'project':
+					$project = ProjectObject::getById($log['project']);
+					if ($project->isPublic())
+						$can_see = true;
+					break;
+				case 'system':
+					$can_see = false;
+					break;
+			}
+			
+			if ($can_see)
+				$ret[] = new LogEntry($log);
+		}
+		return $ret;
+	}
+	
 	protected function _fetchType()
 	{
 		if ($this->_hashFetchedType)

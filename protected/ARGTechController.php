@@ -12,6 +12,7 @@ class ARGTech_Controller
 		
 		require_once('includes/Smarty.class.php');
 		$this->_smarty = new Smarty();
+		$this->_smarty->assign('this', $this->_smarty);
 		$this->_smarty->template_dir = $site_root . 'protected/templates/';
 		$this->_smarty->compile_dir = $site_root . 'protected/templates_c/';
 		$this->_smarty->assign('phrase', $phrase);
@@ -47,6 +48,18 @@ class ARGTech_Controller
 		} else {
 			$this->details($args);
 		}
+	}
+	
+	public function logAction($args)
+	{
+		$obj_id = array_shift($args);
+		
+		$this->_smarty->assign('title', $this->_ownedType['name']);
+		$res = BaseObject::getByTypeAndId($this->_ownedType['id'], $obj_id);
+		$this->_smarty->assign('object', $res);
+		$this->_smarty->display('header.tpl');
+		$this->_smarty->display('object-log.tpl');
+		$this->_smarty->display('footer.tpl');
 	}
 	
 	public function details($args)
