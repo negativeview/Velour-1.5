@@ -32,7 +32,7 @@ class Signup_Controller extends ARGTech_Controller
 		}
 		
 		require_once('classes/ActivityLog.php');
-		ActivityLog::log('signup', $user, null);
+		ActivityLog::log('signup', $user, null, array());
 		$user->setLoggedIn();
 		
 		switch($submit) {
