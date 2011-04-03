@@ -5,6 +5,7 @@
 	{/foreach}
 {/if}
 <form method="POST" id="signupform" action="/signup/first">
+	<input type="hidden" name="submit" id="formstep" value="Step Two" />
 	<div class="inner">
 		<table>
 			<tr>
@@ -40,9 +41,10 @@
 				</td>
 			</tr>
 		</table>
+		<input type="submit" style="display: hidden;" />
 	</div>
 	<div class="bottombar">
-		<a href="#" class="bottombutton preferred">Step Two</a>
-		<a href="#" class="bottombutton skip">Skip The Rest</a>
+		<a href="#" onclick="$('#signupform').submit(); return false;" class="bottombutton preferred">Step Two</a>
+		<a href="#" onclick="$('#formstep').val('Skip The Rest'); $('#signupform').submit(); return false;" class="bottombutton skip">Skip The Rest</a>
 	</div>
 </form>
