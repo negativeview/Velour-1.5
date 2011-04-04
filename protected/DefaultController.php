@@ -29,6 +29,8 @@ class Default_Controller extends ARGTech_Controller
 		$public_braggables = array();
 		require_once('classes/BaseObject.php');
 		for ($i = 0; $i < $count; $i++) {
+			if (!$braggables[$i]['obj_id'])
+				continue;
 			$bo = BaseObject::getByTypeAndId($braggables[$i]['obj_type'], $braggables[$i]['obj_id']);
 			if ($bo->isPublic())
 				$public_braggables[] = $bo;
@@ -37,5 +39,7 @@ class Default_Controller extends ARGTech_Controller
 		$this->_smarty->assign('braggables', $public_braggables);
 		$this->_smarty->display('braggables-home.tpl');
 		$this->_smarty->display('footer.tpl');
+		
+		printf("%0.2fMB", memory_get_peak_usage() / (1024 * 1024));
 	}
 }

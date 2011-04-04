@@ -32,5 +32,8 @@ class User_Controller extends ARGTech_Controller
 		$this->_smarty->display('header.tpl');
 		$this->_smarty->display('user-bio.tpl');
 		$this->_smarty->display('footer.tpl');
+		
+		require_once('classes/ActivityLog.php');
+		ActivityLog::log('userprofileviewed', array(), array($user));
 	}
 }

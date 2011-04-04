@@ -183,7 +183,6 @@ if (isset($_SESSION['user'])) {
 
 $_num_db_queries = 0;
 $_queries = Array();
-//$smarty->assign_by_ref('queries', $_queries);
 
 function raw_query($q) {
 	global $_num_db_queries;

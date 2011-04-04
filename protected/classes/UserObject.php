@@ -52,12 +52,24 @@ class UserObject extends BaseObject
 	{
 		UserObject::$_usersById['id' . $row['id']] = new UserObject($row['id']);
 		UserObject::$_usersById['id' . $row['id']]->_rawData = $row;
+		UserObject::$_usersById['id' . $row['id']]->_hasFetchedRaw = true;
 		return UserObject::$_usersById['id' . $row['id']];
 	}
 	
 	public function __construct($id)
 	{
 		parent::__construct(1, $id, 'user');
+	}
+	
+	public static function tryLogin($username, $password)
+	{
+		$res = db_one("SELECT * FROM user WHERE email = '" . $username . "' AND passhash = MD5(CONCAT('" . $password . "', COALESCE(salt, 'argtech')))");
+		if ($res) {
+			require_once('classes/ActivityLog.php');
+			$_SESSION['user'] = $res['id'];
+			ActivityLog::log('login', array(), array(UserObject::getById($res['id'])));
+		}
+		return $res;
 	}
 	
 	public function setLoggedIn()
@@ -74,7 +86,7 @@ class UserObject extends BaseObject
 	
 	public function getImage()
 	{
-		return '<img src="/user/' . $this->_id . '/icon.png" />';
+		return '<a href="' . $this->toURL() . '"><img src="/user/' . $this->_id . '/icon.png" title="' . $this->getName() . '" /></a>';
 	}
 	
 	public function getName()

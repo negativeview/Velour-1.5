@@ -14,9 +14,9 @@
 		</div>
 		<div class="body">{$braggable->getBraggable()}</div>
 		<div class="bottombar">
-			<a href="{$braggable->getDiscussURL()}" class="bottombutton">Discuss</a>
-			<a href="{$braggable->getLogURL()}" class="bottombutton">Log</a>
-			<a href="{$braggable->getSubscribeURL()}" class="bottombutton">Subscribe</a>
+			<a href="{$braggable->getDiscussURL()}" class="bottom button">Discuss</a>
+			<a href="{$braggable->getLogURL()}" class="bottom button">Log</a>
+			<a href="{$braggable->getSubscribeURL()}" class="bottom button">Subscribe</a>
 		</div>
 	</div>
 {/foreach}

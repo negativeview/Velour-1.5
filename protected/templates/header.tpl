@@ -41,8 +41,14 @@
 	</head>
 	<body>
 		<div id="loginout">
-			<a href="/login/">Login</a>
-			<a href="/signup/">Signup</a>
+			<a href="/user/">Users</a>
+			<a href="/project/">Projects</a>
+			{if $logged_in_user}
+				<a href="/logout/">Logout</a>
+			{else}
+				<a href="/login/">Login</a>
+				<a href="/signup/">Signup</a>
+			{/if}
 		</div>
 		<div id="header">
 			<h1><a href="/"><img src="/logo.png" /></a></h1>

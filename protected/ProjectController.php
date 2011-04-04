@@ -21,4 +21,30 @@ class Project_Controller extends ARGTech_Controller
 			readfile($site_root . 'protected/argtech_projects/0');
 		}
 	}
+	
+	public function details($args)
+	{
+		require_once('classes/ProjectObject.php');
+		
+		$this->_smarty->display('header.tpl');
+		$project = ProjectObject::getByid($args[0]);
+		if (!$project->isPublic()) {
+			echo 'Error: You do not have permission to view this object.';
+			$this->_smarty->display('footer.tpl');
+			return;
+		}
+		$this->_smarty->assign('project', $project);
+		$this->_smarty->display('project-front-page.tpl');
+		$this->_smarty->display('footer.tpl');
+		
+		$objects = array();
+		$objects[] = $project;
+		
+		global $user;
+		if ($user)
+			$objects[] = $user;
+		
+		require_once('classes/ActivityLog.php');
+		ActivityLog::log('projectview', array(), $objects);
+	}
 }

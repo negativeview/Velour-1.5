@@ -22,7 +22,8 @@ class BaseObject
 	
 	public static function getAllByType($type)
 	{
-		$res = db_one("SELECT * FROM top_level_object WHERE id = '" . $type . "'");
+		require_once('ObjectType.php');
+		$res = ObjectType::getByid($type);
 		$className = $res['name'] . 'Object';
 		
 		require_once('classes/' . $className . '.php');
@@ -37,9 +38,25 @@ class BaseObject
 		return $ret;
 	}
 	
+	public static function getByTypeAndRow($type, $row)
+	{
+		require_once('classes/ObjectType.php');
+		
+		$res = ObjectType::getById($type);
+		if (!$res)
+			die("There is no top level object with id " . $type);
+		$className = $res['name'] . 'Object';
+
+		require_once('classes/' . $className . '.php');
+		return $className::getWithRow($row);
+	}
+	
 	public static function getByTypeAndId($type, $id)
 	{
-		$res = db_one("SELECT * FROM top_level_object WHERE id = '" . $type . "'");
+		require_once('classes/ObjectType.php');
+		$res = ObjectType::getById($type);
+		if (!$res)
+			die("There is no top level object with id " . $type);
 		$className = $res['name'] . 'Object';
 		
 		require_once('classes/' . $className . '.php');
@@ -55,8 +72,47 @@ class BaseObject
 	
 	public function getId()
 	{
-		$this->_fetch();
-		return $this->_rawData['id'];
+		return $this->_id;
+	}
+	
+	private $_hasDoneCanSee = false;
+	private $_canSee = false;
+	public function canSee()
+	{
+		if ($this->_hasDoneCanSee)
+			return $this->_canSee;
+		
+		$this->_hasDoneCanSee = true;
+		
+		global $user;
+		
+		// If they aren't logged in, the logic is the same as the public function.
+		// Skip a lot of work in that case.
+		if (!$user) {
+			$this->_canSee = $this->isPublic();
+			return $this->_canSee;
+		}
+		
+		// Even if we're logged in, if they're public, we can see it.
+		if ($this->isPublic()) {
+			$this->_canSee = true;
+			return true;
+		}
+
+		if ($this->userIsUnder()) {
+			$this->_canSee = true;
+			return true;
+		}
+
+		$res = db_one("SELECT * FROM obj_to_obj WHERE obj_type_left = 1 AND obj_id_right = '" . $user->getId() . 
+			"' AND obj_type_right = '" . $this->_typeInfo['id'] . "' AND obj_id_right = '" . $this->getId() . "'");
+		if ($res) {
+			$this->_canSee = true;
+			return true;
+		}
+
+		$this->_canSee = false;
+		return false;
 	}
 	
 	public function getDiscussURL()
@@ -67,14 +123,20 @@ class BaseObject
 	
 	public function getLogURL()
 	{
-		$this->_fetchType;
+		$this->_fetchType();
 		return '/' . $this->_typeInfo['slug'] . '/' . $this->_id . '/log/';
 	}
 	
 	public function getSubscribeURL()
 	{
-		$this->_fetchType;
+		$this->_fetchType();
 		return '/' . $this->_typeInfo['slug'] . '/' . $this->_id . '/subscribe/';
+	}
+	
+	public function getToDoURL()
+	{
+		$this->_fetchType();
+		return '/' . $this->_typeInfo['slug'] . '/' . $this->_id . '/todo/';
 	}
 	
 	public function toLink()
@@ -88,6 +150,49 @@ class BaseObject
 		return '/' . $this->_typeInfo['slug'] . '/' . $this->_id . '/';
 	}
 	
+	public function userIsUnder()
+	{
+		global $user;
+		
+		if (!$user)
+			return false;
+		
+		$this->_fetchObjectsUnder();
+		
+		foreach ($this->_subObjects as $subObject) {
+			if ($subObject->getTypeId() == 1 && $subObject->getId() == $user->getId())
+				return true;
+		}
+		return false;
+	}
+	
+	protected $_isOwned;
+	protected $_hasFetchedOwned;
+	
+	public function isOwned()
+	{
+		if ($this->_hasFetchedOwned)
+			return $this->_isOwned;
+		$this->_hasFetchedOwned = true;
+		
+		global $user;
+		
+		if (!$user) {
+			$this->_isOwned = false;
+			return false;
+		}
+		
+		$res = db_one("SELECT * FROM obj_to_obj WHERE obj_type_left = 1 AND obj_id_left = '" . $user->getID() .
+			"' AND obj_type_right = '" . $this->getTypeId() . "' AND obj_id_right = '" . $this->_id . "'");
+		if ($res) {
+			$this->_isOwned = true;
+			return true;
+		}
+		
+		$this->_isOwned = false;
+		return false;
+	}
+	
 	protected function _fetchPermissions()
 	{
 		if ($this->_hasFetchedPermissions)
@@ -95,6 +200,64 @@ class BaseObject
 		$this->_hasFetchedPermissions = true;
 		
 		$this->_permissionInfo = db_one("SELECT * FROM object_permissions WHERE obj_type = " . $this->_type . " AND obj_id = " . $this->_id);
+	}
+
+	protected $_subObjects;
+	protected $_haveFetchedSubObjects = false;
+	
+	protected function _fetchObjectsUnder()
+	{
+		if ($this->_haveFetchedSubObjects)
+			return;
+		$this->_haveFetchedSubObjects = true;
+		
+ 		$res = db_many("SELECT * FROM obj_to_obj WHERE obj_type_left = '" . $this->getTypeId() .
+			"' AND obj_id_left = '" . $this->getId() . "'");
+		$this->_subObjects = array();
+		foreach ($res as $object) {
+			$ob = BaseObject::getByTypeAndId($object['obj_type_right'], $object['obj_id_right']);
+			$this->_subObjects[] = $ob;			
+		}
+	}
+
+	public function getObjectsUnder()
+	{
+		$this->_fetchObjectsUnder();
+		return $this->_subObjects;
+	}
+	
+	public function getSubObjects($type, $autoExpand = false)
+	{
+		$this->_fetchObjectsUnder();
+		
+		$ret = array();
+		foreach($this->_subObjects as $subObject) {
+			if ($subObject->getTypeId() == $type)
+				$ret[] = $subObject;
+		}
+		
+		if ($autoExpand) {
+			$real_ret = array();
+			$ids = array();
+			foreach($ret as $r) {
+				if ($r->deflated())
+					$ids[] = $r->getId();
+			}
+			
+			if (count($ids) == 0)
+				return $ret;
+			
+			$type = ObjectType::getById($type);
+			
+			$res = db_many("SELECT * FROM " . $type['slug'] . " WHERE id IN('" . implode("', '", $ids) . "')");
+			foreach($res as $row) {
+				$real_ret[] = BaseObject::getByTypeAndRow($type['id'], $row);
+			}
+			
+			return $real_ret;
+		}
+		
+		return $ret;
 	}
 	
 	public function getLogs()
@@ -105,11 +268,15 @@ class BaseObject
 		
 		$res = db_many(
 			"SELECT activity.*, activity_template.*, activity.id AS id " .
-			"FROM log_to_object " .
-			"LEFT JOIN activity ON (activity.id = log_to_object.log_id) " .
-			"LEFT JOIN activity_template ON (activity_template.id = activity.template) " . 
-			"WHERE obj_type = " . $this->_type . " AND obj_id = " . $this->_id);
+			"FROM activity " .
+			"LEFT JOIN activity_template ON (activity.template = activity_template.id) " .
+			"WHERE activity.id IN (" .
+				"SELECT obj_id_left FROM obj_to_obj WHERE obj_type_left = 3 AND obj_type_right = '" . $this->getTypeId() . "' AND obj_id_right = '" . $this->getId() . "'" .
+			")"
+		);
 		$ret = array();
+		
+		$log_ids = array();
 		foreach ($res as $log) {
 			$can_see = false;
 
@@ -129,19 +296,43 @@ class BaseObject
 					break;
 			}
 			
-			if ($can_see)
+			if ($can_see) {
 				$ret[] = new LogEntry($log);
+				$log_ids[] = $log['id'];
+			}
 		}
+		
+		if (count($log_ids)) {
+			$res = db_many("SELECT * FROM activity_key_store WHERE activity IN ('" . implode("', '", $log_ids) . "')");
+			
+			foreach ($res as $activitykv) {
+				foreach ($ret as $activity) {
+					if ($activity->getId() == $activitykv['activity']) {
+						$activity->setKeyValue($activitykv['key'], $activitykv['value']);
+						break;
+					}
+				}
+			}
+		}
+		
 		return $ret;
 	}
 	
 	protected function _fetchType()
 	{
-		if ($this->_hashFetchedType)
+		require_once('classes/ObjectType.php');
+		
+		if ($this->_hasFetchedType)
 			return;
 		
 		$this->_hasFetchedType = true;
-		$this->_typeInfo = db_one("SELECT * FROM top_level_object WHERE id = '" . $this->_type . "'");
+		$this->_typeInfo = ObjectType::getById($this->_type);
+	}
+	
+	public function getTypeId()
+	{
+		$this->_fetchType();
+		return $this->_typeInfo['id'];
 	}
 	
 	public function getTypeName()
@@ -219,5 +410,10 @@ class BaseObject
 	public function getBraggable()
 	{
 		return '';
+	}
+	
+	public function deflated()
+	{
+		return !$this->_hasFetchedRaw;
 	}
 }
