@@ -87,4 +87,10 @@ class ProjectObject extends BaseObject
 		$this->_fetch();
 		return $this->_rawData['bio'];
 	}
+	
+	public function updateBio($bio)
+	{
+		$this->_rawData['bio'] = $bio;
+		db_do("UPDATE project SET bio = '" . mysql_real_escape_string($bio) . "' WHERE id = '" . $this->_id . "'");
+	}
 }

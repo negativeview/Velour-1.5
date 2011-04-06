@@ -84,6 +84,24 @@ class UserObject extends BaseObject
 		return $this->_rawData['signup'];
 	}
 	
+	public function isEditable()
+	{
+		global $user;
+		
+		if (!$user)
+			return false;
+			
+		if ($user->getID() == $this->_id)
+			return true;
+			
+		return false;
+	}
+	
+	public function updateBio($bio)
+	{
+		db_one("UPDATE user SET bio = '" . mysql_real_escape_string($bio) . "' WHERE id = '" . $this->_id . "'");
+	}
+	
 	public function getImage()
 	{
 		return '<a href="' . $this->toURL() . '"><img src="/user/' . $this->_id . '/icon.png" title="' . $this->getName() . '" /></a>';

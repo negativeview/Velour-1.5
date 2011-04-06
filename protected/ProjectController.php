@@ -28,6 +28,18 @@ class Project_Controller extends ARGTech_Controller
 		
 		$this->_smarty->display('header.tpl');
 		$project = ProjectObject::getByid($args[0]);
+
+		if ($_SERVER['REQUEST_METHOD'] == "POST" && isset($_POST['action'])) {
+			switch($_POST['action']) {
+				case 'generic-post':
+					if ($_POST['id'] == 'project-bio' && $project->isOwned()) {
+						$project->updateBio($_POST['value']);
+					}
+					break;
+			}
+			exit();
+		}
+
 		if (!$project->isPublic()) {
 			echo 'Error: You do not have permission to view this object.';
 			$this->_smarty->display('footer.tpl');

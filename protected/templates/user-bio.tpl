@@ -2,12 +2,12 @@
 {$user->getImage()}
 <div class="todo-body-wrapper inside-wrapper">
 	<div class="header-wrap">
-		{if $user == $logged_in_user}
-			<a href="#" class="button top">Edit</a>
+		{if $user->isEditable()}
+			<a href="#" class="button top edit" editable="user-bio">Edit</a>
 		{/if}
 		<div class="header-top-line">Biography</div>
 	</div>
-	<div class="inside-entry">
+	<div class="inside-entry" id="user-bio">
 		{$user->getBraggable()}
 	</div>
 </div>

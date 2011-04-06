@@ -1,3 +1,60 @@
+function edit_inline_rt() {
+	var button = $(this);
+	var id = button.attr('editable');
+	
+	var m = $('<textarea />');
+	var to_replace = $('#' + id);
+	var w = to_replace.width();
+	var h = to_replace.height();
+	
+	// Add the HTML contents from the replaced bit to the textarea.
+	m.html(to_replace.html());
+	m.attr('id', id + '_edit');
+	m.css('width', w + 'px');
+	m.css('height', h + 'px');
+	
+	to_replace.wrapInner(m);
+	
+	var ed = new tinymce.Editor(
+		document.getElementById(id + '_edit'),
+		{
+			theme: "advanced",
+			theme_advanced_buttons1: "bold,italic,underline,strikethrough,blockquote,|,forecolor,backcolor,|,link,unlink,|,sub,sup,|,formatselect,image,code,hr",
+			theme_advanced_buttons2: "",
+			convert_urls: false,
+			id: id + '_edit_raw'
+		}
+	);
+	ed.render(true);
+	
+	button.html('Save');
+	button.unbind('click');
+	button.click(
+		function() {
+			var content = tinyMCE.activeEditor.getContent();
+			$.post(
+				document.location.href,
+				{
+					action: 'generic-post',
+					id: id,
+					value: content,
+				},
+				function(res) {
+					$('#' + id + '_edit').detach();
+					tinyMCE.activeEditor.remove();
+					to_replace.wrapInner(content);
+					button.html('Edit');
+					button.unbind('click');
+					button.click(edit_inline_rt);
+				}
+			);
+			return false;
+		}
+	);
+	
+	return false;
+}
+
 function setup_reply() {
 	tinyMCE.init({
 		mode: "textareas",
@@ -30,12 +87,16 @@ function setup_date(t) {
 $(document).ready(
 	function() {
 		setInterval(check_favicon, 10000);
-		$('.time').each(function(it, el) {
-			$(el).html(setup_date($(el).html()));
+		$('.button.edit').each(function(idx, el) {
+			var e = $(el);
+			if (e.attr('editable')) {
+				var el = $('#' + e.attr('editable'));
+				if (el) {
+					e.click(edit_inline_rt);
+				}
+			} else {
+				console.log('no editable');
+			}
 		});
-		setup_reply();
-		if (document.sub_load) {
-			sub_load();
-		}
 	}
 );

@@ -8,11 +8,11 @@
 			<div class="header-top-line">
 				Biography
 				{if $project->isOwned()}
-					<a href="#" class="top button">Edit</a>
+					<a href="#" class="top button edit" editable="project-bio">Edit</a>
 				{/if}
 			</div>
 		</div>
-		<div class="biography-entry inside-entry">{$project->getBraggable()}</div>
+		<div class="biography-entry inside-entry" id="project-bio">{$project->getBraggable()}</div>
 	</div>
 	<div class="roster-wrapper inside-wrapper">
 		<div class="header-wrap">

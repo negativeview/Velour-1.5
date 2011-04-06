@@ -28,6 +28,18 @@ class User_Controller extends ARGTech_Controller
 	{
 		$user_id = array_shift($args);
 		$user = UserObject::getById($user_id);
+
+		if ($_SERVER['REQUEST_METHOD'] == "POST" && isset($_POST['action'])) {
+			switch($_POST['action']) {
+				case 'generic-post':
+					if ($_POST['id'] == 'user-bio' && $user->isEditable()) {
+						$user->updateBio($_POST['value']);
+					}
+					break;
+			}
+			exit();
+		}
+
 		$this->_smarty->assign('user', $user);
 		$this->_smarty->display('header.tpl');
 		$this->_smarty->display('user-bio.tpl');
