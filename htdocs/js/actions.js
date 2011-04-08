@@ -27,6 +27,7 @@ function edit_inline_rt() {
 	);
 	ed.render(true);
 	
+	button.attr('original_html', button.html());
 	button.html('Save');
 	button.unbind('click');
 	button.click(
@@ -43,7 +44,7 @@ function edit_inline_rt() {
 					$('#' + id + '_edit').detach();
 					tinyMCE.activeEditor.remove();
 					to_replace.wrapInner(content);
-					button.html('Edit');
+					button.html(button.attr('original_html'));
 					button.unbind('click');
 					button.click(edit_inline_rt);
 				}
@@ -53,17 +54,6 @@ function edit_inline_rt() {
 	);
 	
 	return false;
-}
-
-function setup_reply() {
-	tinyMCE.init({
-		mode: "textareas",
-		theme: "advanced",
-		width: '540',
-		height: '200',
-		theme_advanced_buttons1: "bold,italic,underline,strikethrough,blockquote,|,forecolor,backcolor,|,link,unlink,|,sub,sup,|,formatselect,image,code,hr",
-		theme_advanced_buttons2: ""
-	});
 }
 
 function twoDigits(n) {
@@ -94,8 +84,6 @@ $(document).ready(
 				if (el) {
 					e.click(edit_inline_rt);
 				}
-			} else {
-				console.log('no editable');
 			}
 		});
 	}

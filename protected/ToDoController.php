@@ -10,15 +10,29 @@ class Todo_Controller extends ARGTech_Controller
 		parent::__construct();
 		$this->_ownedType = array('name' => 'ToDos', 'id' => 4);
 	}
-	
+
 	public function details($args)
 	{
-		$todo_id = array_shift($args);
-		$todo = TodoObject::getById($todo_id);
+		if ($_SERVER['REQUEST_METHOD'] == "POST" && isset($_POST['action'])) {
+			$todo_id = array_shift($args);
+			$todo = TodoObject::getById($todo_id);
 
-		$this->_smarty->display('header.tpl');
-		$this->_smarty->assign('todo', $todo);
-		$this->_smarty->display('todo-body.tpl');
-		$this->_smarty->display('footer.tpl');
+			switch($_POST['action']) {
+				case 'generic-post':
+					switch($_POST['id']) {
+						case 'summary':
+							if ($todo->isOwned())
+								db_do("UPDATE todo SET body = '" . $_POST['value'] . "' WHERE id = '$todo_id'");
+							break;
+						case 'add-comment':
+							if ($todo->isOwned())
+								$todo->addComment($_POST['value']);
+							break;
+					}
+			}
+			exit();
+		}
+		parent::details($args);
 	}
+	
 }

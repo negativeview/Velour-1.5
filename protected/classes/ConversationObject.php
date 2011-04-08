@@ -1,6 +1,8 @@
 <?php
 
 require_once('classes/BaseObject.php');
+require_once('classes/ProjectObject.php');
+
 class ConversationObject extends BaseObject
 {
 	private static $_conversationsById = array();

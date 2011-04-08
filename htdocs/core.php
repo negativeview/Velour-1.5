@@ -55,7 +55,6 @@ $catch_phrases = Array(
 	'Technology <span class="hilight">storyboard.</span>',
 	'Supplying your <span class="hilight">fix</span>... of technology.',
 	'<span class="hilight">Hooked</span> on ARGs!',
-	'There are always <span class="hilight">two</span> promotions running.',
 	'Made with <span class="hilight">pixels</span>.',
 	'These are <span class="hilight">random</span>. <span class="hilight">Nobody</span> notices at first.',
 	'Let\'s have some <span class="hilight">new</span> clich&eacute;s.',

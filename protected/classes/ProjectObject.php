@@ -24,8 +24,6 @@ class ProjectObject extends BaseObject
 	{
 		global $user;
 		
-		$this->_fetchType();
-
 		$sees_full = false;
 		if ($user) {
 			if ($this->userIsUnder($user))

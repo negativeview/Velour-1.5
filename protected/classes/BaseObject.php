@@ -1,5 +1,7 @@
 <?php
 
+require_once('ObjectType.php');
+
 /**
  * Base object for all ARGTech top-level-objects.
  *
@@ -10,13 +12,10 @@
  */
 class BaseObject
 {
-	protected $_type;
 	protected $_id;
 	protected $_hasFetchedRaw = false;
 	protected $_rawData;
 	protected $_tableName;
-	protected $_hasFetchedType = false;
-	protected $_typeInfo;
 	protected $_hasFetchedPermissions = false;
 	protected $_permissionInfo;
 	
@@ -65,9 +64,14 @@ class BaseObject
 	
 	public function __construct($type, $id, $tableName)
 	{
-		$this->_type = $type;
+		$this->_type = new ObjectType($type);
 		$this->_id = $id;
 		$this->_tableName = $tableName;
+	}
+	
+	public function getType()
+	{
+		return $this->_type;
 	}
 	
 	public function getId()
@@ -105,7 +109,7 @@ class BaseObject
 		}
 
 		$res = db_one("SELECT * FROM obj_to_obj WHERE obj_type_left = 1 AND obj_id_right = '" . $user->getId() . 
-			"' AND obj_type_right = '" . $this->_typeInfo['id'] . "' AND obj_id_right = '" . $this->getId() . "'");
+			"' AND obj_type_right = '" . $this->_type->getID() . "' AND obj_id_right = '" . $this->getId() . "'");
 		if ($res) {
 			$this->_canSee = true;
 			return true;
@@ -117,26 +121,22 @@ class BaseObject
 	
 	public function getDiscussURL()
 	{
-		$this->_fetchType();
-		return '/' . $this->_typeInfo['slug'] . '/' . $this->_id . '/comments/';
+		return '/' . $this->_type->getSlug() . '/' . $this->_id . '/comments/';
 	}
 	
 	public function getLogURL()
 	{
-		$this->_fetchType();
-		return '/' . $this->_typeInfo['slug'] . '/' . $this->_id . '/log/';
+		return '/' . $this->_type->getSlug() . '/' . $this->_id . '/log/';
 	}
 	
 	public function getSubscribeURL()
 	{
-		$this->_fetchType();
-		return '/' . $this->_typeInfo['slug'] . '/' . $this->_id . '/subscribe/';
+		return '/' . $this->_type->getSlug() . '/' . $this->_id . '/subscribe/';
 	}
 	
 	public function getToDoURL()
 	{
-		$this->_fetchType();
-		return '/' . $this->_typeInfo['slug'] . '/' . $this->_id . '/todo/';
+		return '/' . $this->_type->getSlug() . '/' . $this->_id . '/todo/';
 	}
 	
 	public function toLink()
@@ -146,8 +146,7 @@ class BaseObject
 	
 	public function toURL()
 	{
-		$this->_fetchType();
-		return '/' . $this->_typeInfo['slug'] . '/' . $this->_id . '/';
+		return '/' . $this->_type->getSlug() . '/' . $this->_id . '/';
 	}
 	
 	public function userIsUnder()
@@ -168,6 +167,17 @@ class BaseObject
 	
 	protected $_isOwned;
 	protected $_hasFetchedOwned;
+	
+	public function addComment($body)
+	{
+		global $user;
+		
+		db_do("INSERT INTO comment(body, whenit) VALUES('$body', now())");
+		$comment_id = mysql_insert_id();
+		
+		db_do("INSERT INTO obj_to_obj(obj_type_left, obj_id_left, obj_type_right, obj_id_right) VALUES(1, '" . $user->getID() . "', 11, $comment_id)");
+		db_do("INSERT INTO obj_to_obj(obj_type_left, obj_id_left, obj_type_right, obj_id_right) VALUES('" . $this->getType()->getID() . "', '" . $this->_id . "', 11, $comment_id)");
+	}
 	
 	public function isOwned()
 	{
@@ -199,7 +209,8 @@ class BaseObject
 			return;
 		$this->_hasFetchedPermissions = true;
 		
-		$this->_permissionInfo = db_one("SELECT * FROM object_permissions WHERE obj_type = " . $this->_type . " AND obj_id = " . $this->_id);
+		$this->_permissionInfo = db_one(
+			"SELECT * FROM object_permissions WHERE obj_type = " . $this->_type->getID() . " AND obj_id = " . $this->_id);
 	}
 
 	protected $_subObjects;
@@ -318,27 +329,14 @@ class BaseObject
 		return $ret;
 	}
 	
-	protected function _fetchType()
-	{
-		require_once('classes/ObjectType.php');
-		
-		if ($this->_hasFetchedType)
-			return;
-		
-		$this->_hasFetchedType = true;
-		$this->_typeInfo = ObjectType::getById($this->_type);
-	}
-	
 	public function getTypeId()
 	{
-		$this->_fetchType();
-		return $this->_typeInfo['id'];
+		return $this->_type->getID();
 	}
 	
 	public function getTypeName()
 	{
-		$this->_fetchType();
-		return $this->_typeInfo['name'];
+		return $this->_type->getName();
 	}
 	
 	public function getCreated()
@@ -350,7 +348,9 @@ class BaseObject
 	public function getOwner()
 	{
 		$this->_fetch();
-		return $this->_rawData['user_id'];
+		if (isset($this->_rawData['user_id']))
+			return UserObject::getById($this->_rawData['user_id']);
+		return null;
 	}
 	
 	/**

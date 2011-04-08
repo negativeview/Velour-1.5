@@ -50,13 +50,13 @@ class Project_Controller extends ARGTech_Controller
 		$this->_smarty->display('footer.tpl');
 		
 		$objects = array();
-		$objects[] = $project;
 		
 		global $user;
 		if ($user)
 			$objects[] = $user;
 		
+		$objects[] = $project;
 		require_once('classes/ActivityLog.php');
-		ActivityLog::log('projectview', array(), $objects);
+		ActivityLog::log('project', 'view', array(), $objects);
 	}
 }

@@ -67,7 +67,7 @@ class UserObject extends BaseObject
 		if ($res) {
 			require_once('classes/ActivityLog.php');
 			$_SESSION['user'] = $res['id'];
-			ActivityLog::log('login', array(), array(UserObject::getById($res['id'])));
+			ActivityLog::log('system', 'login', array(), array(UserObject::getById($res['id'])));
 		}
 		return $res;
 	}
