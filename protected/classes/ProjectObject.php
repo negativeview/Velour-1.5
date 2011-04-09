@@ -31,9 +31,9 @@ class ProjectObject extends BaseObject
 		}
 		
 		if ($sees_full)
-			return '/' . $this->_typeInfo['slug'] . '/' . $this->_id . '/conversation/';
+			return '/' . $this->_type->getSlug() . '/' . $this->_id . '/conversation/';
 		else
-			return '/' . $this->_typeInfo['slug'] . '/' . $this->_id . '/comments/';
+			return '/' . $this->_type->getSlug() . '/' . $this->_id . '/comments/';
 	}
 	
 	public function __construct($id)
