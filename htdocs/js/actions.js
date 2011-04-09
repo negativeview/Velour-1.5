@@ -41,6 +41,10 @@ function edit_inline_rt() {
 					value: content,
 				},
 				function(res) {
+					if (res) {
+						alert(res);
+						return;
+					}
 					$('#' + id + '_edit').detach();
 					tinyMCE.activeEditor.remove();
 					to_replace.wrapInner(content);

@@ -8,11 +8,11 @@
 			<div class="header-top-line">
 				Biography
 				{if $project->isOwned()}
-					<a href="#" class="top button edit" editable="project-bio">Edit</a>
+					<a href="#" class="top button edit" editable="summary">Edit</a>
 				{/if}
 			</div>
 		</div>
-		<div class="biography-entry inside-entry" id="project-bio">{$project->getBraggable()}</div>
+		<div class="biography-entry inside-entry" id="summary">{$project->getBraggable()}</div>
 	</div>
 	<div class="roster-wrapper inside-wrapper">
 		<div class="header-wrap">
@@ -34,20 +34,6 @@
 				</div>
 			{/foreach}
 		</div>
-	</div>
-	<div class="log-wrapper inside-wrapper">
-		<div class="header-wrap">
-			<div class="header-top-line">Activity</div>
-		</div>
-		{foreach from=$project->getLogs() item=log}
-			<div class="log-entry inside-entry">
-				{$log->toHTML()}
-			</div>
-		{foreachelse}
-			<div class="log-entry inside-entry">
-				There is no activity to report.
-			</div>
-		{/foreach}
 	</div>
 {if $project->userIsUnder()}
 </div>

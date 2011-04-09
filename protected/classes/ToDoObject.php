@@ -67,13 +67,6 @@ class ToDoObject extends BaseObject
 		$this->_id = $id;
 	}
 	
-	public function getBraggable()
-	{
-		$this->_fetch();
-		
-		return $this->_rawData['body'];
-	}
-	
 	public function canSee()
 	{
 		$this->_fetch();
