@@ -22,19 +22,9 @@ class BaseObject
 	public static function getAllByType($type)
 	{
 		require_once('ObjectType.php');
-		$res = ObjectType::getByid($type);
-		$className = $res['name'] . 'Object';
+		$res = new ObjectType($type);
 		
-		require_once('classes/' . $className . '.php');
-		
-		$table_name = $res['slug'];
-		$res = db_many("SELECT * FROM " . $table_name);
-		$ret = array();
-		foreach ($res as $r) {
-			$ret[] = $className::getWithRow($r);
-		}
-		
-		return $ret;
+		return $res->getAll();
 	}
 	
 	public static function getByTypeAndRow($type, $row)
@@ -53,10 +43,10 @@ class BaseObject
 	public static function getByTypeAndId($type, $id)
 	{
 		require_once('classes/ObjectType.php');
-		$res = ObjectType::getById($type);
+		$res = new ObjectType($type);
 		if (!$res)
 			die("There is no top level object with id " . $type);
-		$className = $res['name'] . 'Object';
+		$className = $res->getName() . 'Object';
 		
 		require_once('classes/' . $className . '.php');
 		return $className::getById($id);
@@ -366,6 +356,12 @@ class BaseObject
 		
 		$this->_hasFetchedRaw = true;
 		$this->_rawData = db_one("SELECT * FROM " . $this->_tableName . " WHERE id = '" . $this->_id . "'");
+	}
+	
+	public function setRaw($row)
+	{
+		$this->_hasFetchedRaw = true;
+		$this->_rawData = $row;
 	}
 	
 	/**
