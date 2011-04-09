@@ -55,9 +55,4 @@
 			<h2>{$phrase}</h2>
 		</div>
 		<div id="wrapper">
-			{if rand(1, 200) == 42}
-				<div id="speechbubble"><div>
-				Hello, my name is Percy. I'm here to help.
-				</div></div>
-			{/if}
 			<div class="main">

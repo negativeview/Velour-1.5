@@ -91,21 +91,6 @@ h2 .hilight {
 a img {
 	border: 0px;
 }
-#speechbubble {
-	position: absolute;
-	right: 80px;
-	top: -255px;
-	width: 483px;
-	height: 140px;
-	background-image: url('images/speechbubble.png');
-}
-#speechbubble div {
-	padding-left: 100px;
-	padding-top: 10px;
-	padding-bottom: 10px;
-	padding-right: 10px;
-	font-family: "Palatino Linotype", Palatino, serif;
-}
 .sub {
 	font-size: 0.75em;
 }
