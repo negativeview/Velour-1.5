@@ -17,6 +17,12 @@ class CommentObject extends BaseObject
 		return CommentObject::$_commentById['id' . $id];
 	}
 
+	public function getCreated()
+	{
+		$this->_fetch();
+		return $this->_rawData['whenit'];
+	}
+	
 	public static function getWithRow($row)
 	{
 		CommentObject::$_commentById['id' . $row['id']] = new CommentObject($row['id']);

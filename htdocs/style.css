@@ -597,6 +597,12 @@ tr.header-wrap td {
 .inside-entry {
 	padding: 5px;
 }
+.inside-wrapper.comments .inside-entry {
+	overflow: auto;
+	border: 0px solid #DDD;
+	border-bottom-width: 1px;
+	margin: 10px;
+}
 .inside-wrapper {
 	border: 1px solid #AAA;
 	margin-bottom: 10px;
@@ -655,4 +661,21 @@ tr.header-wrap td {
 	line-height: 24px;
 	text-align: center;
 	background-image: url('/images/layer.png');
+}
+.left-side {
+	width: 100px;
+	float: left;
+	vertical-align: bottom;
+	text-align: center;
+}
+.right-side {
+	width: 740px;
+	float: right;
+}
+#project-left-wrapper .right-side {
+	width: 540px;
+}
+.created-ts {
+	font-size: 75%;
+	color: #666;
 }

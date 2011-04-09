@@ -154,6 +154,12 @@ class ARGTech_Controller
 							else
 								echo 'You are not allowed to do that.';
 							break;
+						case 'add-comment':
+							if ($obj->canSee())
+								$obj->addComment($_POST['value']);
+							else
+								echo 'You are not allowed to do that.';
+							break;
 					}
 			}
 			exit();
