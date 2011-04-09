@@ -162,8 +162,12 @@ class BaseObject
 	{
 		global $user;
 		
-		db_do("INSERT INTO comment(body, whenit) VALUES('$body', now())");
+		$body = mysql_real_escape_string($body);
+		
+		db_do("INSERT INTO comment(whenit) VALUES(now())");
 		$comment_id = mysql_insert_id();
+		
+		db_do("INSERT INTO obj_desc(obj_type, obj_id, description) VALUES(11, '$comment_id', '$body')");
 		
 		db_do("INSERT INTO obj_to_obj(obj_type_left, obj_id_left, obj_type_right, obj_id_right) VALUES(1, '" . $user->getID() . "', 11, $comment_id)");
 		db_do("INSERT INTO obj_to_obj(obj_type_left, obj_id_left, obj_type_right, obj_id_right) VALUES('" . $this->getType()->getID() . "', '" . $this->_id . "', 11, $comment_id)");
@@ -282,9 +286,12 @@ class BaseObject
 	
 	public function getOwner()
 	{
-		$this->_fetch();
-		if (isset($this->_rawData['user_id']))
-			return UserObject::getById($this->_rawData['user_id']);
+		$this->_fetchSuperObjects();
+		foreach ($this->_superObjects as $obj) {
+			if ($obj['obj_type_left'] == 1)
+				return BaseObject::getByTypeAndId(1, $obj['obj_id_left']);
+		}
+		
 		return null;
 	}
 	
@@ -403,4 +410,16 @@ class BaseObject
 	{
 		return !$this->_hasFetchedRaw;
 	}
+	
+	protected $_hasFetchedSuperObjects = false;
+	protected function _fetchSuperObjects()
+	{
+		if ($this->_hasFetchedSuperObjects)
+			return;
+		
+		$this->_hasFetchedSuperObjects = true;
+		
+		$this->_superObjects = db_many("SELECT * FROM obj_to_obj WHERE obj_type_right = '" . $this->getType()->getID() . "' AND obj_id_right = '" . $this->_id . "'");	
+	}
+	
 }

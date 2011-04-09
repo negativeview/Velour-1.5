@@ -1,8 +1,10 @@
-<div class="todo-body-wrapper inside-wrapper">
-	<div class="header-wrap">
-		<div class="header-top-line">
-			{$object->getName()}
-		</div>
+<div class="todo-body-entry inside-entry">
+	<div class="left-side">
+		{assign var=owner value=$object->getOwner()}
+		{$owner->getImage()}
+		<div class="created-ts">{$object->getCreated()}</div>
 	</div>
-	<div class="todo-body-entry inside-entry">{$object->getBody()}</div>
+	<div class="right-side">
+		{$object->getBraggable()}
+	</div>
 </div>
