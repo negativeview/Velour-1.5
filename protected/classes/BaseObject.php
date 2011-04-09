@@ -362,6 +362,41 @@ class BaseObject
 		} else {
 			db_do("INSERT INTO obj_desc(obj_type, obj_id, description) VALUES('" . $this->_type->getID() . "', '" . $this->_id . "', '$braggable')");
 		}
+		
+		global $user;
+		$objects = array();
+		$objects[] = $user;
+		$objects[] = $this;
+		
+		db_do("DELETE FROM obj_to_keyword WHERE obj_type = '" . $this->_type->getID() . "' AND obj_id = '" . $this->_id . "'");
+
+		$stripped_braggable = strip_tags($braggable);
+		$words = preg_split('/[^a-zA-Z0-9]/', $stripped_braggable);
+		$final_arr = array();
+		foreach ($words as $word) {
+			$word = strtolower(trim($word));
+			if ($word == '')
+				continue;
+				
+			if (!isset($final_arr[$word]))
+				$final_arr[$word] = 0;
+				
+			$final_arr[$word]++;
+		}
+		
+		foreach ($final_arr as $k => $v) {
+			$res = db_one("SELECT * FROM keywords WHERE word = '$k'");
+			if ($res) {
+				db_do("INSERT INTO obj_to_keyword(keyword_id, obj_type, obj_id, count) VALUES('" . $res['id'] . "', '" . $this->_type->getID() . "', '" . $this->_id . "', $v)");
+			} else {
+				db_do("INSERT INTO keywords(word) VALUES('$k')");
+				$id = mysql_insert_id();
+				db_do("INSERT INTO obj_to_keyword(keyword_id, obj_type, obj_id, count) VALUES('$id', '" . $this->_type->getID() . "', '" . $this->_id . "', $v)");
+			}
+		}
+		
+		require_once('classes/ActivityLog.php');
+		ActivityLog::log('general', 'summary-update', array(), $objects);
 	}
 		
 	public function deflated()
