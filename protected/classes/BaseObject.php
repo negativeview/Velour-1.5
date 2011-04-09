@@ -31,10 +31,10 @@ class BaseObject
 	{
 		require_once('classes/ObjectType.php');
 		
-		$res = ObjectType::getById($type);
+		$res = new ObjectType($type);
 		if (!$res)
 			die("There is no top level object with id " . $type);
-		$className = $res['name'] . 'Object';
+		$className = $res->getName() . 'Object';
 
 		require_once('classes/' . $className . '.php');
 		return $className::getWithRow($row);
@@ -182,6 +182,9 @@ class BaseObject
 			return false;
 		}
 		
+		if ($user == $this)
+			return true;
+		
 		$res = db_one("SELECT * FROM obj_to_obj WHERE obj_type_left = 1 AND obj_id_left = '" . $user->getID() .
 			"' AND obj_type_right = '" . $this->getTypeId() . "' AND obj_id_right = '" . $this->_id . "'");
 		if ($res) {
@@ -248,72 +251,14 @@ class BaseObject
 			if (count($ids) == 0)
 				return $ret;
 			
-			$type = ObjectType::getById($type);
+			$type = new ObjectType($type);
 			
-			$res = db_many("SELECT * FROM " . $type['slug'] . " WHERE id IN('" . implode("', '", $ids) . "')");
+			$res = db_many("SELECT * FROM " . $type->getSlug() . " WHERE id IN('" . implode("', '", $ids) . "')");
 			foreach($res as $row) {
-				$real_ret[] = BaseObject::getByTypeAndRow($type['id'], $row);
+				$real_ret[] = BaseObject::getByTypeAndRow($type->getID(), $row);
 			}
 			
 			return $real_ret;
-		}
-		
-		return $ret;
-	}
-	
-	public function getLogs()
-	{
-		require_once('LogEntry.php');
-		require_once('ProjectObject.php');
-		require_once('UserObject.php');
-		
-		$res = db_many(
-			"SELECT activity.*, activity_template.*, activity.id AS id " .
-			"FROM activity " .
-			"LEFT JOIN activity_template ON (activity.template = activity_template.id) " .
-			"WHERE activity.id IN (" .
-				"SELECT obj_id_left FROM obj_to_obj WHERE obj_type_left = 3 AND obj_type_right = '" . $this->getTypeId() . "' AND obj_id_right = '" . $this->getId() . "'" .
-			")"
-		);
-		$ret = array();
-		
-		$log_ids = array();
-		foreach ($res as $log) {
-			$can_see = false;
-
-			switch ($log['permission_type']) {
-				case 'user':
-					$user = UserObject::getById($log['user']);
-					if ($user->isPublic())
-						$can_see = true;
-					break;
-				case 'project':
-					$project = ProjectObject::getById($log['project']);
-					if ($project->isPublic())
-						$can_see = true;
-					break;
-				case 'system':
-					$can_see = false;
-					break;
-			}
-			
-			if ($can_see) {
-				$ret[] = new LogEntry($log);
-				$log_ids[] = $log['id'];
-			}
-		}
-		
-		if (count($log_ids)) {
-			$res = db_many("SELECT * FROM activity_key_store WHERE activity IN ('" . implode("', '", $log_ids) . "')");
-			
-			foreach ($res as $activitykv) {
-				foreach ($ret as $activity) {
-					if ($activity->getId() == $activitykv['activity']) {
-						$activity->setKeyValue($activitykv['key'], $activitykv['value']);
-						break;
-					}
-				}
-			}
 		}
 		
 		return $ret;
@@ -398,16 +343,27 @@ class BaseObject
 		return '';
 	}
 	
-	/**
-	 * If you ever get on the home page as a super-awesome object, what do you want to be displayed for you?
-	 *
-	 * There are no real requirements for this. It will be placed as-is into the home page. Valid HTML, please.
-	 */
+	protected $_hasGottenBraggable = false;
 	public function getBraggable()
 	{
-		return '';
+		if (!$this->_hasGottenBraggable) {
+			$this->_braggable = db_one("SELECT * FROM obj_desc WHERE obj_type = '" . $this->_type->getID() . "' AND obj_id = '" . $this->_id . "'");
+			$this->_hasGottenBraggable = true;
+		}
+		
+		return $this->_braggable['description'];
 	}
 	
+	public function setBraggable($braggable)
+	{
+		$this->getBraggable();
+		if ($this->_braggable) {
+			db_do("UPDATE obj_desc SET description = '$braggable' WHERE id = '" . $this->_braggable['id'] . "'");
+		} else {
+			db_do("INSERT INTO obj_desc(obj_type, obj_id, description) VALUES('" . $this->_type->getID() . "', '" . $this->_id . "', '$braggable')");
+		}
+	}
+		
 	public function deflated()
 	{
 		return !$this->_hasFetchedRaw;

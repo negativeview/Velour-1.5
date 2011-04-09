@@ -140,7 +140,25 @@ class ARGTech_Controller
 	}
 	
 	public function details($args)
-	{
+	{	
+		if ($_SERVER['REQUEST_METHOD'] == "POST" && isset($_POST['action'])) {
+			$id = array_shift($args);
+			$obj = BaseObject::getByTypeAndId($this->_ownedType['id'], $id);
+
+			switch($_POST['action']) {
+				case 'generic-post':
+					switch($_POST['id']) {
+						case 'summary':
+							if ($obj->isOwned())
+								$obj->setBraggable($_POST['value']);
+							else
+								echo 'You are not allowed to do that.';
+							break;
+					}
+			}
+			exit();
+		}
+
 		$obj_id = array_shift($args);
 		$res = BaseObject::getByTypeAndId($this->_ownedType['id'], $obj_id);
 		$this->_smarty->assign('object', $res);

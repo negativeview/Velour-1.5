@@ -112,10 +112,4 @@ class UserObject extends BaseObject
 		$this->_fetch();
 		return $this->_rawData['display_name'];
 	}
-	
-	public function getBraggable()
-	{
-		$this->_fetch();
-		return $this->_rawData['bio'];
-	}
 }

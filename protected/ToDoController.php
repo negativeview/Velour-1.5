@@ -14,23 +14,17 @@ class Todo_Controller extends ARGTech_Controller
 	public function details($args)
 	{
 		if ($_SERVER['REQUEST_METHOD'] == "POST" && isset($_POST['action'])) {
-			$todo_id = array_shift($args);
+			$todo_id = $args[0];
 			$todo = TodoObject::getById($todo_id);
 
 			switch($_POST['action']) {
 				case 'generic-post':
 					switch($_POST['id']) {
-						case 'summary':
-							if ($todo->isOwned())
-								db_do("UPDATE todo SET body = '" . $_POST['value'] . "' WHERE id = '$todo_id'");
-							break;
 						case 'add-comment':
 							if ($todo->isOwned())
 								$todo->addComment($_POST['value']);
-							break;
 					}
 			}
-			exit();
 		}
 		parent::details($args);
 	}
