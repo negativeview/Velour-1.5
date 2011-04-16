@@ -1,6 +1,6 @@
 <?php
 
-class ProjectObject extends BaseObject
+class ProjectObject extends MagicBaseObject
 {
 	private static $_projectsById = array();
 	public static function getById($id)
