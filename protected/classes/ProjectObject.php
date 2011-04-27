@@ -1,6 +1,6 @@
 <?php
 
-class ProjectObject extends MagicBaseObject
+class ProjectObject extends BaseObject
 {
 	private static $_projectsById = array();
 	public static function getById($id)
@@ -72,11 +72,5 @@ class ProjectObject extends MagicBaseObject
 	public function getImage()
 	{
 		return '<img src="/project/' . $this->_id . '/icon.png" />';
-	}
-	
-	public function getName()
-	{
-		$this->_fetch();
-		return $this->_rawData['public_name'];
 	}
 }

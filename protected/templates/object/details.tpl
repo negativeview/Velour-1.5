@@ -1,10 +1,4 @@
-{assign var=type value=$object->getType()}
-
-<h3>{$type->toLink()} &raquo; {$object->getName()}</h3>
-{if $object->userIsUnder()}
-	{include file="project-sidebar.tpl" project=$object}
-	<div id="project-left-wrapper">
-{/if}
+<h3>{$object->getMenuTitle()} &raquo; {$object->getName()}</h3>
 	<div class="bio-wrapper inside-wrapper">
 		<div class="header-wrap">
 			<div class="header-top-line">
@@ -31,6 +25,3 @@
 			{include file='object/comments.tpl' object=$object}
 		</div>
 	{/if}
-{if $object->userIsUnder()}
-</div>
-{/if}

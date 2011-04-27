@@ -192,6 +192,9 @@ function raw_query($q) {
 	$start = microtime(true);
 	$res = mysql_query($q);
 	if (mysql_error()) {
+		echo '<pre>';
+		print_r(debug_backtrace());
+		echo '</pre>';
 		die(mysql_error() . ': ' . $q);
 	}
 	$end = microtime(true);

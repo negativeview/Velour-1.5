@@ -42,7 +42,7 @@ switch(count($pieces)) {
 
 $action = str_replace('.', '', $action);
 
-$controller_name = ucfirst($controller) . '_Controller';
+$controller_name = ucfirst($controller) . 'Controller';
 
 require_once(ucfirst($controller) . 'Controller.php');
 $controller = new $controller_name();

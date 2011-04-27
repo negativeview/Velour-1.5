@@ -1,14 +1,10 @@
 <?php
 
 require_once('ARGTechController.php');
+require_once('classes/PermissionObject.php');
 
-class Default_Controller extends ARGTech_Controller
+class DefaultController extends ARGTechController
 {
-	public function __construct()
-	{
-		parent::__construct();
-	}
-	
 	/**
 	 * Find most bragworthy, public information.
 	 *
@@ -20,22 +16,18 @@ class Default_Controller extends ARGTech_Controller
 	 */
 	public function defaultAction($args)
 	{
-		require_once('classes/ActivityLog.php');
+		$res = db_many("SELECT id FROM base_object WHERE id IN (SELECT current FROM obj_static) ORDER BY buzz DESC");
 		$this->_smarty->display('header.tpl');
-		
-		$braggables = ActivityLog::activityByObject(30);
-		$count = count($braggables);
 		
 		$public_braggables = array();
 		require_once('classes/BaseObject.php');
-		for ($i = 0; $i < $count; $i++) {
-			if (!$braggables[$i]['obj_id'])
-				continue;
-			$bo = BaseObject::getByTypeAndId($braggables[$i]['obj_type'], $braggables[$i]['obj_id']);
-			if ($bo->isPublic())
-				$public_braggables[] = $bo;
+		foreach($res as $row) {
+			$tmp = new PermissionObject($row['id']);
+			
+			if ($tmp->isPublic())
+				$public_braggables[] = $tmp;
 		}
-		
+
 		$this->_smarty->assign('braggables', $public_braggables);
 		$this->_smarty->display('braggables-home.tpl');
 		$this->_smarty->display('footer.tpl');

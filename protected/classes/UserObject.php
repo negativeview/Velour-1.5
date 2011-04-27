@@ -63,7 +63,7 @@ class UserObject extends BaseObject
 	
 	public static function tryLogin($username, $password)
 	{
-		$res = db_one("SELECT * FROM user WHERE email = '" . $username . "' AND passhash = MD5(CONCAT('" . $password . "', COALESCE(salt, 'argtech')))");
+		$res = db_one("SELECT * FROM users WHERE email = '" . $username . "' AND passhash = MD5(CONCAT('" . $password . "', COALESCE(salt, 'argtech')))");
 		if ($res) {
 			require_once('classes/ActivityLog.php');
 			$_SESSION['user'] = $res['id'];
@@ -76,12 +76,6 @@ class UserObject extends BaseObject
 	{
 		session_start();
 		$_SESSION['user'] = $this->_id;
-	}
-	
-	public function getCreated()
-	{
-		$this->_fetch();
-		return $this->_rawData['signup'];
 	}
 	
 	public function isEditable()
@@ -100,16 +94,5 @@ class UserObject extends BaseObject
 	public function updateBio($bio)
 	{
 		db_one("UPDATE user SET bio = '" . mysql_real_escape_string($bio) . "' WHERE id = '" . $this->_id . "'");
-	}
-	
-	public function getImage()
-	{
-		return '<a href="' . $this->toURL() . '"><img src="/user/' . $this->_id . '/icon.png" title="' . $this->getName() . '" /></a>';
-	}
-	
-	public function getName()
-	{
-		$this->_fetch();
-		return $this->_rawData['display_name'];
 	}
 }

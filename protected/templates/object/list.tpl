@@ -5,18 +5,14 @@
 	</div>
 	<table cellspacing="0" cellpadding="0">
 		<tr>
-			<th>Icon</th>
 			<th>Name</th>
 			<th>Created</th>
-			<th>Owner</th>
 			<th>Actions</th>
 		</tr>
 		{foreach from=$objects item=object}
 		<tr>
-			<td class="img">{$object->getImage()}</td>
-			<td>{$object->toLink()}</td>
+			<td>{$object->getName()}</td>
 			<td>{$object->getCreated()}</td>
-			<td>{if $object->getOwner()}{assign var=owner value=$object->getOwner()}{$owner->toLink()}{/if}</td>
 			<td>
 				<a href="{$object->getDiscussURL()}">Discuss</a>
 				<a href="{$object->getLogURL()}">Log</a>

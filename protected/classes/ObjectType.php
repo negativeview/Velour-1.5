@@ -13,18 +13,6 @@ class ObjectType
 		ObjectType::$_allowed_mappings = db_many("SELECT * FROM obj_allowed_mappings");
 	}
 	
-	protected static function _doCache()
-	{
-		if (!empty(ObjectType::$_cache))
-			return;
-			
-		$tmp = db_many("SELECT * FROM top_level_object");
-		foreach ($tmp as $type)
-		{
-			ObjectType::$_cache['id' . $type['id']] = $type;
-		}		
-	}
-	
 	public function getAll()
 	{
 		require_once('classes/' . $this->getName() . 'Object.php');
@@ -55,7 +43,6 @@ class ObjectType
 	
 	public function getName()
 	{
-		$this->_doCache();
 		return ObjectType::$_cache['id' . $this->_id]['name'];
 	}
 	

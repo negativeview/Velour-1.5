@@ -2,7 +2,7 @@
 
 require_once('ARGTechController.php');
 
-class Login_Controller extends ARGTech_Controller
+class LoginController extends ARGTechController
 {
 	public function __construct()
 	{

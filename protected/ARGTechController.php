@@ -1,6 +1,6 @@
 <?php
 
-class ARGTech_Controller
+class ARGTechController
 {
 	protected $_smarty = null;
 	protected $_ownedType;
@@ -35,12 +35,13 @@ class ARGTech_Controller
 	
 	public function getList()
 	{
-		$res = BaseObject::getAllByType($this->_ownedType['id']);
+		$res = db_many("SELECT * FROM obj_static WHERE type = '" . $this->_ownedType['id'] . "'");
 
 		$real_res = array();
 		foreach ($res as $r) {
-			if ($r->canSee())
-				$real_res[] = $r;
+			$tmp = BaseObject::getById($r['id']);
+			if ($tmp->canSee())
+				$real_res[] = $tmp;
 		}
 		
 		return $real_res;
@@ -73,7 +74,7 @@ class ARGTech_Controller
 			$obj_id = $args[0];
 
 			$this->_smarty->assign('title', $this->_ownedType['name']);
-			$res = BaseObject::getByTypeAndId($this->_ownedType['id'], $obj_id);
+			$res = BaseObject::getById($obj_id);
 			
 			if ($res->canSee()) {
 				$this->details($args);
@@ -166,7 +167,8 @@ class ARGTech_Controller
 		}
 
 		$obj_id = array_shift($args);
-		$res = BaseObject::getByTypeAndId($this->_ownedType['id'], $obj_id);
+		$res = BaseObject::getById($obj_id);
+		
 		$this->_smarty->assign('object', $res);
 		$this->_smarty->display('header.tpl');
 		$this->_smarty->display('object/details.tpl');

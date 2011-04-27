@@ -4,7 +4,7 @@ require_once('ARGTechController.php');
 require_once('classes/ActivityLog.php');
 require_once('classes/UserObject.php');
 
-class User_Controller extends ARGTech_Controller
+class UserController extends ARGTechController
 {
 	public function __construct()
 	{
