@@ -13,6 +13,22 @@ require_once('BaseObject.php');
 
 class PermissionObject extends BaseObject
 {
+	private $_cachedRaw;
+	
+	private static $_byId;
+	public static function getById($id)
+	{
+		if (!PermissionObject::$_byId) {
+			PermissionObject::$_byId = array();
+		}
+		
+		if (!isset(PermissionObject::$_byId['a' . $id])) {
+			PermissionObject::$_byId['a' . $id] = new PermissionObject($id);
+		}
+		
+		return PermissionObject::$_byId['a' . $id];
+	}
+	
 	/**
 	 * Constructor
 	 *
@@ -22,11 +38,34 @@ class PermissionObject extends BaseObject
 	public function __construct($id)
 	{
 		parent::__construct($id);
+		$this->_cachedRaw = array();
+	}
+	
+	protected function _realFetchRaw()
+	{
+		$raw = parent::_realFetchRaw();
+		$this->_cachedRaw = $raw;
+		return $raw;
+	}
+	
+	public function __destruct()
+	{
+		$raw = parent::_fetchRaw();
+		
+		$ak = array_keys($this->_cachedRaw);
+		foreach($ak as $key) {
+			if ($this->_cachedRaw[$key] != $raw[$key]) {
+				
+				db_do("UPDATE obj_static SET views = views + 1 WHERE id = '" . $this->_id . "'");
+			}
+		}
 	}
 	
 	public function isPublic()
 	{
 		$raw = $this->_fetchRaw();
+		
+		$this->_fetched['raw']['title'] = 'foo';
 		switch ($raw['privacy_setting']) {
 			case 'complex':
 				return false;
@@ -54,7 +93,7 @@ class PermissionObject extends BaseObject
 		if (!$raw['parent'])
 			return null;
 		
-		return new PermissionObject($raw['parent']);
+		return PermissionObject::getById($raw['parent']);
 	}
 	
 	public function getProject()
@@ -64,7 +103,7 @@ class PermissionObject extends BaseObject
 		if (!$raw['project'])
 			return null;
 		
-		return new PermissionObject($raw['project']);
+		return PermissionObject::getById($raw['project']);
 	}
 	
 	public function toURL()
@@ -108,7 +147,7 @@ class PermissionObject extends BaseObject
 		if (!$creator)
 			return null;
 		
-		return new PermissionObject($creator);
+		return PermissionObject::getById($creator);
 	}
 	
 	public function getBraggable()

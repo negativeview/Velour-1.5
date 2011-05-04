@@ -1,6 +1,8 @@
 <?php
 
 require_once('ObjectType.php');
+require_once('htdocs/database.php');
+require_once('htdocs/core.php');
 
 /**
  * Base object for all ARGTech top-level-objects.
@@ -11,9 +13,6 @@ require_once('ObjectType.php');
  * comments able to be put on the object, being able to favorite an object, etc.
  */
 
-require_once('UserObject.php');
-require_once('ProjectObject.php');
-
 class BaseObject
 {
 	/** @var integer */
@@ -21,6 +20,9 @@ class BaseObject
 	
 	/** @var array */
 	protected $_fetched;
+	
+	/** @var boolean */
+	protected $_has_updated;
 	
 	/**
 	 * Constructor
@@ -32,6 +34,7 @@ class BaseObject
 	{
 		$this->_id = $id;
 		$this->_fetched = array();
+		$this->_has_updated = false;
 	}
 	
 	protected function _fetchWrapper($key, $function)
@@ -43,6 +46,7 @@ class BaseObject
 			die('_fetchWrapper called with something not callable: ' . print_r($function, true));
 
 		$this->_fetched[$key] = call_user_func($function);
+		$this->_has_updated = false;
 		return $this->_fetched[$key];
 	}
 	
@@ -51,7 +55,7 @@ class BaseObject
 		return $this->_fetchWrapper('raw', array($this, '_realFetchRaw'));
 	}
 	
-	private function _realFetchRaw()
+	protected function _realFetchRaw()
 	{	
 		$res = db_one("SELECT obj_static.id, obj_static.type, obj_types.slug, obj_types.menu_title, " .
 			"obj_types.privacy_setting, base_object.creator, base_object.parent, " .
@@ -63,5 +67,79 @@ class BaseObject
 			"LEFT JOIN base_object ON (base_object.id = obj_static.current) " .
 			"WHERE obj_static.id = " . $this->_id);
 		return $res;
-	}	
+	}
+	
+	public function getRaw()
+	{
+		return $this->_fetched;
+	}
+	
+	public function getId()
+	{
+		return $this->_id;
+	}
+	
+	public function getType()
+	{
+		$this->_fetchRaw();
+		return $this->_fetched['raw']['type'];
+	}
+	
+	public function getSlug()
+	{
+		$this->_fetchRaw();
+		return $this->_fetched['raw']['slug'];
+	}
+	
+	public function getMenuTitle()
+	{
+		$this->_fetchRaw();
+		return $this->_fetched['raw']['menu_title'];
+	}
+	
+	public function getPrivacySetting()
+	{
+		$this->_fetchRaw();
+		return $this->_fetched['raw']['privacy_setting'];
+	}
+	
+	public function getCreator()
+	{
+		$this->_fetchRaw();
+		return $this->_fetched['raw']['creator'];
+	}
+	
+	public function getParent()
+	{
+		$this->_fetchRaw();
+		return $this->_fetched['raw']['parent'];
+	}
+	
+	public function setParent($parent)
+	{
+		$this->_fetchRaw();
+		
+		if (is_object($parent))
+			$parent = $parent->getId();
+			
+		$this->_fetched['raw']['parent'] = $parent;
+		$this->_has_updated = true;
+	}
+	
+	public function getProject()
+	{
+		$this->_fetchRaw();
+		return $this->_fetched['raw']['project'];
+	}
+	
+	public function getCreated()
+	{
+		$this->_fetchRaw();
+		return new DateTime($this->_fetched['raw']['created']);
+	}
+	
+	public function hasBeenUpdated()
+	{
+		return $this->_has_updated;
+	}
 }

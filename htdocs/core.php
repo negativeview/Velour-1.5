@@ -1,4 +1,4 @@
-<?
+<?php
 
 error_reporting(-1);
 date_default_timezone_set('GMT');
@@ -124,6 +124,9 @@ switch(date("md")) {
 	case "0229":
 		$smarty->assign('phrase', 'Happy birthday, <span class="hilight">Daniel</span>!');
 		break;
+	case "0427":
+		$smarty->assign('phrase', 'Happy birthday, <span class="hilight">Mike Monello</span>!');
+		break;
 	case "0806":
 		$smarty->assign('phrase', 'Happy birthday, <span class="hilight">Percy</span>!');
 		break;
@@ -228,18 +231,6 @@ function db_do($query) {
 function check_login($un, $pass) {
 	return db_one("SELECT * FROM users WHERE email = '" . mysql_real_escape_string($un) . "' AND passhash = MD5(CONCAT('" .
 		mysql_real_escape_string($pass) . "', COALESCE(salt, 'argtech')))");
-}
-
-function setup_theme($theme) {
-	global $site_root;
-	
-	$old_path = get_include_path();
-	
-	set_include_path(
-		$site_root . 'protected/' . $theme . '/' .
-		PATH_SEPARATOR . $site_root . 'protected/' . $theme . '/classes/' .
-		PATH_SEPARATOR . $old_path
-	);
 }
 
 ?>

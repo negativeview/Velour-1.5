@@ -16,13 +16,15 @@ class DefaultController extends ARGTechController
 	 */
 	public function defaultAction($args)
 	{
-		$res = db_many("SELECT id FROM base_object WHERE id IN (SELECT current FROM obj_static) ORDER BY buzz DESC");
+		$res = db_many("SELECT id FROM base_object WHERE id IN (" .
+			"SELECT current FROM obj_static LEFT JOIN obj_types ON (obj_types.id = obj_static.type) WHERE obj_types.privacy_setting IN ('public')" .
+			") ORDER BY buzz DESC LIMIT 5");
 		$this->_smarty->display('header.tpl');
 		
 		$public_braggables = array();
 		require_once('classes/BaseObject.php');
 		foreach($res as $row) {
-			$tmp = new PermissionObject($row['id']);
+			$tmp = PermissionObject::getById($row['id']);
 			
 			if ($tmp->isPublic())
 				$public_braggables[] = $tmp;
