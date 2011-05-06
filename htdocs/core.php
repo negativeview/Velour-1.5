@@ -139,6 +139,9 @@ switch(date("md")) {
 	case "1105":
 		$smarty->assign('phrase', 'Remember, remember the fifth of November.');
 		break;
+	case "1107":
+		$smarty->assign('phrase', 'Happy birthday, <span class="hilight">Steve Diddle</span>');
+		break;
 	case "1108":
 		$smarty->assign('phrase', 'Happy birthday, <span class="hilight">Celina</span>.');
 		break;
