@@ -8,122 +8,98 @@ require_once '/opt/local/apache2/protected/classes/BaseObject.php';
  */
 class BaseObjectTest extends PHPUnit_Framework_TestCase
 {
-    /**
-     * @var BaseObject
-     */
-    protected $ids;
-
+	private $_subscriber;
+	private $_incCount;
+	private $_lastData;
+	private $_latsOb;
+	
     /**
      * Sets up the fixture, for example, opens a network connection.
      * This method is called before a test is executed.
      */
     protected function setUp()
     {
-    	$this->ids = db_many("SELECT id FROM obj_static");
+    	$this->_subscriber = array($this, 'countingCallback');
+    	$this->_incCount = 0;
+    	$this->_lastData = null;
+    	$this->_lastOb = null;
     }
     
-    public function testNoFetchAtStart()
+    public function countingCallback($ob = null, $data = null)
     {
-    	foreach ($this->ids as $id) {
-    		$obj = new BaseObject($id['id']);
-    		$this->assertEmpty($obj->getRaw());
-    	}
+    	$this->_incCount++;
+    	$this->_lastData = $data;
+    	$this->_lastOb = $ob;
+    }
+
+	/**
+	 * Makes sure that things are sane.
+	 */
+    public function testSubscriberEmpty()
+    {
+    	$bo = new BaseObject(1);
+    	$this->assertEquals(0, count($bo->getSubscriberList()));
     }
     
-    public function testAppropriateType()
+    public function testAddSubscriberNormally()
     {
-    	foreach ($this->ids as $id) {
-    		$obj = new BaseObject($id['id']);
-    	}
+    	$bo = new BaseObject(1);
+    	$bo->subscribe('example', $this->_subscriber, array());
+    	$subscribers = $bo->getSubscriberList();
+    	$this->assertEquals(1, count($subscribers));
+    	$this->assertEquals(1, count($subscribers['example']));
     }
     
-    public function testSlug()
+    public function testAddSubscriberOnlyOnce()
     {
-    	foreach ($this->ids as $id) {
-    		$obj = new BaseObject($id['id']);
-    		$this->assertNotEquals($obj->getSlug(), '');
-    		$this->assertNotEquals($obj->getSlug(), null);
-    	}
+    	$bo = new BaseObject(1);
+    	$bo->subscribe('example', $this->_subscriber, array());
+    	$bo->subscribe('example', $this->_subscriber, array());
+    	$subscribers = $bo->getSubscriberList();
+    	$this->assertEquals(1, count($subscribers));
+    	$this->assertEquals(1, count($subscribers['example']));
     }
     
-    public function testMenuTitle()
+    public function testCallbackWorks()
     {
-    	foreach ($this->ids as $id) {
-    		$obj = new BaseObject($id['id']);
-    		$this->assertNotEquals($obj->getMenuTitle(), '');
-    		$this->assertNotEquals($obj->getMenuTitle(), null);
-    	}
+    	$bo = new BaseObject(1);
+    	$bo->subscribe('example', $this->_subscriber, array());
+    	$bo->dispatch('example');
+    	$this->assertEquals(1, $this->_incCount);
     }
     
-    public function testPrivacySetting()
+    public function testCallbackPassesData()
     {
-    	foreach ($this->ids as $id) {
-    		$obj = new BaseObject($id['id']);
-    		$this->assertContains(
-    			$obj->getPrivacySetting(),
-    			array(
-    				'complex',
-    				'parent',
-    				'project',
-    				'public'
-    			)
-    		);
-    	}
+    	$data = array(
+    		'this'         => 'data',
+    		'is'           => 'very',
+    		'unlikely'     => 'to',
+    		'accidentally' => 'be',
+    		'duplicated'   => 'accidentally'
+    	);
+    	$bo = new BaseObject(1);
+    	$bo->subscribe('example', $this->_subscriber);
+    	$bo->dispatch('example', $data);
+    	$this->assertEquals(1, $this->_incCount);
+    	$this->assertEquals($data, $this->_lastData);
     }
     
-    public function testCreator()
+    public function testCallbackPassesObject()
     {
-    	foreach ($this->ids as $id) {
-    		$obj = new BaseObject($id['id']);
-    		$creator = $obj->getCreator();
-    		if ($creator !== null) {
-    			$creator = new BaseObject($creator);
-    			$this->assertNotNull($creator);
-    			$this->assertEquals($creator->getType(), 1);
-    		}
-    	}
+    	$bo = new BaseObject(1);
+    	$bo->subscribe('example', $this->_subscriber);
+    	$bo->dispatch('example');
+    	$this->assertEquals(1, $this->_incCount);
+    	$this->assertEquals($bo, $this->_lastOb);
     }
     
-    public function testParent()
+    public function testCallbackOnlyOnce()
     {
-    	foreach ($this->ids as $id) {
-    		$obj = new BaseObject($id['id']);
-    		$parent = $obj->getParent();
-    		if ($parent !== null) {
-    			$parent = new BaseObject($parent);
-    			$this->assertNotNull($parent);
-    			$this->assertNotNull($parent->getType());
-    			
-    			$this->assertFalse($obj->hasBeenUpdated());
-    			$obj->setParent($parent);
-    			$this->assertTrue($obj->hasBeenUpdated());
-    			$this->assertEquals($obj->getParent(), $parent->getId());
-    			$obj->setParent($parent->getId());
-    			$this->assertEquals($obj->getParent(), $parent->getId());
-    		}
-    	}
-    }
-    
-    public function testProject()
-    {
-    	foreach ($this->ids as $id) {
-    		$obj = new BaseObject($id['id']);
-    		$project = $obj->getProject();
-    		if ($project !== null) {
-    			$project = new BaseObject($project);
-    			$this->assertNotNull($project);
-    			$this->assertEquals($project->getType(), 2);
-    		}
-    	}
-    }
-    
-    public function testCreated()
-    {
-    	foreach ($this->ids as $id) {
-    		$obj = new BaseObject($id['id']);
-    		$this->assertTrue(is_object($obj->getCreated()), 'BaseObject::getCreated does not return an object.');
-    		$this->assertEquals(get_class($obj->getCreated()), 'DateTime');
-    	}
+    	$bo = new BaseObject(1);
+    	$bo->subscribe('example', $this->_subscriber, array());
+    	$bo->subscribe('example', $this->_subscriber, array());
+    	$bo->dispatch('example');
+    	$this->assertEquals(1, $this->_incCount);
     }
 
     /**

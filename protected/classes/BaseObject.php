@@ -24,6 +24,9 @@ class BaseObject
 	/** @var boolean */
 	protected $_has_updated;
 	
+	/** @var array */
+	protected $_subscribers;
+	
 	/**
 	 * Constructor
 	 *
@@ -34,7 +37,35 @@ class BaseObject
 	{
 		$this->_id = $id;
 		$this->_fetched = array();
+		$this->_subscribers = array();
 		$this->_has_updated = false;
+	}
+	
+	public function getSubscriberList()
+	{
+		return $this->_subscribers;
+	}
+	
+	public function subscribe($event, $callback)
+	{
+		if (!isset($this->_subscribers[$event]))
+			$this->_subscribers[$event] = array();
+		
+		foreach ($this->_subscribers[$event] as $cb) {
+			if ($callback === $cb)
+				return;
+		}
+		$this->_subscribers[$event][] = $callback;
+	}
+	
+	public function dispatch($event, $data = null)
+	{
+		if (!isset($this->_subscribers[$event]))
+			return;
+		
+		foreach ($this->_subscribers[$event] as $cb) {
+			call_user_func($cb, $this, $data);
+		}		
 	}
 	
 	protected function _fetchWrapper($key, $function)
