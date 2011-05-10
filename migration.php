@@ -142,7 +142,7 @@ while ($row = mysql_fetch_assoc($res)) {
 	db_do("INSERT INTO obj_text(value) VALUES('" . mysql_real_escape_string($row['body']) . "')");
 	$body_id = mysql_insert_id();
 	
-	db_do("INSERT INTO base_object(creator, parent, title, created, description) VALUES(" . $user_old_to_new['a' . $row['creator']] . ", " . $project_old_to_new['a' . $row['project_id']] . ", $title_id, '" . $row['created'] . "', $body_id)");
+	db_do("INSERT INTO base_object(creator, parent, title, created, description, project) VALUES(" . $user_old_to_new['a' . $row['creator']] . ", " . $project_old_to_new['a' . $row['project_id']] . ", $title_id, '" . $row['created'] . "', $body_id, '" . $project_old_to_new['a' . $row['project_id']] . "')");
 	$ver_id = mysql_insert_id();
 	
 	db_do("INSERT INTO obj_static(type, current) VALUES(5, $ver_id)");
@@ -211,6 +211,12 @@ while ($row = mysql_fetch_assoc($res)) {
 }
 db_do("ALTER TABLE conversation DROP title, DROP body, DROP user_id, DROP posted");
 
+$res = db_do("SELECT * FROM file");
+$files_old_to_new = array();
+while ($row = mysql_fetch_assoc($res)) {
+	$files_old_to_new['a' . $row['id']] = $row;
+}
+
 $res = db_do("SELECT * FROM file_version");
 while ($row = mysql_fetch_assoc($res)) {
 	db_do("INSERT INTO obj_string(value) VALUES('" . mysql_real_escape_string($row['shortdesc']) . "')");
@@ -219,7 +225,7 @@ while ($row = mysql_fetch_assoc($res)) {
 	db_do("INSERT INTO obj_text(value) VALUES('" . mysql_real_escape_string($row['note']) . "')");
 	$body_id = mysql_insert_id();
 	
-	db_do("INSERT INTO base_object(creator, title, created, description) VALUES(" . $user_old_to_new['a' . $row['creator_id']] . ", $title_id, '" . $row['created'] . "', $body_id)");
+	db_do("INSERT INTO base_object(creator, title, created, description, parent) VALUES(" . $user_old_to_new['a' . $row['creator_id']] . ", $title_id, '" . $row['created'] . "', $body_id, '" . $project_old_to_new['a' . $files_old_to_new['a' . $row['file_id']]['project_id']] . "')");
 	$ver_id = mysql_insert_id();
 	
 	db_do("INSERT INTO obj_static(type, current, views) VALUES(7, $ver_id, '" . $row['dl_count'] . "')");

@@ -1,158 +1,86 @@
 <?php
 
-require_once('BaseObject.php');
-
 /**
- * Base object for all ARGTech top-level-objects.
- *
- * All top-level objects extend from this class. This makes sure that we have some core
- * functionality present on all of the objects. So far these include the ability to be
- * constructed via a type/id pair, becoming a front-page featured object, having
- * comments able to be put on the object, being able to favorite an object, etc.
+ * Handles adding permission information to a base object. Built to be flexible not because
+ * this particular bit needs it, but because it's built on a foundation of flexible awesome.
  */
 
-class PermissionObject extends BaseObject
+class PermissionObject
 {
-	private $_cachedRaw;
+	private $_subscriptionCount;
 	
-	private static $_byId;
-	public static function getById($id)
+	public function __construct()
 	{
-		if (!PermissionObject::$_byId) {
-			PermissionObject::$_byId = array();
-		}
+		$this->_subscriptionCount = 0;
 		
-		if (!isset(PermissionObject::$_byId['a' . $id])) {
-			PermissionObject::$_byId['a' . $id] = new PermissionObject($id);
-		}
-		
-		return PermissionObject::$_byId['a' . $id];
+		BaseObject::staticSubscribe('create', array($this, 'newBaseObject'));
 	}
 	
-	/**
-	 * Constructor
-	 *
-	 * @param integer $id The id of this row in the obj_static table.
-	 * @return BaseObject
-	 */
-	public function __construct($id)
+	public function newBaseObject($ob)
 	{
-		parent::__construct($id);
-		$this->_cachedRaw = array();
+		$ob->subscribe('data:raw', array($this, 'setupPermissions'));
+		$this->_subscriptionCount++;
 	}
 	
-	protected function _realFetchRaw()
+	public function setupPermissions($ob, $data)
 	{
-		$raw = parent::_realFetchRaw();
-		$this->_cachedRaw = $raw;
-		return $raw;
-	}
-	
-	public function __destruct()
-	{
-		$raw = parent::_fetchRaw();
-		
-		$ak = array_keys($this->_cachedRaw);
-		foreach($ak as $key) {
-			if ($this->_cachedRaw[$key] != $raw[$key]) {
-				
-				db_do("UPDATE obj_static SET views = views + 1 WHERE id = '" . $this->_id . "'");
-			}
-		}
-	}
-	
-	public function isPublic()
-	{
-		$raw = $this->_fetchRaw();
-		
-		$this->_fetched['raw']['title'] = 'foo';
-		switch ($raw['privacy_setting']) {
+		switch ($data['privacy_setting']) {
 			case 'complex':
-				return false;
-			case 'parent':
-				$parent = $this->getParent();
-				if (!$parent)
-					return false;
-				return $parent->isPublic();
-			case 'project':
-				$project = $this->getProject();
-				if (!$project)
-					return false;
-				return $project->isPublic();
+				// Some other class is going to have to handle this,
+				// as it's not something that has been deemed common enough
+				// to just go in here.
+				
+				$ob->addFunction('canSee', array($this, 'canSeeComplex'));
+				break;
 			case 'public':
-				return true;
+				$ob->addFunction('canSee', array($this, 'canSeeTrue'));
+				break;
+			case 'project':
+				$ob->addFunction('canSee', array($this, 'canSeeProject'));
+				break;
+			case 'parent':
+				$ob->addFunction('canSee', array($this, 'canSeeParent'));
+				break;
 			default:
-				die('Unknown privacy setting: ' . $raw['privacy_setting']);
+				die('Unknown privacy setting: ' . $data['privacy_setting']);
 		}
+		$ob->unsubscribe('data:raw', array($this, 'setupPermissions'));
+		$this->_subscriptionCount--;
 	}
 	
-	public function getParent()
+	public function getSubscriptionCount()
 	{
-		$raw = $this->_fetchRaw();
-
-		if (!$raw['parent'])
-			return null;
+		return $this->_subscriptionCount;
+	}
+	
+	// TODO: Do this.
+	public function canSeeComplex($ob, $data)
+	{
+		return false;
+	}
+	
+	public function canSeeTrue($ob, $data)
+	{
+		return true;
+	}
+	
+	public function canSeeProject($ob, $data)
+	{
+		$project = $ob->getProject();
+		if (!$project) {
+			throw new Exception('Object ' . $ob->toString() . ' has project permissions, but no project.');
+		}
 		
-		return PermissionObject::getById($raw['parent']);
+		return $project->canSee();
 	}
 	
-	public function getProject()
+	public function canSeeParent($ob, $data)
 	{
-		$raw = $this->_fetchRaw();
+		$parent = $ob->getParent();
+		if (!$parent) {
+			throw new Exception('Object ' . $ob->toString() . ' has parent permissions, but no parent.');
+		}
 		
-		if (!$raw['project'])
-			return null;
-		
-		return PermissionObject::getById($raw['project']);
-	}
-	
-	public function toURL()
-	{
-		$raw = $this->_fetchRaw();
-		return '/' . $raw['slug'] . '/' . $raw['id'] . '/';
-	}
-	
-	public function toLink()
-	{
-		return '<a href="' . $this->toURL() . '">' . $this->getName() . '</a>';
-	}
-	
-	public function getTypeName()
-	{
-		$raw = $this->_fetchRaw();
-		return $raw['menu_title'];
-	}
-	
-	public function getName()
-	{
-		$raw = $this->_fetchRaw();
-		return $raw['title'];
-	}
-	
-	public function getImage()
-	{
-		return '';
-	}
-	
-	public function getCreated()
-	{
-		$raw = $this->_fetchRaw();
-		return $raw['created'];
-	}
-	
-	public function getOwner()
-	{
-		$raw = $this->_fetchRaw();
-		$creator = $raw['creator'];
-		if (!$creator)
-			return null;
-		
-		return PermissionObject::getById($creator);
-	}
-	
-	public function getBraggable()
-	{
-		$raw = $this->_fetchRaw();
-		return $raw['description'];
+		return $parent->canSee();
 	}
 }

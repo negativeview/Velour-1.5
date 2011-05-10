@@ -13,6 +13,8 @@ class BaseObjectTest extends PHPUnit_Framework_TestCase
 	private $_lastData;
 	private $_latsOb;
 	
+	static private $_staticIncCount;
+	
     /**
      * Sets up the fixture, for example, opens a network connection.
      * This method is called before a test is executed.
@@ -23,6 +25,20 @@ class BaseObjectTest extends PHPUnit_Framework_TestCase
     	$this->_incCount = 0;
     	$this->_lastData = null;
     	$this->_lastOb = null;
+    	
+    	BaseObject::destroyCache();
+    	
+    	self::$_staticIncCount = 0;
+    }
+    
+    public function testAddFunction()
+    {
+    	$ob = BaseObject::getById(1);
+    	$ob->addFunction('foo', $this->_subscriber);
+    	$ob->foo();
+    	$this->assertEquals(1, $this->_incCount);
+    	$this->assertEmpty($this->_lastData);
+    	$this->assertEquals($ob, $this->_lastOb);
     }
     
     public function countingCallback($ob = null, $data = null)
@@ -37,22 +53,36 @@ class BaseObjectTest extends PHPUnit_Framework_TestCase
 	 */
     public function testSubscriberEmpty()
     {
-    	$bo = new BaseObject(1);
+    	$bo = BaseObject::getById(1);
     	$this->assertEquals(0, count($bo->getSubscriberList()));
     }
     
     public function testAddSubscriberNormally()
     {
-    	$bo = new BaseObject(1);
+    	$bo = BaseObject::getById(1);
     	$bo->subscribe('example', $this->_subscriber, array());
     	$subscribers = $bo->getSubscriberList();
     	$this->assertEquals(1, count($subscribers));
     	$this->assertEquals(1, count($subscribers['example']));
     }
     
+    public function testUnsubscribe()
+    {
+    	$bo = BaseObject::getById(1);
+    	$bo->subscribe('example', $this->_subscriber, array());
+    	$subscribers = $bo->getSubscriberList();
+    	$this->assertEquals(1, count($subscribers));
+    	$this->assertEquals(1, count($subscribers['example']));
+    	
+    	$bo->unsubscribe('example', $this->_subscriber, array());
+    	$subscribers = $bo->getSubscriberList();
+    	$this->assertEquals(1, count($subscribers));
+    	$this->assertEquals(0, count($subscribers['example']));    	
+    }
+    
     public function testAddSubscriberOnlyOnce()
     {
-    	$bo = new BaseObject(1);
+    	$bo = BaseObject::getById(1);
     	$bo->subscribe('example', $this->_subscriber, array());
     	$bo->subscribe('example', $this->_subscriber, array());
     	$subscribers = $bo->getSubscriberList();
@@ -62,7 +92,7 @@ class BaseObjectTest extends PHPUnit_Framework_TestCase
     
     public function testCallbackWorks()
     {
-    	$bo = new BaseObject(1);
+    	$bo = BaseObject::getById(1);
     	$bo->subscribe('example', $this->_subscriber, array());
     	$bo->dispatch('example');
     	$this->assertEquals(1, $this->_incCount);
@@ -77,7 +107,7 @@ class BaseObjectTest extends PHPUnit_Framework_TestCase
     		'accidentally' => 'be',
     		'duplicated'   => 'accidentally'
     	);
-    	$bo = new BaseObject(1);
+    	$bo = BaseObject::getById(1);
     	$bo->subscribe('example', $this->_subscriber);
     	$bo->dispatch('example', $data);
     	$this->assertEquals(1, $this->_incCount);
@@ -86,7 +116,7 @@ class BaseObjectTest extends PHPUnit_Framework_TestCase
     
     public function testCallbackPassesObject()
     {
-    	$bo = new BaseObject(1);
+    	$bo = BaseObject::getById(1);
     	$bo->subscribe('example', $this->_subscriber);
     	$bo->dispatch('example');
     	$this->assertEquals(1, $this->_incCount);
@@ -95,11 +125,32 @@ class BaseObjectTest extends PHPUnit_Framework_TestCase
     
     public function testCallbackOnlyOnce()
     {
-    	$bo = new BaseObject(1);
+    	$bo = BaseObject::getById(1);
     	$bo->subscribe('example', $this->_subscriber, array());
     	$bo->subscribe('example', $this->_subscriber, array());
     	$bo->dispatch('example');
     	$this->assertEquals(1, $this->_incCount);
+    }
+    
+    public function testStaticCallback()
+    {
+    	$bo = BaseObject::getById(1);
+    	$bo->subscribe('example', array('BaseObjectTest', 'staticCallback'), array());
+    	$bo->dispatch('example');
+    	$this->assertEquals(1, self::$_staticIncCount);
+    }
+    
+    public static function staticCallback()
+    {
+    	self::$_staticIncCount++;
+    }
+    
+    public function testCreateCallback()
+    {
+    	BaseObject::staticSubscribe('create', $this->_subscriber, array());
+    	$bo = BaseObject::getById(1);
+    	$this->assertEquals(1, $this->_incCount);
+    	$this->assertEquals($bo, $this->_lastOb);
     }
 
     /**
