@@ -2,6 +2,9 @@
 
 require_once('htdocs/database.php');
 
+mysql_connect($db_host, $db_user, $db_password);
+mysql_select_db($db_name);
+
 $query_count = 0;
 function db_do($q)
 {

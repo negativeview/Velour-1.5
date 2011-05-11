@@ -31,6 +31,60 @@ class BaseObjectTest extends PHPUnit_Framework_TestCase
     	self::$_staticIncCount = 0;
     }
     
+    public function testDefaultHasNotChanged()
+    {
+    	$ob = BaseObject::getById(1);
+    	$this->assertFalse($ob->hasChanged());
+    }
+    
+    public function testHasChanged()
+    {
+    	$ob = BaseObject::getById(1);
+    	$ob->setTitle('Daniel');
+    	$this->assertTrue($ob->hasChanged());
+    }
+    
+    public function testActuallySaves()
+    {
+    	$ob = BaseObject::getById(1);
+    	$old = $ob->getViews();
+    	$ob->addView();
+    	$this->assertEquals($old + 1, $ob->getViews());
+    	BaseObject::destroyCache();
+    	
+    	$ob = BaseObject::getById(1);
+    	$this->assertEquals($old + 1, $ob->getViews());
+    }
+    
+    public function testCanSaveString()
+    {
+    	$ob = BaseObject::getById(1);
+    	
+		// Any random changing value.
+    	$t = time();
+    	
+    	$ob->setTitle($t);
+    	BaseObject::destroyCache();
+    	
+    	$ob = BaseObject::getById(1);
+    	$db = DB::getInstance();
+    	$this->assertEquals($t, $ob->getTitle(), print_r($db->getCache(), 1));
+    }
+    
+    public function testCanSaveText()
+    {
+    	$ob = BaseObject::getById(1);
+    	
+		// Any random changing value.
+    	$t = time();
+    	
+    	$ob->setBody($t);
+    	BaseObject::destroyCache();
+    	
+    	$ob = BaseObject::getById(1);
+    	$this->assertEquals($t, $ob->getBody());
+    }
+    
     public function testAddFunction()
     {
     	$ob = BaseObject::getById(1);

@@ -22,6 +22,9 @@ class BaseObject
 	/** @var array */
 	protected $_fetched;
 	
+	/** @var array */
+	protected $_fetched_originals;
+	
 	/** @var boolean */
 	protected $_has_updated;
 	
@@ -67,6 +70,7 @@ class BaseObject
 	{
 		$this->_id = $id;
 		$this->_fetched = array();
+		$this->_fetched_originals = array();
 		$this->_subscribers = array();
 		$this->_has_updated = false;
 		
@@ -166,7 +170,7 @@ class BaseObject
 			die('_fetchWrapper called with something not callable: ' . print_r($function, true));
 
 		$this->_fetched[$key] = call_user_func($function);
-		$this->_has_updated = false;
+		$this->_fetched_originals[$key] = $this->_fetched[$key];
 		
 		$this->dispatch('data:' . $key, $this->_fetched[$key]);
 		return $this->_fetched[$key];
@@ -233,10 +237,48 @@ class BaseObject
 		return $this->_id;
 	}
 	
+	public function hasChanged()
+	{
+		return $this->_has_updated;
+	}
+	
+	public function getBody()
+	{
+		$this->_fetchRaw();
+		return $this->_fetched['raw']['base_object']['description']['value'];
+	}
+	
+	public function setBody($body)
+	{
+		$this->_fetchRaw();
+		$this->_fetched['raw']['base_object']['description']['value'] = $body;
+		$this->_has_updated = true;
+	}
+	
 	public function getTitle()
 	{
 		$this->_fetchRaw();
 		return $this->_fetched['raw']['base_object']['title']['value'];
+	}
+	
+	public function getViews()
+	{
+		$this->_fetchRaw();
+		return $this->_fetched['raw']['obj_static']['views']['value'];
+	}
+	
+	public function addView()
+	{
+		$this->_fetchRaw();
+		$this->_fetched['raw']['obj_static']['views']['value']++;
+		$this->_has_updated = true;
+	}
+	
+	public function setTitle($title)
+	{
+		$this->_fetchRaw();
+		$this->_fetched['raw']['base_object']['title']['value'] = $title;
+		$this->_has_updated = true;
 	}
 	
 	public function getDescription()
@@ -313,5 +355,82 @@ class BaseObject
 	public function hasBeenUpdated()
 	{
 		return $this->_has_updated;
+	}
+	
+	public function __destruct()
+	{
+		$changed_columns = array();
+		$string_columns = array();
+		
+		if ($this->_has_updated) {
+			foreach ($this->_fetched['raw'] as $table => $columns) {
+				foreach ($columns as $name => $data) {
+					if ($data['value'] !== $this->_fetched_originals['raw'][$table][$name]['value']) {
+						if ($data['type'] == 'string') {
+							$db = DB::getInstance();
+							$db->startInsert('obj_string');
+							$db->setColumn('value', $data['value']);
+							$new_id = $db->endInsert();
+							$this->_fetched['raw'][$table]['_' . $name] = array(
+								'value' => $new_id,
+								'type' => 'raw'
+							);
+						}
+
+						if ($data['type'] == 'text') {
+							$db = DB::getInstance();
+							$db->startInsert('obj_text');
+							$db->setColumn('value', $data['value']);
+							$new_id = $db->endInsert();
+							$this->_fetched['raw'][$table]['_' . $name] = array(
+								'value' => $new_id,
+								'type' => 'raw'
+							);
+						}
+
+						if (!isset($changed_columns[$table]))
+							$changed_columns[$table] = array();
+						
+						$changed_columns[$table][$name] = $data;
+					}
+				}
+			}
+			
+			// base object is special. We have to insert it, then update the
+			// obj_static. It's crazy sauce. But it's our MAGIC crazy sauce.
+			if (isset($changed_columns['base_object'])) {
+				$db = DB::getInstance();
+				$db->startInsert('base_object');
+				$db->setColumn('creator', $this->_fetched['raw']['base_object']['creator']['value']);
+				$db->setColumn('parent', $this->_fetched['raw']['base_object']['parent']['value']);
+				$db->setColumn('project', $this->_fetched['raw']['base_object']['project']['value']);
+				$db->setColumn('title', $this->_fetched['raw']['base_object']['_title']['value']);
+				$db->setColumn('description', $this->_fetched['raw']['base_object']['_description']['value']);
+				$db->setColumn('buzz', $this->_fetched['raw']['base_object']['buzz']['value']);
+				$db->setColumn('buzz_date', $this->_fetched['raw']['base_object']['buzz_date']['value']);
+				
+				$new_base = $db->endInsert();
+				
+				if (!isset($changed_columns['obj_static']))
+					$changed_columns['obj_static'] = array();
+				
+				$changed_columns['obj_static']['current'] = array(
+					'value' => $new_base,
+					'type' => 'raw'
+				);
+				
+				unset($changed_columns['base_object']);
+			}
+			
+			foreach ($changed_columns as $table => $columns) {
+				$db = DB::getInstance();
+
+				$db->startUpdate($table);				
+				foreach ($columns as $name => $data) {
+					$db->setColumn($name, $data['value']);
+				}
+				$db->endUpdate($this->_id);
+			}
+		}
 	}
 }

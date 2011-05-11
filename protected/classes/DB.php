@@ -5,8 +5,8 @@ require_once('htdocs/database.php');
 class DB
 {
 	private static $_instance = null;
-	
 	private $_queryInfo = null;
+	private $_queryCache = null;
 	
 	public static function getInstance()
 	{
@@ -16,7 +16,7 @@ class DB
 			global $db_password;
 			global $db_name;
 			
-			return new DB($db_host, $db_user, $db_password, $db_name);
+			self::$_instance = new DB($db_host, $db_user, $db_password, $db_name);
 		}
 		
 		return self::$_instance;
@@ -28,9 +28,76 @@ class DB
 		$this->_username = $username;
 		$this->_password = $password;
 		$this->_database = $database;
+		$this->_queryCache = array();
 		
 		$this->_connection = mysql_connect($this->_host, $this->_username, $this->_password);
 		mysql_select_db($this->_database);
+	}
+	
+	public function clearCache()
+	{
+		$this->_queryCache = array();
+	}
+	
+	public function getCache()
+	{
+		return $this->_queryCache;
+	}
+	
+	public function startInsert($tableName)
+	{
+		$this->_queryInfo = array(
+			'table' => $tableName,
+			'columns' => array()
+		);
+	}
+	
+	public function endInsert()
+	{
+		$query = "INSERT INTO " . $this->_queryInfo['table'] . " (";
+		$i = 0;
+		foreach ($this->_queryInfo['columns'] as $name => $value) {
+			if ($i != 0)
+				$query .= ", ";
+			$query .= $name;
+			$i++;
+		}
+		$query .= ") VALUES(";
+		$i = 0;
+		foreach ($this->_queryInfo['columns'] as $name => $value) {
+			if ($i != 0)
+				$query .= ", ";
+			$query .= "'" . $value . "'";
+			$i++;
+		}
+		$query .= ")";
+		
+		$this->_query($query);
+		
+		return mysql_insert_id();
+	}
+	
+	public function startUpdate($tableName)
+	{
+		$this->_queryInfo = array(
+			'table' => $tableName,
+			'columns' => array()
+		);
+	}
+	
+	public function setColumn($column, $value)
+	{
+		$this->_queryInfo['columns'][$column] = $value;
+	}
+	
+	public function endUpdate($id)
+	{
+		$query = "UPDATE " . $this->_queryInfo['table'] . " SET ";
+		foreach ($this->_queryInfo['columns'] as $name => $value) {
+			$query .= " " . $name . " = '" . $value . "'";
+		}
+		$query .= " WHERE id = '" . $id . "'";
+		$this->_query($query);
 	}
 	
 	public function addTable($tableName)
@@ -144,9 +211,7 @@ class DB
 	{
 		$query = $this->_buildQuery();
 
-		$res = mysql_query($query);
-		if (mysql_error())
-			die(mysql_error() . "\n" . $query);
+		$res = $this->_query($query);
 		$res = mysql_fetch_assoc($res);
 		
 		$ret = array();
@@ -159,10 +224,14 @@ class DB
 				$tmp2['value'] = $res[$table['tableName'] . '_' . $field];
 				$tmp2['type'] = 'raw';
 				
-				if (in_array($field, $table['stringFields']))
+				if (in_array($field, $table['stringFields'])) {
 					$tmp2['type'] = 'string';
-				if (in_array($field, $table['textFields']))
+					$tmp['_' . $field] = $res['_' . $table['tableName'] . '_' . $field];
+				}
+				if (in_array($field, $table['textFields'])) {
 					$tmp2['type'] = 'text';
+					$tmp['_' . $field] = $res['_' . $table['tableName'] . '_' . $field];
+				}
 				
 				$tmp[$field] = $tmp2;
 			}
@@ -190,6 +259,7 @@ class DB
 		
 		foreach ($this->_queryInfo['db'] as $table) {
 			foreach ($table['stringFields'] as $field) {
+				$query .= ', ' . $table['tableName'] . '.' . $field . ' AS _' . $table['tableName'] . '_' . $field;
 				$query .= ', (SELECT value FROM obj_string WHERE obj_string.id = ' . $table['tableName'] . '.' . $field . ') AS ' . $table['tableName'] . '_' . $field;
 			}
 		}
@@ -214,5 +284,16 @@ class DB
 		$query .= ' WHERE ' . $firstWhere['table'] . '.' . $firstWhere['column'] . ' = ' . $firstWhere['value'];
 		
 		return $query;
+	}
+	
+	private function _query($query)
+	{
+		$this->_queryCache[] = $query;
+		
+		$res = mysql_query($query);
+		if (mysql_error())
+			die(mysql_error() . ': ' . $query);
+		
+		return $res;
 	}
 }
