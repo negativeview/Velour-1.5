@@ -24,7 +24,7 @@ class PermissionObject
 	
 	public function setupPermissions($ob, $data)
 	{
-		switch ($data['privacy_setting']) {
+		switch ($data['obj_types_privacy_setting']) {
 			case 'complex':
 				// Some other class is going to have to handle this,
 				// as it's not something that has been deemed common enough

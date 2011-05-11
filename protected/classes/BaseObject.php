@@ -1,6 +1,7 @@
 <?php
 
 require_once('ObjectType.php');
+require_once('DB.php');
 require_once('htdocs/database.php');
 require_once('htdocs/core.php');
 
@@ -177,17 +178,49 @@ class BaseObject
 	}
 	
 	protected function _realFetchRaw()
-	{	
-		$res = db_one("SELECT obj_static.id, obj_static.type, obj_types.slug, obj_types.menu_title, " .
-			"obj_types.privacy_setting, base_object.creator, base_object.parent, " .
-			"base_object.project, base_object.created, " .
-			"(SELECT value FROM obj_string WHERE obj_string.id = base_object.title) AS title, " .
-			"(SELECT value FROM obj_text t WHERE t.id = base_object.description) AS description " .
-			"FROM obj_static " .
-			"LEFT JOIN obj_types ON (obj_types.id = obj_static.type) " .
-			"LEFT JOIN base_object ON (base_object.id = obj_static.current) " .
-			"WHERE obj_static.id = " . $this->_id);
-		return $res;
+	{
+		$db = DB::getInstance();
+		
+		$db->addTable('obj_static')
+		   ->addColumns('obj_static',
+		   		array(
+		   			'current',
+		   			'id',
+		   			'type',
+		   			'views',
+		   		)
+		   	);
+		   
+		$db->addJoin('obj_types', 'obj_static', 'id', 'type')
+		   ->addColumns('obj_types',
+		   		array(
+		   			'id',
+		   			'menu_title',
+		   			'privacy_setting',
+		   			'slug',
+		   		)
+		   	);
+		   
+		$db->addJoin('base_object', 'obj_static', 'id', 'current')
+		   ->addColumns('base_object',
+		   		array(
+		   			'buzz',
+		   			'buzz_date',
+		   			'created',
+		   			'creator',
+		   			'description',
+		   			'id',
+		   			'parent',
+		   			'project',
+		   			'title',
+		   		)
+		   	);
+		   
+		$db->addWhereEquals('obj_static', 'id', $this->_id);
+		$db->addStringField('base_object', 'title');
+		$db->addTextField('base_object', 'description');
+		
+		return $db->getSingleResult();
 	}
 	
 	public function getRaw()
@@ -200,41 +233,53 @@ class BaseObject
 		return $this->_id;
 	}
 	
+	public function getTitle()
+	{
+		$this->_fetchRaw();
+		return $this->_fetched['raw']['base_object_title'];
+	}
+	
+	public function getDescription()
+	{
+		$this->_fetchRaw();
+		return $this->_fetched['raw']['base_object_description'];
+	}
+	
 	public function getType()
 	{
 		$this->_fetchRaw();
-		return $this->_fetched['raw']['type'];
+		return $this->_fetched['raw']['obj_static_type'];
 	}
 	
 	public function getSlug()
 	{
 		$this->_fetchRaw();
-		return $this->_fetched['raw']['slug'];
+		return $this->_fetched['raw']['obj_types_slug'];
 	}
 	
 	public function getMenuTitle()
 	{
 		$this->_fetchRaw();
-		return $this->_fetched['raw']['menu_title'];
+		return $this->_fetched['raw']['obj_types_menu_title'];
 	}
 	
 	public function getPrivacySetting()
 	{
 		$this->_fetchRaw();
-		return $this->_fetched['raw']['privacy_setting'];
+		return $this->_fetched['raw']['obj_types_privacy_setting'];
 	}
 	
 	public function getCreator()
 	{
 		$this->_fetchRaw();
-		return $this->_fetched['raw']['creator'];
+		return $this->_fetched['raw']['base_object_creator'];
 	}
 	
 	public function getParent()
 	{
 		$this->_fetchRaw();
-		if ($this->_fetched['raw']['parent'])
-			return BaseObject::getById($this->_fetched['raw']['parent']);
+		if ($this->_fetched['raw']['base_object_parent'])
+			return BaseObject::getById($this->_fetched['raw']['base_object_parent']);
 		
 		return null;
 	}
@@ -246,15 +291,15 @@ class BaseObject
 		if (is_object($parent))
 			$parent = $parent->getId();
 			
-		$this->_fetched['raw']['parent'] = $parent;
+		$this->_fetched['raw']['base_object_parent'] = $parent;
 		$this->_has_updated = true;
 	}
 	
 	public function getProject()
 	{
 		$this->_fetchRaw();
-		if ($this->_fetched['raw']['project'])
-			return BaseObject::getById($this->_fetched['raw']['project']);
+		if ($this->_fetched['raw']['base_object_project'])
+			return BaseObject::getById($this->_fetched['raw']['base_object_project']);
 		
 		return null;
 	}
@@ -262,7 +307,7 @@ class BaseObject
 	public function getCreated()
 	{
 		$this->_fetchRaw();
-		return new DateTime($this->_fetched['raw']['created']);
+		return new DateTime($this->_fetched['raw']['base_object_created']);
 	}
 	
 	public function hasBeenUpdated()
