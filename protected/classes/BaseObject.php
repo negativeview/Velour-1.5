@@ -236,50 +236,50 @@ class BaseObject
 	public function getTitle()
 	{
 		$this->_fetchRaw();
-		return $this->_fetched['raw']['base_object_title'];
+		return $this->_fetched['raw']['base_object']['title']['value'];
 	}
 	
 	public function getDescription()
 	{
 		$this->_fetchRaw();
-		return $this->_fetched['raw']['base_object_description'];
+		return $this->_fetched['raw']['base_object']['description']['value'];
 	}
 	
 	public function getType()
 	{
 		$this->_fetchRaw();
-		return $this->_fetched['raw']['obj_static_type'];
+		return $this->_fetched['raw']['obj_static']['type']['value'];
 	}
 	
 	public function getSlug()
 	{
 		$this->_fetchRaw();
-		return $this->_fetched['raw']['obj_types_slug'];
+		return $this->_fetched['raw']['obj_types']['slug']['value'];
 	}
 	
 	public function getMenuTitle()
 	{
 		$this->_fetchRaw();
-		return $this->_fetched['raw']['obj_types_menu_title'];
+		return $this->_fetched['raw']['obj_types']['menu_title']['value'];
 	}
 	
 	public function getPrivacySetting()
 	{
 		$this->_fetchRaw();
-		return $this->_fetched['raw']['obj_types_privacy_setting'];
+		return $this->_fetched['raw']['obj_types']['privacy_setting']['value'];
 	}
 	
 	public function getCreator()
 	{
 		$this->_fetchRaw();
-		return $this->_fetched['raw']['base_object_creator'];
+		return $this->_fetched['raw']['base_object']['creator']['value'];
 	}
 	
 	public function getParent()
 	{
 		$this->_fetchRaw();
-		if ($this->_fetched['raw']['base_object_parent'])
-			return BaseObject::getById($this->_fetched['raw']['base_object_parent']);
+		if ($this->_fetched['raw']['base_object']['parent']['value'])
+			return BaseObject::getById($this->_fetched['raw']['base_object']['parent']['value']);
 		
 		return null;
 	}
@@ -291,15 +291,15 @@ class BaseObject
 		if (is_object($parent))
 			$parent = $parent->getId();
 			
-		$this->_fetched['raw']['base_object_parent'] = $parent;
+		$this->_fetched['raw']['base_object']['parent']['value'] = $parent;
 		$this->_has_updated = true;
 	}
 	
 	public function getProject()
 	{
 		$this->_fetchRaw();
-		if ($this->_fetched['raw']['base_object_project'])
-			return BaseObject::getById($this->_fetched['raw']['base_object_project']);
+		if ($this->_fetched['raw']['base_object']['project']['value'])
+			return BaseObject::getById($this->_fetched['raw']['base_object']['project']['value']);
 		
 		return null;
 	}
@@ -307,7 +307,7 @@ class BaseObject
 	public function getCreated()
 	{
 		$this->_fetchRaw();
-		return new DateTime($this->_fetched['raw']['base_object_created']);
+		return new DateTime($this->_fetched['raw']['base_object']['created']['value']);
 	}
 	
 	public function hasBeenUpdated()

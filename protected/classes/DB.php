@@ -149,7 +149,28 @@ class DB
 			die(mysql_error() . "\n" . $query);
 		$res = mysql_fetch_assoc($res);
 		
-		return $res;
+		$ret = array();
+		foreach ($this->_queryInfo['db'] as $table) {
+			$tmp = array();
+			
+			foreach ($table['fields'] as $field) {
+				$tmp2 = array();
+				
+				$tmp2['value'] = $res[$table['tableName'] . '_' . $field];
+				$tmp2['type'] = 'raw';
+				
+				if (in_array($field, $table['stringFields']))
+					$tmp2['type'] = 'string';
+				if (in_array($field, $table['textFields']))
+					$tmp2['type'] = 'text';
+				
+				$tmp[$field] = $tmp2;
+			}
+			
+			$ret[$table['tableName']] = $tmp;
+		}
+		
+		return $ret;
 	}
 	
 	private function _buildQuery()
