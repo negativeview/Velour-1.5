@@ -31,6 +31,13 @@ class BaseObjectTest extends PHPUnit_Framework_TestCase
     	self::$_staticIncCount = 0;
     }
     
+    public function testRaw()
+    {
+    	$ob  = BaseObject::getById(1);
+    	$ob->getTitle();
+    	print_r($ob->getRaw());
+    }
+    
     public function testDefaultHasNotChanged()
     {
     	$ob = BaseObject::getById(1);
@@ -46,6 +53,11 @@ class BaseObjectTest extends PHPUnit_Framework_TestCase
     
     public function testActuallySaves()
     {
+//		$db = DB::getInstance();
+//		$db->addTable('base_object');
+//		$db->addColumns('base_object', array('id'));
+//		$all_base_objects = $db->getAll();
+
     	$ob = BaseObject::getById(1);
     	$old = $ob->getViews();
     	$ob->addView();
@@ -207,10 +219,6 @@ class BaseObjectTest extends PHPUnit_Framework_TestCase
     	$this->assertEquals($bo, $this->_lastOb);
     }
 
-    /**
-     * Tears down the fixture, for example, closes a network connection.
-     * This method is called after a test is executed.
-     */
     protected function tearDown()
     {
     }

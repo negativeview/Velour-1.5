@@ -207,6 +207,20 @@ class DB
 		throw new Exception('Could not find text field:' . print_r($this->_queryInfo, 1));
 	}
 	
+	public function getAll()
+	{
+		$query = $this->_buildQuery();
+
+		$res = $this->_query($query);
+		
+		$ret = array();
+		while ($res = mysql_fetch_assoc($res)) {
+			$ret[] = $this->_buildResult($res);
+		}
+		
+		return $ret;
+	}
+	
 	public function getSingleResult()
 	{
 		$query = $this->_buildQuery();
@@ -214,6 +228,11 @@ class DB
 		$res = $this->_query($query);
 		$res = mysql_fetch_assoc($res);
 		
+		$ret = $this->_buildResult($res);
+	}
+	
+	private function _buildResult($res)
+	{
 		$ret = array();
 		foreach ($this->_queryInfo['db'] as $table) {
 			$tmp = array();

@@ -42,7 +42,7 @@ class PermissionObject
 				$ob->addFunction('canSee', array($this, 'canSeeParent'));
 				break;
 			default:
-				die('Unknown privacy setting: ' . $data['privacy_setting']);
+				throw new Exception('Unknown privacy setting: ' . $data['privacy_setting']);
 		}
 		$ob->unsubscribe('data:raw', array($this, 'setupPermissions'));
 		$this->_subscriptionCount--;
