@@ -26,27 +26,26 @@ class BaseObjectTest extends PHPUnit_Framework_TestCase
     	$this->_lastData = null;
     	$this->_lastOb = null;
     	
-    	BaseObject::destroyCache();
+    	CoreObject::destroyCache();
     	
     	self::$_staticIncCount = 0;
     }
     
     public function testRaw()
     {
-    	$ob  = BaseObject::getById(1);
+    	$ob = CoreObject::getById(1);
     	$ob->getTitle();
-    	print_r($ob->getRaw());
     }
     
     public function testDefaultHasNotChanged()
     {
-    	$ob = BaseObject::getById(1);
+    	$ob = CoreObject::getById(1);
     	$this->assertFalse($ob->hasChanged());
     }
     
     public function testHasChanged()
     {
-    	$ob = BaseObject::getById(1);
+    	$ob = CoreObject::getById(1);
     	$ob->setTitle('Daniel');
     	$this->assertTrue($ob->hasChanged());
     }
@@ -58,167 +57,45 @@ class BaseObjectTest extends PHPUnit_Framework_TestCase
 //		$db->addColumns('base_object', array('id'));
 //		$all_base_objects = $db->getAll();
 
-    	$ob = BaseObject::getById(1);
+    	$ob = CoreObject::getById(1);
     	$old = $ob->getViews();
     	$ob->addView();
     	$this->assertEquals($old + 1, $ob->getViews());
-    	BaseObject::destroyCache();
+    	CoreObject::destroyCache();
     	
-    	$ob = BaseObject::getById(1);
+    	$ob = CoreObject::getById(1);
     	$this->assertEquals($old + 1, $ob->getViews());
     }
     
     public function testCanSaveString()
     {
-    	$ob = BaseObject::getById(1);
+    	$ob = CoreObject::getById(1);
     	
 		// Any random changing value.
     	$t = time();
     	
     	$ob->setTitle($t);
-    	BaseObject::destroyCache();
+    	CoreObject::destroyCache();
     	
-    	$ob = BaseObject::getById(1);
+    	$ob = CoreObject::getById(1);
     	$db = DB::getInstance();
     	$this->assertEquals($t, $ob->getTitle(), print_r($db->getCache(), 1));
     }
     
     public function testCanSaveText()
     {
-    	$ob = BaseObject::getById(1);
+    	$ob = CoreObject::getById(1);
     	
 		// Any random changing value.
     	$t = time();
     	
     	$ob->setBody($t);
-    	BaseObject::destroyCache();
+    	CoreObject::destroyCache();
     	
-    	$ob = BaseObject::getById(1);
+    	$ob = CoreObject::getById(1);
     	$this->assertEquals($t, $ob->getBody());
     }
     
-    public function testAddFunction()
-    {
-    	$ob = BaseObject::getById(1);
-    	$ob->addFunction('foo', $this->_subscriber);
-    	$ob->foo();
-    	$this->assertEquals(1, $this->_incCount);
-    	$this->assertEmpty($this->_lastData);
-    	$this->assertEquals($ob, $this->_lastOb);
-    }
-    
-    public function countingCallback($ob = null, $data = null)
-    {
-    	$this->_incCount++;
-    	$this->_lastData = $data;
-    	$this->_lastOb = $ob;
-    }
-
-	/**
-	 * Makes sure that things are sane.
-	 */
-    public function testSubscriberEmpty()
-    {
-    	$bo = BaseObject::getById(1);
-    	$this->assertEquals(0, count($bo->getSubscriberList()));
-    }
-    
-    public function testAddSubscriberNormally()
-    {
-    	$bo = BaseObject::getById(1);
-    	$bo->subscribe('example', $this->_subscriber, array());
-    	$subscribers = $bo->getSubscriberList();
-    	$this->assertEquals(1, count($subscribers));
-    	$this->assertEquals(1, count($subscribers['example']));
-    }
-    
-    public function testUnsubscribe()
-    {
-    	$bo = BaseObject::getById(1);
-    	$bo->subscribe('example', $this->_subscriber, array());
-    	$subscribers = $bo->getSubscriberList();
-    	$this->assertEquals(1, count($subscribers));
-    	$this->assertEquals(1, count($subscribers['example']));
-    	
-    	$bo->unsubscribe('example', $this->_subscriber, array());
-    	$subscribers = $bo->getSubscriberList();
-    	$this->assertEquals(1, count($subscribers));
-    	$this->assertEquals(0, count($subscribers['example']));    	
-    }
-    
-    public function testAddSubscriberOnlyOnce()
-    {
-    	$bo = BaseObject::getById(1);
-    	$bo->subscribe('example', $this->_subscriber, array());
-    	$bo->subscribe('example', $this->_subscriber, array());
-    	$subscribers = $bo->getSubscriberList();
-    	$this->assertEquals(1, count($subscribers));
-    	$this->assertEquals(1, count($subscribers['example']));
-    }
-    
-    public function testCallbackWorks()
-    {
-    	$bo = BaseObject::getById(1);
-    	$bo->subscribe('example', $this->_subscriber, array());
-    	$bo->dispatch('example');
-    	$this->assertEquals(1, $this->_incCount);
-    }
-    
-    public function testCallbackPassesData()
-    {
-    	$data = array(
-    		'this'         => 'data',
-    		'is'           => 'very',
-    		'unlikely'     => 'to',
-    		'accidentally' => 'be',
-    		'duplicated'   => 'accidentally'
-    	);
-    	$bo = BaseObject::getById(1);
-    	$bo->subscribe('example', $this->_subscriber);
-    	$bo->dispatch('example', $data);
-    	$this->assertEquals(1, $this->_incCount);
-    	$this->assertEquals($data, $this->_lastData);
-    }
-    
-    public function testCallbackPassesObject()
-    {
-    	$bo = BaseObject::getById(1);
-    	$bo->subscribe('example', $this->_subscriber);
-    	$bo->dispatch('example');
-    	$this->assertEquals(1, $this->_incCount);
-    	$this->assertEquals($bo, $this->_lastOb);
-    }
-    
-    public function testCallbackOnlyOnce()
-    {
-    	$bo = BaseObject::getById(1);
-    	$bo->subscribe('example', $this->_subscriber, array());
-    	$bo->subscribe('example', $this->_subscriber, array());
-    	$bo->dispatch('example');
-    	$this->assertEquals(1, $this->_incCount);
-    }
-    
-    public function testStaticCallback()
-    {
-    	$bo = BaseObject::getById(1);
-    	$bo->subscribe('example', array('BaseObjectTest', 'staticCallback'), array());
-    	$bo->dispatch('example');
-    	$this->assertEquals(1, self::$_staticIncCount);
-    }
-    
-    public static function staticCallback()
-    {
-    	self::$_staticIncCount++;
-    }
-    
-    public function testCreateCallback()
-    {
-    	BaseObject::staticSubscribe('create', $this->_subscriber, array());
-    	$bo = BaseObject::getById(1);
-    	$this->assertEquals(1, $this->_incCount);
-    	$this->assertEquals($bo, $this->_lastOb);
-    }
-
     protected function tearDown()
     {
     }

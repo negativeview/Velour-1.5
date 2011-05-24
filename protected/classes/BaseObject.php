@@ -1,6 +1,7 @@
 <?php
 
 require_once('ObjectType.php');
+require_once('CoreObject.php');
 require_once('DB.php');
 require_once('htdocs/database.php');
 require_once('htdocs/core.php');
@@ -16,9 +17,6 @@ require_once('htdocs/core.php');
 
 class BaseObject
 {
-	/** @var integer */
-	protected $_id;	
-	
 	/** @var array */
 	protected $_fetched;
 	
@@ -28,137 +26,24 @@ class BaseObject
 	/** @var boolean */
 	protected $_has_updated;
 	
-	/** @var array */
-	protected $_subscribers;
-	
-	/** @var array */
-	protected $_functions;
-	
-	static protected $_staticSubscribers = array();
-	
-	static protected $_byId = array();
-	
-	public static function getById($id)
-	{
-		if (!$id)
-			die('Trying to load from id ' . $id . ' which is obviously bad.');
-			
-		if (isset(self::$_byId['a' . $id]))
-			return self::$_byId['a' . $id];
-		
-		self::$_byId['a' . $id] = new BaseObject($id);
-		return self::$_byId['a' . $id];
-	}
-	
-	public static function destroyCache()
-	{
-		self::$_byId = array();
-	}
-	
-	public function toString()
-	{
-		return $this->_id;
-	}
-	
+	/** @var CoreObject */
+	protected $_core_object;
+
 	/**
 	 * Constructor
 	 *
 	 * @param integer $id The id of this row in the obj_static table.
 	 * @return BaseObject
 	 */
-	protected function __construct($id)
+	protected function __construct($coreObject)
 	{
-		$this->_id = $id;
+		$this->_core_object = $coreObject;
 		$this->_fetched = array();
 		$this->_fetched_originals = array();
-		$this->_subscribers = array();
 		$this->_has_updated = false;
+		$this->_core_object->addExtender($this);
 		
-		self::staticDispatch('create', $this);
-	}
-	
-	public function addFunction($funcName, $cb)
-	{
-		$this->_functions[$funcName] = $cb;
-	}
-	
-	public function __call($name, $arguments)
-	{
-		// There are many classes that add functions in response to
-		// loading our data. So let's load it and let those functions
-		// lazy load if we haven't already.
-		
-		$this->_fetchRaw();
-		
-		if (isset($this->_functions[$name]))
-			return call_user_func($this->_functions[$name], $this, $arguments);
-		
-		throw new Exception('Method ' . $name . ' does not exist.');
-	}
-	
-	public static function staticSubscribe($event, $callback)
-	{
-		if (!isset(self::$_staticSubscribers[$event])) {
-			self::$_staticSubscribers[$event] = array();
-		}
-		
-		foreach (self::$_staticSubscribers[$event] as $cb) {
-			if ($callback === $cb)
-				return;
-		}
-		
-		self::$_staticSubscribers[$event][] = $callback;
-	}
-	
-	public static function staticDispatch($event, $data = null)
-	{
-		if (!isset(self::$_staticSubscribers[$event]))
-			return;
-		
-		foreach (self::$_staticSubscribers[$event] as $cb) {
-			call_user_func($cb, $data);
-		}
-	}
-	
-	public function getSubscriberList()
-	{
-		return $this->_subscribers;
-	}
-	
-	public function subscribe($event, $callback)
-	{
-		if (!isset($this->_subscribers[$event]))
-			$this->_subscribers[$event] = array();
-		
-		foreach ($this->_subscribers[$event] as $cb) {
-			if ($callback === $cb)
-				return;
-		}
-		$this->_subscribers[$event][] = $callback;
-	}
-	
-	public function unsubscribe($event, $callback)
-	{
-		if (!isset($this->_subscribers[$event]))
-			$this->_subscribers[$event] = array();
-		
-		for ($i = 0; $i < count($this->_subscribers[$event]); $i++) {
-			$cb = $this->_subscribers[$event][$i];
-			if ($callback === $cb) {
-				array_splice($this->_subscribers[$event], $i, 1);
-				break;
-			}
-		}
-	}
-	
-	public function dispatch($event, $data = null)
-	{
-		if (!isset($this->_subscribers[$event]))
-			return;
-		
-		foreach ($this->_subscribers[$event] as $cb) {
-			call_user_func($cb, $this, $data);
-		}		
+		CoreObject::staticDispatch('BaseObject.create', $this);
 	}
 	
 	protected function _fetchWrapper($key, $function)
@@ -172,7 +57,7 @@ class BaseObject
 		$this->_fetched[$key] = call_user_func($function);
 		$this->_fetched_originals[$key] = $this->_fetched[$key];
 		
-		$this->dispatch('data:' . $key, $this->_fetched[$key]);
+		$this->_core_object->dispatch('data:' . $key, $this->_fetched[$key]);
 		return $this->_fetched[$key];
 	}
 	
@@ -220,7 +105,7 @@ class BaseObject
 		   		)
 		   	);
 		   
-		$db->addWhereEquals('obj_static', 'id', $this->_id);
+		$db->addWhereEquals('obj_static', 'id', $this->_core_object->getId());
 		$db->addStringField('base_object', 'title');
 		$db->addTextField('base_object', 'description');
 		
@@ -234,7 +119,7 @@ class BaseObject
 	
 	public function getId()
 	{
-		return $this->_id;
+		return $this->_core_object->getId();
 	}
 	
 	public function hasChanged()
@@ -429,8 +314,15 @@ class BaseObject
 				foreach ($columns as $name => $data) {
 					$db->setColumn($name, $data['value']);
 				}
-				$db->endUpdate($this->_id);
+				$db->endUpdate($this->_core_object->getId());
 			}
 		}
 	}
+	
+	public static function newCore($coreObject)
+	{
+		new BaseObject($coreObject);
+	}
 }
+
+CoreObject::staticSubscribe('CoreObject.create', array('BaseObject', 'newCore'), array());
