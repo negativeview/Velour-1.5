@@ -13,7 +13,7 @@ class PermissionObject
 	{
 		$this->_subscriptionCount = 0;
 		
-		BaseObject::staticSubscribe('create', array($this, 'newBaseObject'));
+		CoreObject::staticSubscribe('create', array($this, 'newBaseObject'));
 	}
 	
 	public function newBaseObject($ob)

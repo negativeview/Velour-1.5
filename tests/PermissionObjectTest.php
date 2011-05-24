@@ -9,12 +9,12 @@ class PermissionObjectTest extends PHPUnit_Framework_TestCase
 	public function setUp()
 	{
 		$this->_permissionObject = new PermissionObject();
-		BaseObject::destroyCache();
+		CoreObject::destroyCache();
 	}
 	
 	public function testBasicSubscribe()
 	{
-		$bo = BaseObject::getById(1);
+		$bo = CoreObject::getById(1);
 		$this->assertEquals(1, $this->_permissionObject->getSubscriptionCount());
 	}
 	
@@ -33,14 +33,14 @@ class PermissionObjectTest extends PHPUnit_Framework_TestCase
 		);
 		
 		foreach ($obj_ids as $id) {
-			$ob = BaseObject::getById($id);
+			$ob = CoreObject::getById($id);
 			$ob->canSee();
 		}
 	}
 	
 	public function testUnsubscribe()
 	{
-		$bo = BaseObject::getById(1);
+		$bo = CoreObject::getById(1);
 		$this->assertEquals(1, $this->_permissionObject->getSubscriptionCount());
 		
 		// This triggers the database pull, which should cause our permission object to run,
