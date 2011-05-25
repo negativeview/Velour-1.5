@@ -30,10 +30,10 @@ db_do("DROP TABLE post_alerts");
 db_do("DROP TABLE randcounts");
 db_do("DROP TABLE searches");
 
-db_do("CREATE TABLE obj_allowed_mappings(id serial, left_type BIGINT(20) UNSIGNED NOT NULL, right_type BIGINT(20) UNSIGNED NOT NULL)");
+db_do("CREATE TABLE obj_allowed_mappings(id serial, left_type BIGINT(20) UNSIGNED NOT NULL, right_type BIGINT(20) UNSIGNED NOT NULL) TYPE=InnoDB");
 
 /* Create the object type table, very important for a few reasons. */
-db_do("CREATE TABLE obj_types(id SERIAL, slug VARCHAR(255), t VARCHAR(255), menu_title VARCHAR(255), privacy_setting ENUM('complex', 'public', 'project', 'parent'))");
+db_do("CREATE TABLE obj_types(id SERIAL, slug VARCHAR(255), t VARCHAR(255), menu_title VARCHAR(255), privacy_setting ENUM('complex', 'public', 'project', 'parent')) TYPE=InnoDB");
 db_do("ALTER TABLE obj_types ADD UNIQUE(slug)");
 db_do("ALTER TABLE obj_types ADD UNIQUE(t)");
 db_do("ALTER TABLE obj_types ADD UNIQUE(menu_title)");
@@ -48,21 +48,22 @@ db_do("INSERT INTO obj_types(slug, t, menu_title, privacy_setting) VALUES('comme
 db_do("INSERT INTO obj_types(slug, t, menu_title, privacy_setting) VALUES('file', 'file', 'Files', 'parent')");
 
 /* This stores any varchar values for the object. */
-db_do("CREATE TABLE obj_string(id SERIAL, value VARCHAR(255))");
+db_do("CREATE TABLE obj_string(id SERIAL, value VARCHAR(255)) TYPE=InnoDB");
 
 /* This stores any text values for the object. */
-db_do("CREATE TABLE obj_text(id SERIAL, value TEXT)");
+db_do("CREATE TABLE obj_text(id SERIAL, value TEXT) TYPE=InnoDB");
+
+db_do("CREATE TABLE obj_static(id serial, type BIGINT(20) UNSIGNED NOT NULL, current BIGINT(20) UNSIGNED NOT NULL, views BIGINT(20) UNSIGNED NOT NULL DEFAULT 0) TYPE=InnoDB");
 
 /* The base object table is the master table for all objects. This table will get big. */
-db_do("CREATE TABLE base_object(id serial, creator BIGINT(20) UNSIGNED, parent BIGINT(20) UNSIGNED, project BIGINT(20) UNSIGNED, title BIGINT(20) UNSIGNED, created DATETIME, description BIGINT(20) UNSIGNED, buzz DECIMAL(5, 3) UNSIGNED NOT NULL DEFAULT 0.0, buzz_date DATETIME)");
+db_do("CREATE TABLE base_object(id serial, creator BIGINT(20) UNSIGNED, parent BIGINT(20) UNSIGNED, project BIGINT(20) UNSIGNED, title BIGINT(20) UNSIGNED, created DATETIME, description BIGINT(20) UNSIGNED, buzz DECIMAL(5, 3) UNSIGNED NOT NULL DEFAULT 0.0, buzz_date DATETIME) TYPE=InnoDB");
 db_do("ALTER TABLE base_object ADD CONSTRAINT base_object_title_fk FOREIGN KEY (title) REFERENCES obj_string(id)");
 db_do("ALTER TABLE base_object ADD CONSTRAINT base_object_description_fk FOREIGN KEY (description) REFERENCES obj_text(id)");
 db_do("ALTER TABLE base_object ADD CONSTRAINT base_object_creator_fk FOREIGN KEY (creator) REFERENCES obj_static(id)");
 db_do("ALTER TABLE base_object ADD CONSTRAINT base_object_project_fk FOREIGN KEY (project) REFERENCES obj_static(id)");
 db_do("ALTER TABLE base_object ADD CONSTRAINT base_object_parent_fk FOREIGN KEY (parent) REFERENCES obj_static(id)");
 
-db_do("CREATE TABLE obj_static(id serial, type BIGINT(20) UNSIGNED NOT NULL, current BIGINT(20) UNSIGNED NOT NULL, views BIGINT(20) UNSIGNED NOT NULL DEFAULT 0)");
-db_do("ALTER TABLE obj_static ADD CONSTRAINT obj_static_current_fk FOREIGN KEY (current) REFERENCES base_obj(id)");
+db_do("ALTER TABLE obj_static ADD CONSTRAINT obj_static_current_fk FOREIGN KEY (current) REFERENCES base_object(id)");
 db_do("ALTER TABLE obj_static ADD CONSTRAINT obj_static_obj_type_fk FOREIGN KEY(type) REFERENCES obj_types(id)");
 
 
