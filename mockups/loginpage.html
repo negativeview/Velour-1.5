@@ -85,6 +85,22 @@
 		<div id="header"> 
 			<h2>Happy birthday, <span class="hilight">Martin Aggett</span>!</h2>
 		</div> 
-		<%- body %>
+		<div id="loginwrap">
+            <h3>Login!</h3> 
+            <form method="POST">
+                <table>
+                    <tr>
+                        <td><label for="email">Email:</label></td>
+                        <td><label for="password">Password:</label></td>
+                    </tr>
+                    <tr>
+                        <td><input type="text" name="email" /></td>
+                        <td><input type="password" name="password" /></td>
+                    </tr>
+                </table>
+                <input type="submit" value="Login" class="loginbutton" />
+            </form>
+            <a href="#" id="noaccount">Don't have an account?</a>
+		</div> 
     </body> 
 </html>
