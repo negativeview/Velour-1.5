@@ -1,0 +1,82 @@
+digraph FeatureList {
+#    nodesep = 1.0
+    
+# Boxes are for servers
+    node [shape="box"];
+    
+    subgraph cluster_done {
+        label = "Done";
+        style=filled;
+		color=green3;
+		
+        http_framework [ label="HTTP" ];
+        message_bus [ label="Message Bus" ];
+    }
+    
+    alert_format_planning [ label="Messaging Format Planning" ];
+    activity_log [ label="Activity Log" ];
+    data_import [ label="Data Import" ];
+    entities [ label="Entities Module" ];
+    history_tool [ label="History" ];
+    live_stream [ label="Live Stream" ];
+    login_page [ label="Login Page" ];
+    logging [ label="Logging" ];
+    project_chat [ label="Project Chat" ];
+    project_entity [ label="Project Entity" ];
+    register_page [ label="Register Page" ];
+    sidebar_alerts [ label="Sidebar Alerts" ];
+    user_entity [ label="User Entity" ];
+    user_preferences [ label="User Preferences" ];
+    wiki [ label="Wiki" ];
+    wiki_entity [ label="Wiki Entity" ];
+    viki [ label="Viki" ];
+    
+    
+# The sidebar alerts needed bits.
+    user_preferences->sidebar_alerts [ label = "What alerts to show" ];
+    activity_log->sidebar_alerts [ label = "Show historical events" ];
+    live_stream->sidebar_alerts [ label = "Bus over which to speak" ];
+    alert_format_planning->sidebar_alerts [ label = "General planning" ];
+
+# The login page needed bits.
+    user_entity->login_page [ label = "User to log in" ];
+    http_framework->login_page [ label = "Parse out HTTP headers" ];
+    data_import->login_page [ label = "Ensure backwards compat" ];
+    register_page->login_page [ label = "New users" ];
+
+# History tool
+    activity_log->history_tool [ label = "Historical events to process" ];
+    live_stream->history_tool [ label = "Live updates?" ];
+
+# Sayings in the headbar
+    live_stream->header_sayings [ label = "Bus over which to speak" ];
+
+# Project chat
+    live_stream->project_chat [ label = "Bus over which to speak" ];
+    project_entity->project_chat [ label = "The subject of conversation" ];
+    user_entity->project_chat [ label = "Who is chatting" ];
+
+# Viki
+    wiki->viki [ label = "Supplies mass of code" ];
+    user_entity->viki [ label = "Who is editing" ];
+    message_bus->viki [ label = "Real-time editing" ];
+
+# Wiki
+    user_entity->wiki [ label = "Who is editing" ];
+    wiki_entity->wiki [ label = "The entity" ];
+    login_page->wiki;
+    message_bus->wiki;
+
+# User registration
+    user_entity->register_page;
+    http_framework->register_page;
+    message_bus->register_page;
+
+# Logging
+    message_bus->logging;
+    
+# Entities Module
+    entities->user_entity;
+    entities->project_entity;
+    entities->wiki_entity;
+}
