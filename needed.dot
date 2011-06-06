@@ -9,6 +9,7 @@ digraph FeatureList {
         style=filled;
 		color=green3;
 		
+        entities [ label="Entities Module" ];
         http_framework [ label="HTTP" ];
         message_bus [ label="Message Bus" ];
     }
@@ -16,7 +17,7 @@ digraph FeatureList {
     alert_format_planning [ label="Messaging Format Planning" ];
     activity_log [ label="Activity Log" ];
     data_import [ label="Data Import" ];
-    entities [ label="Entities Module" ];
+    header_sayings [ label="Quips" ];
     history_tool [ label="History" ];
     live_stream [ label="Live Stream" ];
     login_page [ label="Login Page" ];
@@ -24,13 +25,20 @@ digraph FeatureList {
     project_chat [ label="Project Chat" ];
     project_entity [ label="Project Entity" ];
     register_page [ label="Register Page" ];
+    sessions [ label="Sessions" ];
     sidebar_alerts [ label="Sidebar Alerts" ];
     user_entity [ label="User Entity" ];
     user_preferences [ label="User Preferences" ];
     wiki [ label="Wiki" ];
     wiki_entity [ label="Wiki Entity" ];
     viki [ label="Viki" ];
-    
+
+# Sessions
+    login_page->sessions [ label = "To create the session" ];
+    user_entity->sessions [ label = "To populate" ];
+
+# Live stream
+    sessions->live_stream [ label = "Filtering" ];
     
 # The sidebar alerts needed bits.
     user_preferences->sidebar_alerts [ label = "What alerts to show" ];
@@ -42,7 +50,6 @@ digraph FeatureList {
     user_entity->login_page [ label = "User to log in" ];
     http_framework->login_page [ label = "Parse out HTTP headers" ];
     data_import->login_page [ label = "Ensure backwards compat" ];
-    register_page->login_page [ label = "New users" ];
 
 # History tool
     activity_log->history_tool [ label = "Historical events to process" ];
@@ -64,19 +71,20 @@ digraph FeatureList {
 # Wiki
     user_entity->wiki [ label = "Who is editing" ];
     wiki_entity->wiki [ label = "The entity" ];
-    login_page->wiki;
-    message_bus->wiki;
+    message_bus->wiki [ label = "Real-time editing" ];
 
 # User registration
-    user_entity->register_page;
-    http_framework->register_page;
-    message_bus->register_page;
+    user_entity->register_page [ label = "Need something to fill in" ];
+    http_framework->register_page [ label = "It's a page isn't it?" ];
 
 # Logging
-    message_bus->logging;
+    message_bus->logging [ label = "Bus to watch." ];
     
 # Entities Module
-    entities->user_entity;
-    entities->project_entity;
-    entities->wiki_entity;
+    entities->user_entity [ label = "Need base code" ];
+    entities->project_entity [ label = "Need base code" ];
+    entities->wiki_entity [ label = "Need base code" ];
+    
+# User Preferences
+    user_entity->user_preferences [ label = "User we're preferencing" ];
 }
