@@ -9,7 +9,6 @@ digraph FeatureList {
         style=filled;
 		color=green3;
 		
-        entities [ label="Entities Module" ];
         http_framework [ label="HTTP" ];
         message_bus [ label="Message Bus" ];
     }
@@ -19,6 +18,7 @@ digraph FeatureList {
     buzz [ label="Buzz" ];
     data_import [ label="Data Import" ];
     email [ label="Email" ];
+    entities [ label="Entities Module" ];
     file_planning [ label="File Planning" ];
     file_entity [ label="File Entity" ];
     files [ label="Files" ];

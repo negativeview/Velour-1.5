@@ -44,6 +44,6 @@ var wellFormed = {
         callback(message);
     }
 };
-//r.addExtension(wellFormed);
+r.addExtension(wellFormed);
 
 r.listen(8080);
