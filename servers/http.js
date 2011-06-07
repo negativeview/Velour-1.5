@@ -13,9 +13,6 @@ var outstanding = {};
 // Keep a counter to have a unique message id.
 var id = 0;
 
-// Log the HTTP requests.
-app.use(express.logger());
-
 // Use ejs rendering for our templates.
 app.set('view engine', 'ejs');
 
@@ -24,14 +21,13 @@ app.set('view engine', 'ejs');
 //       code that makes them able to run in what is effectively parallel.
 app.param('userId', function(req, res, next, id) {
     add_required_message(req, next, 'getUser', 'user', {userId: id});
-    add_required_message(req, next, 'getUser', 'anotherUser', {userId: id});
 });
 
 // Due to the param stuff above, this code is super easy, as user and
 // anotherUser are populated from above. We just have to pass stuff to the
 // view.
 app.get('/user/:userId', function(req, res) {
-    res.render('index', {message: {message: req.user.userId + req.anotherUser.userId}});
+    res.render('index', {message: {message: req.user.userId}});
 });
 
 var c = new Faye.Client('http://localhost:8080/private');
@@ -82,7 +78,6 @@ function add_required_message(req, next, messageName, key, data) {
     var mid = message_with_reply(messageName, data, function(err, message) {
         r[k] = message.message;
         delete r.requiredMessages[message.mid];
-        console.log('inner2');
         
         var l = 0;
         for (var i in r.requiredMessages) {
