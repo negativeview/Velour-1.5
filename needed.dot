@@ -2,23 +2,24 @@ digraph FeatureList {
 #    nodesep = 1.0
     
 # Boxes are for servers
-    node [shape="box"];
-    
-    subgraph cluster_done {
-        label = "Done";
-        style=filled;
-		color=green3;
-		
+    node [shape="box", color=black style=bold];
+
+    subgraph cluster_yay {
+        style=bold
+        color=green3
+        shape=box
+        label=Done
+
         http_framework [ label="HTTP" ];
-        message_bus [ label="Message Bus" ];
-    }
+        message_bus [ label="Message Bus" ];        
+        entities [ label="Entities Module" ];
+    };
     
     alert_format_planning [ label="Messaging Format Planning" ];
     activity_log [ label="Activity Log" ];
     buzz [ label="Buzz" ];
     data_import [ label="Data Import" ];
     email [ label="Email" ];
-    entities [ label="Entities Module" ];
     file_planning [ label="File Planning" ];
     file_entity [ label="File Entity" ];
     files [ label="Files" ];
@@ -41,7 +42,6 @@ digraph FeatureList {
     viki [ label="Viki" ];
 
 # File Entity
-    entities->file_entity [ label="Framework" ];
     file_planning->file_entity [ label="Knowing what to build" ];
 
 # Files
@@ -49,7 +49,6 @@ digraph FeatureList {
     file_entity->files [ label="Represent!" ];
 
 # HTML 5 Video
-    http_framework->html5_video [ label="A page to put it on" ];
     files->html5_video [ label="So I can upload it" ];
 
 # Email
@@ -73,7 +72,6 @@ digraph FeatureList {
 
 # The login page needed bits.
     user_entity->login_page [ label = "User to log in" ];
-    http_framework->login_page [ label = "Parse out HTTP headers" ];
     data_import->login_page [ label = "Ensure backwards compat" ];
 
 # History tool
@@ -91,24 +89,16 @@ digraph FeatureList {
 # Viki
     wiki->viki [ label = "Supplies mass of code" ];
     user_entity->viki [ label = "Who is editing" ];
-    message_bus->viki [ label = "Real-time editing" ];
 
 # Wiki
     user_entity->wiki [ label = "Who is editing" ];
     wiki_entity->wiki [ label = "The entity" ];
-    message_bus->wiki [ label = "Real-time editing" ];
 
 # User registration
     user_entity->register_page [ label = "Need something to fill in" ];
-    http_framework->register_page [ label = "It's a page isn't it?" ];
 
 # Logging
-    message_bus->logging [ label = "Bus to watch." ];
     
-# Entities Module
-    entities->user_entity [ label = "Need base code" ];
-    entities->project_entity [ label = "Need base code" ];
-    entities->wiki_entity [ label = "Need base code" ];
 
 # Buzz
     user_entity->buzz [ label = "User to calculate buzz for" ];
