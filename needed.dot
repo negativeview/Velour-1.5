@@ -4,42 +4,49 @@ digraph FeatureList {
 # Boxes are for servers
     node [shape="box", color=black style=bold];
 
-    subgraph cluster_yay {
+    subgraph cluster_done {
         style=bold
         color=green3
         shape=box
-        label=Done
+        label="Done\nThese entities have been completed.\nThey were removed from the right side to not clutter things up."
 
         http_framework [ label="HTTP" ];
         message_bus [ label="Message Bus" ];        
         entities [ label="Entities Module" ];
     };
     
-    alert_format_planning [ label="Messaging Format Planning" ];
-    activity_log [ label="Activity Log" ];
-    buzz [ label="Buzz" ];
-    data_import [ label="Data Import" ];
-    email [ label="Email" ];
-    file_planning [ label="File Planning" ];
-    file_entity [ label="File Entity" ];
-    files [ label="Files" ];
-    header_sayings [ label="Quips" ];
-    history_tool [ label="History" ];
-    html5_video [ label="HTML 5 Video Player" ];
-    live_stream [ label="Live Stream" ];
-    login_page [ label="Login Page" ];
-    logging [ label="Logging" ];
-    persistence [ label="Persistence" ];
-    project_chat [ label="Project Chat" ];
-    project_entity [ label="Project Entity" ];
-    register_page [ label="Register Page" ];
-    sessions [ label="Sessions" ];
-    sidebar_alerts [ label="Sidebar Alerts" ];
-    user_entity [ label="User Entity" ];
-    user_preferences [ label="User Preferences" ];
-    wiki [ label="Wiki" ];
-    wiki_entity [ label="Wiki Entity" ];
-    viki [ label="Viki" ];
+    subgraph cluster_not {
+        style=bold
+        color=black
+        shape=box
+        label="Incomplete\nThese still need to be done. Lines indicate predecessors.\nTop items should be done before bottom."
+        
+        alert_format_planning [ label="Messaging Format Planning" ];
+        activity_log [ label="Activity Log" ];
+        buzz [ label="Buzz" ];
+        data_import [ label="Data Import" ];
+        email [ label="Email" ];
+        file_planning [ label="File Planning" ];
+        file_entity [ label="File Entity" ];
+        files [ label="Files" ];
+        header_sayings [ label="Quips" ];
+        history_tool [ label="History" ];
+        html5_video [ label="HTML 5 Video Player" ];
+        live_stream [ label="Live Stream" ];
+        login_page [ label="Login Page" ];
+        logging [ label="Logging" ];
+        persistence [ label="Persistence" ];
+        project_chat [ label="Project Chat" ];
+        project_entity [ label="Project Entity" ];
+        register_page [ label="Register Page" ];
+        sessions [ label="Sessions" ];
+        sidebar_alerts [ label="Sidebar Alerts" ];
+        user_entity [ label="User Entity" ];
+        user_preferences [ label="User Preferences" ];
+        wiki [ label="Wiki" ];
+        wiki_entity [ label="Wiki Entity" ];
+        viki [ label="Viki" ];
+    }
 
 # File Entity
     file_planning->file_entity [ label="Knowing what to build" ];
