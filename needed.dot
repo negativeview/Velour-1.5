@@ -10,9 +10,11 @@ digraph FeatureList {
         shape=box
         label="Done\nThese entities have been completed.\nThey were removed from the right side to not clutter things up."
 
+        entities [ label="Entities Module" ];
         http_framework [ label="HTTP" ];
         message_bus [ label="Message Bus" ];        
-        entities [ label="Entities Module" ];
+        project_planning [ label="Project Planning" ];
+        user_entity [ label="User Entity" ];
     };
     
     subgraph cluster_not {
@@ -21,96 +23,70 @@ digraph FeatureList {
         shape=box
         label="Incomplete\nThese still need to be done. Lines indicate predecessors.\nTop items should be done before bottom."
         
-        alert_format_planning [ label="Messaging Format Planning" ];
         activity_log [ label="Activity Log" ];
+        alert_format_planning [ label="Messaging Format Planning" ];
         buzz [ label="Buzz" ];
         data_import [ label="Data Import" ];
+        diff_code [ label="Shared Diff Code"];
         email [ label="Email" ];
-        file_planning [ label="File Planning" ];
         file_entity [ label="File Entity" ];
+        file_planning [ label="File Planning" ];
         files [ label="Files" ];
         header_sayings [ label="Quips" ];
         history_tool [ label="History" ];
         html5_video [ label="HTML 5 Video Player" ];
         live_stream [ label="Live Stream" ];
-        login_page [ label="Login Page" ];
         logging [ label="Logging" ];
+        login_page [ label="Login Page" ];
         persistence [ label="Persistence" ];
         project_chat [ label="Project Chat" ];
         project_entity [ label="Project Entity" ];
         register_page [ label="Register Page" ];
         sessions [ label="Sessions" ];
         sidebar_alerts [ label="Sidebar Alerts" ];
-        user_entity [ label="User Entity" ];
         user_preferences [ label="User Preferences" ];
+        viki [ label="Viki" ];
+        viki_planning [ label = "Viki Planning" ];
+        web_design [ label = "Web Design" ];
         wiki [ label="Wiki" ];
         wiki_entity [ label="Wiki Entity" ];
-        viki [ label="Viki" ];
+        wiki_planning [ label="Wiki Planning" ];
     }
 
-# File Entity
-    file_planning->file_entity [ label="Knowing what to build" ];
-
-# Files
-    login_page->files [ label="So I can upload as a user" ];
-    file_entity->files [ label="Represent!" ];
-
-# HTML 5 Video
-    files->html5_video [ label="So I can upload it" ];
-
-# Email
-    user_preferences->email [ label="Make sure not to spam" ];
-    
-# Activity Log
-    persistence->activity_log [ label="Place to store things" ];
-
-# Sessions
-    login_page->sessions [ label = "To create the session" ];
-    user_entity->sessions [ label = "To populate" ];
-
-# Live stream
-    sessions->live_stream [ label = "Filtering" ];
-    
-# The sidebar alerts needed bits.
-    user_preferences->sidebar_alerts [ label = "What alerts to show" ];
-    activity_log->sidebar_alerts [ label = "Show historical events" ];
-    live_stream->sidebar_alerts [ label = "Bus over which to speak" ];
-    alert_format_planning->sidebar_alerts [ label = "General planning" ];
-
-# The login page needed bits.
-    user_entity->login_page [ label = "User to log in" ];
-    data_import->login_page [ label = "Ensure backwards compat" ];
-
-# History tool
     activity_log->history_tool [ label = "Historical events to process" ];
-    live_stream->history_tool [ label = "Live updates?" ];
-
-# Sayings in the headbar
+    activity_log->sidebar_alerts [ label = "Show historical events" ];
+    alert_format_planning->sidebar_alerts [ label = "General planning" ];
+    data_import->login_page [ label = "Ensure backwards compat" ];
+    diff_code->history_tool [ label = "Concise descriptions"];
+    diff_code->wiki [ label = "Diff View" ];
+    file_entity->files [ label="Represent!" ];
+    file_planning->file_entity [ label="Knowing what to build" ];
+    files->html5_video [ label="So I can upload it" ];
     live_stream->header_sayings [ label = "Bus over which to speak" ];
-
-# Project chat
+    live_stream->history_tool [ label = "Live updates?" ];
     live_stream->project_chat [ label = "Bus over which to speak" ];
-    project_entity->project_chat [ label = "The subject of conversation" ];
-    user_entity->project_chat [ label = "Who is chatting" ];
-
-# Viki
-    wiki->viki [ label = "Supplies mass of code" ];
-    user_entity->viki [ label = "Who is editing" ];
-
-# Wiki
-    user_entity->wiki [ label = "Who is editing" ];
-    wiki_entity->wiki [ label = "The entity" ];
-
-# User registration
-    user_entity->register_page [ label = "Need something to fill in" ];
-
-# Logging
-    
-
-# Buzz
-    user_entity->buzz [ label = "User to calculate buzz for" ];
+    live_stream->sidebar_alerts [ label = "Bus over which to speak" ];
+    login_page->files [ label="So I can upload as a user" ];
+    login_page->sessions [ label = "To create the session" ];
+    persistence->activity_log [ label="Place to store things" ];
     project_entity->buzz [ label = "Project to calculate buzz for" ];
-    
-# User Preferences
-    user_entity->user_preferences [ label = "User we're preferencing" ];
+    project_entity->project_chat [ label = "The subject of conversation" ];
+    sessions->live_stream [ label = "Filtering" ];
+    user_preferences->email [ label="Make sure not to spam" ];
+    user_preferences->sidebar_alerts [ label = "What alerts to show" ];
+    viki_planning->viki [ label = "Know what to build" ];
+    web_design->header_sayings [ label = "Somewhere to put it" ];
+    web_design->history_tool [ label = "Somewhere to put it" ];
+    web_design->html5_video [ label = "Somewhere to put it" ];
+    web_design->live_stream [ label = "Somewhere to put it" ];
+    web_design->login_page [ label = "Design for it" ];
+    web_design->project_chat [ label = "Somewhere to put it" ];
+    web_design->register_page [ label = "Design for it" ];
+    web_design->sidebar_alerts [ label = "Design for it" ];
+    web_design->user_preferences [ label = "Design for it" ];
+    web_design->viki [ label = "Design for it" ];
+    web_design->wiki [ label = "Design for it" ];
+    wiki_entity->wiki [ label = "The entity" ];
+    wiki_planning->wiki_entity [ label = "Know what to build" ];
+    wiki->viki [ label = "Supplies mass of code" ];
 }
