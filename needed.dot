@@ -28,6 +28,7 @@ digraph FeatureList {
         buzz [ label="Buzz" ];
         data_import [ label="Data Import" ];
         diff_code [ label="Shared Diff Code"];
+        diff_search [ label="Find Appropriate Diff Code"];
         email [ label="Email" ];
         file_entity [ label="File Entity" ];
         file_planning [ label="File Planning" ];
@@ -59,6 +60,7 @@ digraph FeatureList {
     data_import->login_page [ label = "Ensure backwards compat" ];
     diff_code->history_tool [ label = "Concise descriptions"];
     diff_code->wiki [ label = "Diff View" ];
+    diff_search->diff_code [ label = "What to use"];
     file_entity->files [ label="Represent!" ];
     file_planning->file_entity [ label="Knowing what to build" ];
     files->html5_video [ label="So I can upload it" ];
