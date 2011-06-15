@@ -21,6 +21,10 @@ function User(id) {
     this.display_name = 'Anonymous Coward';
 }
 
+User.prototype.toString = function() {
+    JSON.stringify(this, ['id', 'email', 'salt', 'email_validated', 'display_name', 'valid', 'created']);
+}
+
 // Keep a counter to have a unique message id.
 var id = 0;
 
