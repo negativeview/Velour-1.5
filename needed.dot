@@ -1,5 +1,5 @@
 digraph FeatureList {
-#    nodesep = 1.0
+    nodesep = 1.0
     
 # Boxes are for servers
     node [shape="box", color=black style=bold];
@@ -10,11 +10,14 @@ digraph FeatureList {
         shape=box
         label="Done\nThese entities have been completed.\nThey were removed from the right side to not clutter things up."
 
+        diff_requirements [ label="Define Diff Requirements" ];
         entities [ label="Entities Module" ];
         http_framework [ label="HTTP" ];
         message_bus [ label="Message Bus" ];        
         project_planning [ label="Project Planning" ];
+        unit_testing [ label="Unit Testing" ];
         user_entity [ label="User Entity" ];
+        wiki_planning [ label="Wiki Planning" ];
     };
     
     subgraph cluster_not {
@@ -27,6 +30,8 @@ digraph FeatureList {
         alert_format_planning [ label="Messaging Format Planning" ];
         buzz [ label="Buzz" ];
         data_import [ label="Data Import" ];
+        data_structure [ label="Data Structure" ];
+        database_sharding [ label="Database Sharding Planning" ];
         diff_code [ label="Shared Diff Code"];
         diff_search [ label="Find Appropriate Diff Code"];
         email [ label="Email" ];
@@ -46,23 +51,27 @@ digraph FeatureList {
         sessions [ label="Sessions" ];
         sidebar_alerts [ label="Sidebar Alerts" ];
         user_preferences [ label="User Preferences" ];
+        versioning [ label="Versioning" ];
         viki [ label="Viki" ];
         viki_planning [ label = "Viki Planning" ];
         web_design [ label = "Web Design" ];
         wiki [ label="Wiki" ];
         wiki_entity [ label="Wiki Entity" ];
-        wiki_planning [ label="Wiki Planning" ];
     }
 
     activity_log->history_tool [ label = "Historical events to process" ];
     activity_log->sidebar_alerts [ label = "Show historical events" ];
     alert_format_planning->sidebar_alerts [ label = "General planning" ];
     data_import->login_page [ label = "Ensure backwards compat" ];
+    data_structure->data_import [ label = "Import format" ];
+    data_structure->database_sharding [ label="Sanity Checks" ];
+    data_structure->versioning [ label = "Know how to version" ];
     diff_code->history_tool [ label = "Concise descriptions"];
     diff_code->wiki [ label = "Diff View" ];
     diff_search->diff_code [ label = "What to use"];
     file_entity->files [ label="Represent!" ];
     file_planning->file_entity [ label="Knowing what to build" ];
+    file_planning->versioning [ label = "Requirements gathering" ];
     files->html5_video [ label="So I can upload it" ];
     live_stream->header_sayings [ label = "Bus over which to speak" ];
     live_stream->history_tool [ label = "Live updates?" ];
@@ -71,11 +80,16 @@ digraph FeatureList {
     login_page->files [ label="So I can upload as a user" ];
     login_page->sessions [ label = "To create the session" ];
     persistence->activity_log [ label="Place to store things" ];
+    persistence->versioning [ label="Save old versions" ];
     project_entity->buzz [ label = "Project to calculate buzz for" ];
     project_entity->project_chat [ label = "The subject of conversation" ];
     sessions->live_stream [ label = "Filtering" ];
     user_preferences->email [ label="Make sure not to spam" ];
     user_preferences->sidebar_alerts [ label = "What alerts to show" ];
+    versioning->activity_log [ label = "See old versions" ];
+    versioning->data_import [ label = "Save old versions" ];
+    versioning->files [ label = "Versioning impacts files" ];
+    versioning->wiki [ label = "Core code" ];
     viki_planning->viki [ label = "Know what to build" ];
     web_design->header_sayings [ label = "Somewhere to put it" ];
     web_design->history_tool [ label = "Somewhere to put it" ];
@@ -89,6 +103,5 @@ digraph FeatureList {
     web_design->viki [ label = "Design for it" ];
     web_design->wiki [ label = "Design for it" ];
     wiki_entity->wiki [ label = "The entity" ];
-    wiki_planning->wiki_entity [ label = "Know what to build" ];
     wiki->viki [ label = "Supplies mass of code" ];
 }
