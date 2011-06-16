@@ -3,25 +3,6 @@ digraph FeatureList {
 # Boxes are for servers
     node [shape="box", color=black style=bold];
     
-    ordering=out;
-    rank=same;
-
-    subgraph cluster_done {
-        style=bold
-        color=green3
-        shape=box
-        label="Done\nThese entities have been completed.\nThey were removed from the right side to not clutter things up."
-
-        diff_requirements [ label="Define Diff Requirements" ];
-        entities [ label="Entities Module" ];
-        http_framework [ label="HTTP" ];
-        message_bus [ label="Message Bus" ];        
-        project_planning [ label="Project Planning" ];
-        unit_testing [ label="Unit Testing" ];
-        user_entity [ label="User Entity" ];
-        wiki_planning [ label="Wiki Planning" ];
-    };
-    
     subgraph cluster_not {
         style=bold
         color=black
@@ -40,23 +21,34 @@ digraph FeatureList {
         file_entity [ label="File Entity" ];
         file_planning [ label="File Planning" ];
         files [ label="Files" ];
+        header_design [ label = "Header Design" ];
         header_sayings [ label="Quips" ];
+        history_design [ label = "History Page Design" ];
         history_tool [ label="History" ];
         html5_video [ label="HTML 5 Video Player" ];
+        live_stream_design [ label = "Live Stream Design" ];
         live_stream [ label="Live Stream" ];
         logging [ label="Logging" ];
+        login_page_design [ label = "Login Page Design" ];
         login_page [ label="Login Page" ];
         persistence [ label="Persistence" ];
+        project_chat_design [ label = "Project Chat Design" ];
         project_chat [ label="Project Chat" ];
         project_entity [ label="Project Entity" ];
+        research_redis [ label = "Redis Evaluation" ];
+        register_page_design [ label = "Register Page Design" ];
         register_page [ label="Register Page" ];
         sessions [ label="Sessions" ];
+        sidebar_alerts_design [ label = "Sidebar Alerts Design" ];
         sidebar_alerts [ label="Sidebar Alerts" ];
+        user_preferences_design [ label = "User Preferences Design" ];
         user_preferences [ label="User Preferences" ];
         versioning [ label="Versioning" ];
         viki [ label="Viki" ];
+        viki_design [ label = "Viki Design" ];
         viki_planning [ label = "Viki Planning" ];
-        web_design [ label = "Web Design" ];
+        web_design [ label = "Generic Web Design" ];
+        wiki_design [ label = "Wiki Design" ];
         wiki [ label="Wiki" ];
         wiki_entity [ label="Wiki Entity" ];
     }
@@ -75,35 +67,46 @@ digraph FeatureList {
     file_planning->file_entity [ label="Knowing what to build" ];
     file_planning->versioning [ label = "Requirements gathering" ];
     files->html5_video [ label="So I can upload it" ];
+    header_design->header_sayings;
+    history_design->history_tool;
+    live_stream_design->live_stream;
     live_stream->header_sayings [ label = "Bus over which to speak" ];
     live_stream->history_tool [ label = "Live updates?" ];
     live_stream->project_chat [ label = "Bus over which to speak" ];
     live_stream->sidebar_alerts [ label = "Bus over which to speak" ];
+    login_page_design->login_page;
     login_page->files [ label="So I can upload as a user" ];
     login_page->sessions [ label = "To create the session" ];
     persistence->activity_log [ label="Place to store things" ];
     persistence->versioning [ label="Save old versions" ];
+    project_chat_design->project_chat;
     project_entity->buzz [ label = "Project to calculate buzz for" ];
     project_entity->project_chat [ label = "The subject of conversation" ];
+    research_redis->data_structure;
+    research_redis->persistence;
+    register_page_design->register_page;
     sessions->live_stream [ label = "Filtering" ];
+    sidebar_alerts_design->sidebar_alerts;
+    user_preferences_design->user_preferences;
     user_preferences->email [ label="Make sure not to spam" ];
     user_preferences->sidebar_alerts [ label = "What alerts to show" ];
     versioning->activity_log [ label = "See old versions" ];
     versioning->data_import [ label = "Save old versions" ];
     versioning->files [ label = "Versioning impacts files" ];
     versioning->wiki [ label = "Core code" ];
+    viki_design->viki;
     viki_planning->viki [ label = "Know what to build" ];
-    web_design->header_sayings [ label = "Somewhere to put it" ];
-    web_design->history_tool [ label = "Somewhere to put it" ];
-    web_design->html5_video [ label = "Somewhere to put it" ];
-    web_design->live_stream [ label = "Somewhere to put it" ];
-    web_design->login_page [ label = "Design for it" ];
-    web_design->project_chat [ label = "Somewhere to put it" ];
-    web_design->register_page [ label = "Design for it" ];
-    web_design->sidebar_alerts [ label = "Design for it" ];
-    web_design->user_preferences [ label = "Design for it" ];
-    web_design->viki [ label = "Design for it" ];
-    web_design->wiki [ label = "Design for it" ];
+    web_design->header_design;
+    web_design->history_design;
+    web_design->live_stream_design;
+    web_design->login_page_design;
+    web_design->project_chat_design;
+    web_design->register_page_design;
+    web_design->sidebar_alerts_design;
+    web_design->user_preferences_design;
+    web_design->viki_design;
+    web_design->wiki_design;
+    wiki_design->wiki;
     wiki_entity->wiki [ label = "The entity" ];
     wiki->viki [ label = "Supplies mass of code" ];
 }
