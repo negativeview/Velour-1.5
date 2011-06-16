@@ -3,7 +3,9 @@ var http = require('http');
 
 // Create an "Express," which makes HTTP stuff easier by handling a lot for you
 var express = require('express');
+
 var app = express.createServer();
+app.use(express.static(__dirname + '/../htdocs'));
 
 // We need to talk to the other components via faye.
 var faye = require('faye');

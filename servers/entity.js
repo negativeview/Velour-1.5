@@ -1,9 +1,15 @@
 // We need to talk to the other components via faye.
-var faye = require('faye');
-var sys = require('util');
+var faye  = require('faye');
+var sys   = require('util');
+var redis = require('node-redis');
+
+var redis_client = redis.createClient();
+
+redis_client.on("error", function(err) {
+    console.log("Redis Error: " + err);
+});
 
 var outstanding = {};
-var users = {};
 
 function Entity() {
     this.valid = false;
@@ -33,13 +39,24 @@ var sub = c.subscribe('/private', function(message) {
     if (message.type == 'getUser') {
         var userId = message.message.userId;
         
-        if (!users['id' + userId]) {
-            users['id' + userId] = new User(userId);
-        }
-        
-        user = JSON.parse(JSON.stringify(users['id' + userId], ['id', 'email', 'salt', 'password', 'email_validated', 'display_name', 'valid', 'created']));
-        console.log(user);
-        reply(message, { user: user});
+        redis_client.hgetall('user:' + userId, function(err, obj) {
+            if (err) {
+                console.log("Error fetching user: " + err);
+                return;
+            }
+            
+            if (!obj) {
+                console.log('Creating new');
+                user = new User(userId);
+                console.log('2');
+                redis_client.hmset('user:' + userId, "id", user.getId(), "email", user.getEmail(), "salt", user.getSalt());
+                console.log('3');
+            } else {
+                user = obj;
+                console.log('Got from redis');
+            }
+            reply(message, { user: user});        
+        });
     }
 });
 
