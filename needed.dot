@@ -1,8 +1,10 @@
 digraph FeatureList {
-    nodesep = 1.0
     
 # Boxes are for servers
     node [shape="box", color=black style=bold];
+    
+    ordering=out;
+    rank=same;
 
     subgraph cluster_done {
         style=bold
@@ -58,7 +60,7 @@ digraph FeatureList {
         wiki [ label="Wiki" ];
         wiki_entity [ label="Wiki Entity" ];
     }
-
+    
     activity_log->history_tool [ label = "Historical events to process" ];
     activity_log->sidebar_alerts [ label = "Show historical events" ];
     alert_format_planning->sidebar_alerts [ label = "General planning" ];
