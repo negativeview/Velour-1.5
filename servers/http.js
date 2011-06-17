@@ -29,7 +29,17 @@ app.param('userId', function(req, res, next, id) {
 // anotherUser are populated from above. We just have to pass stuff to the
 // view.
 app.get('/user/:userId', function(req, res) {
-    res.render('index', {message: {message: req.user.userId}, user: req.user.user});
+    res.render(
+        'index',
+        {
+            title: 'Dashboard',
+            message:
+                {
+                    message: req.user.userId
+                },
+            user: req.user.user
+        }
+    );
 });
 
 var c = new Faye.Client('http://localhost:8080/private');

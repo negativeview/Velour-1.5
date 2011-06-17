@@ -1,12 +1,31 @@
 <!doctype html>
 <html>
 	<head> 
-		<title>ARG Technologist - public</title> 
+		<title>ARG Technologist - <%- title %></title> 
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8"> 
 		<link rel="stylesheet" href="/style.css" />
+		<link href='http://fonts.googleapis.com/css?family=Metrophobic&v1' rel='stylesheet' type='text/css'>
 		<!-- This site is, and always will be, out of game for all client ARGs. That does not mean I can't use it for my own purposes. --> 
 	</head> 
 	<body> 
-		<%- body %>
+        <div id="watchbar">
+            <a href="#">A</a>
+            <a href="#" class="active">B</a>
+            <a href="#" class="active">C</a>
+            <a href="#" class="active">D</a>
+            <a href="#">E</a>
+        </div>
+        <div id="contentouter">
+            <div id="content">
+                <div id="maintitle"><%- title %></div>
+                <%- body %>
+                <div id="footer">
+                    <div id="copyright">
+                        Copyright &copy; Daniel Grace, 2011
+                    </div>
+                    <a href="#" id="credits">Credits</a>
+                </div>
+            </div>
+        </div>
     </body> 
 </html>

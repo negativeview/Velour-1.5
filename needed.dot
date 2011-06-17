@@ -44,7 +44,6 @@ digraph FeatureList {
         viki [ label="Viki" ];
         viki_design [ label = "Viki Design" ];
         viki_planning [ label = "Viki Planning" ];
-        web_design [ label = "Generic Web Design" ];
         wiki_design [ label = "Wiki Design" ];
         wiki [ label="Wiki" ];
         wiki_entity [ label="Wiki Entity" ];
@@ -85,16 +84,6 @@ digraph FeatureList {
     versioning->wiki [ label = "Core code" ];
     viki_design->viki;
     viki_planning->viki [ label = "Know what to build" ];
-    web_design->header_design;
-    web_design->history_design;
-    web_design->live_stream_design;
-    web_design->login_page_design;
-    web_design->project_chat_design;
-    web_design->register_page_design;
-    web_design->sidebar_alerts_design;
-    web_design->user_preferences_design;
-    web_design->viki_design;
-    web_design->wiki_design;
     wiki_design->wiki;
     wiki_entity->wiki [ label = "The entity" ];
     wiki->viki [ label = "Supplies mass of code" ];
