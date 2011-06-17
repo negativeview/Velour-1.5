@@ -7,19 +7,21 @@
 		<link href='http://fonts.googleapis.com/css?family=Metrophobic&v1' rel='stylesheet' type='text/css'>
 		<!-- This site is, and always will be, out of game for all client ARGs. That does not mean I can't use it for my own purposes. --> 
 	</head> 
-	<body> 
+	<body class="<%- bodyclass %>"> 
 	    <div id="loginbar">
 	        <input type="email" name="email" placeholder="Email" />
 	        <input type="password" name="password" placeholder="Password" />
 	        <input type="submit" value="Login" />
 	    </div>
-        <div id="watchbar">
-            <a href="#">A</a>
-            <a href="#" class="active">B</a>
-            <a href="#" class="active">C</a>
-            <a href="#" class="active">D</a>
-            <a href="#">E</a>
-        </div>
+	    <% if (bodyclass != 'nowatch') { %>
+            <div id="watchbar">
+                <a href="#">A</a>
+                <a href="#" class="active">B</a>
+                <a href="#" class="active">C</a>
+                <a href="#" class="active">D</a>
+                <a href="#">E</a>
+            </div>
+        <% } %>
         <div id="contentouter">
             <div id="content">
                 <h1 id="maintitle"><%- title %></h1>

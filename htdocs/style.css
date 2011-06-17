@@ -12,6 +12,9 @@ body, html {
     padding-right: 60px;
     min-height: 500px;
 }
+body.nowatch #content {
+    padding-right: 10px;
+}
 #contentouter {
     padding: 5px;
     margin: 40px;
@@ -119,4 +122,40 @@ h2 {
     padding: 5px;
     border-top-left-radius: 0px;
     border-bottom-right-radius: 0px;
+}
+#userbio #avatar {
+    margin: 10px;
+    margin-left: 0px;
+    margin-top: 0px;
+    float: left;
+}
+#userbio.admin #avatar {
+    box-shadow: 0px 0px 10px #F00;
+}
+#biography {
+    margin-left: 160px;
+}
+#keyvalue {
+    position: absolute;
+    top: 260px;
+    width: 150px;
+    font-size: 12px;
+}
+#keyvalue .key {
+    width: 50px;
+    height: 15px;
+    float: left;
+    clear: left;
+    text-align: right;
+    padding-right: 5px;
+    font-weight: bold;
+    padding-bottom: 5px;
+    padding-top: 5px;
+}
+#keyvalue .value {
+    height: 15px;
+    border: 0px solid #CCC;
+    border-bottom-width: 1px;
+    padding-bottom: 5px;
+    padding-top: 5px;
 }

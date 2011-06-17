@@ -28,16 +28,21 @@ app.param('userId', function(req, res, next, id) {
 // Due to the param stuff above, this code is super easy, as user and
 // anotherUser are populated from above. We just have to pass stuff to the
 // view.
+app.get('/', function(req, res) {
+    res.render('dashboard', { title: 'Dashboard', bodyclass: '' });
+});
+
+app.get('/register', function(req, res) {
+    res.render('register', { title: 'Register', bodyclass: 'nowatch' });
+});
+
 app.get('/user/:userId', function(req, res) {
     res.render(
-        'index',
+        'user-info',
         {
-            title: 'Dashboard',
-            message:
-                {
-                    message: req.user.userId
-                },
-            user: req.user.user
+            title: req.user.user.display_name,
+            user: req.user.user,
+            bodyclass: ''
         }
     );
 });
