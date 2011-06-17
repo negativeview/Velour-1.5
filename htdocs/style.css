@@ -15,6 +15,7 @@ body, html {
 #contentouter {
     padding: 5px;
     margin: 40px;
+    margin-top: 60px;
     border-radius: 5px;
     background-image: url('/images/patterns/black_denim.png');
     box-shadow: 2px 2px 5px #000;
@@ -23,7 +24,7 @@ body, html {
 }
 #watchbar {
     position: absolute;
-    top: 45px;
+    top: 65px;
     right: 46px;
     z-index: 3;
     width: 50px;
@@ -107,4 +108,15 @@ h2 {
 }
 #signupform input {
     display: block;
+}
+#loginbar {
+    position: absolute;
+    top: 0px;
+    right: 0px;
+    border-radius: 5px;
+    background-image: url('/images/patterns/black_denim.png');
+    box-shadow: 2px 2px 5px #000;
+    padding: 5px;
+    border-top-left-radius: 0px;
+    border-bottom-right-radius: 0px;
 }

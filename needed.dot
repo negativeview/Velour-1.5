@@ -9,18 +9,18 @@ digraph FeatureList {
         shape=box
         label="Incomplete\nThese still need to be done. Lines indicate predecessors.\nTop items should be done before bottom."
         
+        release_a [ label = "First Public Release" ];
+        release_b [ label = "Second Public Release" ];
+        
         activity_log [ label="Activity Log" ];
         alert_format_planning [ label="Messaging Format Planning" ];
         buzz [ label="Buzz" ];
         data_import [ label="Data Import" ];
-        database_sharding [ label="Database Sharding Planning" ];
         diff_code [ label="Shared Diff Code"];
-        diff_search [ label="Find Appropriate Diff Code"];
         email [ label="Email" ];
         file_entity [ label="File Entity" ];
         file_planning [ label="File Planning" ];
         files [ label="Files" ];
-        header_design [ label = "Header Design" ];
         header_sayings [ label="Quips" ];
         history_design [ label = "History Page Design" ];
         history_tool [ label="History" ];
@@ -28,8 +28,6 @@ digraph FeatureList {
         live_stream_design [ label = "Live Stream Design" ];
         live_stream [ label="Live Stream" ];
         logging [ label="Logging" ];
-        login_page_design [ label = "Login Page Design" ];
-        login_page [ label="Login Page" ];
         login [ label = "Login" ];
         project_chat_design [ label = "Project Chat Design" ];
         project_chat [ label="Project Chat" ];
@@ -52,48 +50,46 @@ digraph FeatureList {
         wiki_entity [ label="Wiki Entity" ];
     }
     
-    activity_log->history_tool [ label = "Historical events to process" ];
-    activity_log->sidebar_alerts [ label = "Show historical events" ];
-    alert_format_planning->sidebar_alerts [ label = "General planning" ];
-    data_import->login [ label = "Ensure backwards compat" ];
-    diff_code->history_tool [ label = "Concise descriptions"];
-    diff_code->wiki [ label = "Diff View" ];
-    diff_search->diff_code [ label = "What to use"];
-    file_entity->files [ label="Represent!" ];
-    file_planning->file_entity [ label="Knowing what to build" ];
-    files->html5_video [ label="So I can upload it" ];
-    header_design->header_sayings;
+    email->release_a;
+    header_sayings->release_a;
+    logging->release_a;
+    project_entity->release_a;
+    wiki->release_a;
+    
+    buzz->release_b;
+    data_import->release_b;
+    files->release_b;
+    history_tool->release_b;
+    html5_video->release_b;
+    project_chat->release_b;
+    recommendations->release_b;
+    sidebar_alerts->release_b;
+    viki->release_b;
+    
+    release_a->file_planning [ style = invis ];
+    release_a->release_b [ style = invis ];
+    
+    activity_log->history_tool;
+    activity_log->sidebar_alerts;
+    alert_format_planning->sidebar_alerts;
+    diff_code->wiki;
+    file_entity->files;
+    file_planning->file_entity;
     history_design->history_tool;
     live_stream_design->live_stream;
-    live_stream->header_sayings [ label = "Bus over which to speak" ];
-    live_stream->history_tool [ label = "Live updates?" ];
-    live_stream->project_chat [ label = "Bus over which to speak" ];
-    live_stream->sidebar_alerts [ label = "Bus over which to speak" ];
-    login_page_design->login_page;
-    login_page->login;
-    login->project_chat;
-    login->recommendations;
-    login->sidebar_alerts;
+    live_stream->project_chat;
     login->user_preferences;
-    login->sessions [ label = "To create the session" ];
-    login->files [ label="So I can upload as a user" ];
     project_chat_design->project_chat;
-    project_entity->buzz [ label = "Project to calculate buzz for" ];
-    project_entity->project_chat [ label = "The subject of conversation" ];
     register_page_design->register_page;
     register_page->register;
-    sessions->live_stream [ label = "Filtering" ];
+    register->login;
+    sessions->login;
     sidebar_alerts_design->sidebar_alerts;
     user_preferences_design->user_preferences;
-    user_preferences->email [ label="Make sure not to spam" ];
-    user_preferences->sidebar_alerts [ label = "What alerts to show" ];
-    versioning->activity_log [ label = "See old versions" ];
-    versioning->data_import [ label = "Save old versions" ];
-    versioning->files [ label = "Versioning impacts files" ];
-    versioning->wiki [ label = "Core code" ];
+    user_preferences->email;
+    versioning->wiki;
     viki_design->viki;
-    viki_planning->viki [ label = "Know what to build" ];
+    viki_planning->viki;
     wiki_design->wiki;
-    wiki_entity->wiki [ label = "The entity" ];
-    wiki->viki [ label = "Supplies mass of code" ];
+    wiki_entity->wiki;
 }
