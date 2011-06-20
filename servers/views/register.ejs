@@ -1,17 +1,33 @@
 <form id="signupform" method="POST">
     <h2>Basic Information</h2>
-    <label for="email">Email:</label>
-    <input type="email" id="email" name="email" />
-    <label for="displayname">Display Name:</label>
-    <input type="text" id="displayname" name="displayname" />
-    <label for="password1">Password:</label>
-    <input type="password" id="password1" name="password1" />
-    <label for="password2">Repeat:</label>
-    <input type="password" id="password2" name="password2" />
+    <div id="mainsection">
+        <div class="option">
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" />
+        </div>
+        <div class="option">
+            <label for="displayname">Display Name:</label>
+            <input type="text" id="displayname" name="displayname" />
+        </div>
+        <div class="option">
+            <label for="password1">Password:</label>
+            <input type="password" id="password1" name="password1" />
+        </div>
+        <div class="option">
+            <label for="password2">Repeat:</label>
+            <input type="password" id="password2" name="password2" />
+        </div>
+    </div>
+    <h2>Role</h2>
+    <div id="rolesection">
+        <div class="option">
+            <label for="role-player">Player</label>
+            <input type="checkbox" name="role[]" value="player" id="role-player" />
+        </div>
+        <div class="option">
+            <label for="role-creator">Creator</label>
+            <input type="checkbox" name="role[]" value="creator" id="role-creator" />
+        </div>
+    </div>
     <input type="submit" value="Register" />
-    <label for="interestedin">I Am Interested In...</label>
-    <label>Playing</label>
-    <input type="checkbox" name="interestedin[]" value="playing" />
-    <label>Making</label>
-    <input type="checkbox" name="interestedin[]" value="making" />
 </form>

@@ -10,7 +10,7 @@ body, html {
     background-image: url('/images/patterns/brushed_alu.png');
     padding: 10px;
     padding-right: 60px;
-    min-height: 500px;
+    padding-bottom: 25px;
 }
 body.nowatch #content {
     padding-right: 10px;
@@ -24,6 +24,11 @@ body.nowatch #content {
     box-shadow: 2px 2px 5px #000;
     position: relative;
     z-index: 2;
+}
+body#register #contentouter {
+    width: 300px;
+    margin-left: auto;
+    margin-right: auto;
 }
 #watchbar {
     position: absolute;
@@ -78,8 +83,11 @@ body.nowatch #content {
 #footer {
     position: absolute;
     bottom: 5px;
-    left: 5px;
-    right: 5px;
+    left: 10px;
+    right: 10px;
+    border: 0px solid #CCC;
+    border-top-width: 1px;
+    height: 20px;
 }
 #footer a {
     color: black;
@@ -101,16 +109,6 @@ body.nowatch #content {
 }
 h2 {
     font-weight: normal;
-}
-#signupform label {
-    width: 100px;
-    float: left;
-    clear: left;
-    text-align: right;
-    padding-right: 10px;
-}
-#signupform input {
-    display: block;
 }
 #loginbar {
     position: absolute;
@@ -158,4 +156,29 @@ h2 {
     border-bottom-width: 1px;
     padding-bottom: 5px;
     padding-top: 5px;
+}
+#signupform #mainsection label {
+    width: 100px;
+    float: left;
+    text-align: right;
+    font-weight: bold;
+    font-size: 90%;
+    clear: left;
+    vertical-align: bottom;
+    height: 27px;
+    line-height: 27px;
+}
+#signupform #mainsection .option {
+    padding: 2px;
+    border: 0px solid black;
+}
+#signupform #mainsection .option:hover {
+    background-color: #DDD;
+}
+#signupform #rolesection input {
+    float: left;
+    clear: left;
+    display: block;
+    text-align: right;
+    margin-left: 110px;
 }
