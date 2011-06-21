@@ -1,10 +1,13 @@
 body, html {
-    font-family: "HelveticaNeue-Light", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-family: 'Metrophobic', arial, serif;
     font-size: 1em;
     margin: 0px;
     padding: 0px;
     font-weight: 300;
     background-image: url('/images/patterns/random_grey_variations.png');
+}
+input[type="submit"] {
+    font-family: 'Metrophobic', arial, serif !important;
 }
 #content {
     background-image: url('/images/patterns/brushed_alu.png');
@@ -18,7 +21,9 @@ body.nowatch #content {
 }
 #contentouter {
     padding: 5px;
-    margin: 40px;
+    width: 650px;
+    margin-left: auto;
+    margin-right: auto;
     margin-top: 60px;
     border-radius: 5px;
     background-image: url('/images/patterns/black_denim.png');
@@ -27,14 +32,14 @@ body.nowatch #content {
     z-index: 2;
 }
 body#register #contentouter {
-    width: 300px;
+    width: 250px;
     margin-left: auto;
     margin-right: auto;
 }
 #watchbar {
     position: absolute;
-    top: 65px;
-    right: 46px;
+    top: 5px;
+    right: 6px;
     z-index: 3;
     width: 50px;
 }
@@ -59,7 +64,6 @@ body#register #contentouter {
     box-shadow: 0px 0px 5px #000;
 }
 #maintitle {
-    font-family: 'Metrophobic', arial, serif;
     font-size: 40px;
     margin: 0px;
     font-weight: normal;
@@ -132,7 +136,8 @@ h2 {
     box-shadow: 0px 0px 10px #F00;
 }
 #biography {
-    margin-left: 160px;
+    margin-left: 170px;
+    margin-right: 10px;
 }
 #keyvalue {
     width: 150px;
@@ -180,17 +185,12 @@ h2 {
     padding-bottom: 5px;
     padding-top: 5px;
 }
+#signupform h2 {
+	margin-bottom: 0px;
+}
 #signupform #mainsection label {
-    width: 100px;
-    float: left;
-    text-align: right;
-    font-weight: bold;
     font-size: 90%;
-    clear: left;
-    vertical-align: bottom;
-    height: 27px;
-    line-height: 27px;
-    padding-right: 5px;
+    display: block;
 }
 #signupform #mainsection .option {
     padding: 2px;
@@ -201,14 +201,10 @@ h2 {
 }
 #signupform #rolesection .option {
     padding: 2px;
+    
 }
-#signupform #rolesection .option label {
-    padding-left: 5px;
-}
-#signupform #rolesection input {
-    float: left;
-    clear: left;
-    display: block;
-    text-align: right;
-    margin-left: 110px;
+#signupform input[type="submit"] {
+	clear: both;
+	display: block;
+	margin-top: 20px;
 }
