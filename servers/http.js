@@ -47,6 +47,24 @@ app.get('/task/new', function(req, res) {
 	}
 });
 
+app.get('/project/new', function(req, res) {
+	if (req.session.authenticatedAs) {
+		res.render(
+			'project-new',
+			{
+				title: 'New Project',
+				bodyclass: '',
+				bodyid: 'project-new',
+				flash: req.flash(),
+				authUser: req.session.authenticatedAs,
+			}
+		);
+	} else {
+		req.flash('error', 'You must be logged in to create a project');
+		res.redirect('back');
+	}
+});
+
 app.post('/login', function(req, res) {
 	message_with_reply(
 		'getUserByEmail',

@@ -205,7 +205,7 @@ label {
     padding: 2px;
     border: 0px solid black;
 }
-#signupform #mainsection .option:hover {
+#signupform .option:hover, #signupform .option.focus {
     background-color: #DDD;
 }
 #signupform #rolesection .option {
@@ -223,17 +223,18 @@ label {
 	text-align: center;
 	font-size: 90%;
 }
-#task-new-form {
+#task-new-form, #project-new-form {
 	margin-top: 10px;
 }
-#task-new-form input[type="text"] {
+#task-new-form input[type="text"], #project-new-form input[type="text"] {
 	width: 300px;
 }
-#task-new-form textarea {
+#task-new-form textarea, #project-new-form textarea {
 	width: 300px;
+	height: 300px;
 	display: block;
 }
-#task-new-form select {
+#task-new-form select, #project-new-form select {
 	display: block;
 }
 .optional {
@@ -247,6 +248,18 @@ label {
 	color: black;
 	padding: 10px;
 }
-#task-new #contentouter {
+#task-new #contentouter, #project-new #contentouter {
 	width: 400px;
+}
+#rolesection .option {
+	position: relative;
+}
+#rolesection input {
+	position: absolute;
+	top: 2px;
+	left: 0px;
+}
+#rolesection label {
+	display: block;
+	padding-left: 20px;
 }

@@ -1,9 +1,12 @@
-<div id="actionbar">
-    <a href="#">Tasks</a>
-    <a href="#">Velocity</a>
-    <a href="#">Suggest</a>
-    <a href="#">Messages</a>
-</div>
+<% if (authUser) { %>
+	<div id="actionbar">
+		<a href="/project/new">Create Project</a>
+	    <a href="/task">Tasks</a>
+		<a href="/velocity">Velocity</a>
+		<a href="/suggest">Suggest</a>
+		<a href="/message">Messages</a>
+	</div>
+<% } %>
 <p>Bacon brisket ball tip, flank tongue tri-tip venison. Beef pork loin
    ball tip, strip steak pork belly cow shoulder hamburger ham pancetta.
    Short ribs pork meatball, pork chop meatloaf bacon biltong pig jerky
