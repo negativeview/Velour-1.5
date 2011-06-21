@@ -7,46 +7,77 @@
 		<a href="/message">Messages</a>
 	</div>
 <% } %>
-<p>Bacon brisket ball tip, flank tongue tri-tip venison. Beef pork loin
-   ball tip, strip steak pork belly cow shoulder hamburger ham pancetta.
-   Short ribs pork meatball, pork chop meatloaf bacon biltong pig jerky
-   headcheese. Corned beef ground round tongue venison cow. Pork belly
-   fatback ground round, meatloaf pig sausage ham headcheese tenderloin.
-   Strip steak beef ribs tri-tip salami swine drumstick. Shoulder chuck
-   pork chop bresaola ham chicken.</p>
-<p>Venison chuck strip steak, fatback pork belly hamburger ground round
-   biltong shankle pork loin jowl tri-tip. Ball tip meatloaf beef ribs,
-   chuck strip steak andouille sirloin chicken salami jerky. Short loin
-   beef andouille, pork belly flank drumstick pig ribeye meatloaf rump
-   pork loin turkey brisket. Ball tip meatloaf bresaola, rump t-bone
-   short loin hamburger. Tri-tip brisket chuck, spare ribs short loin
-   tail ground round turkey jerky fatback shankle. Pork belly venison
-   ham hock meatball, hamburger tri-tip bacon rump shankle pig pancetta.
-   Tongue ham andouille pastrami, t-bone salami strip steak tenderloin
-   corned beef ribeye.</p>
-<p>Biltong andouille pig bresaola meatball turkey. Short loin rump
-   shoulder, strip steak pork chop jerky beef ribs tenderloin flank
-   bacon venison meatloaf fatback cow salami. Turkey meatloaf shoulder,
-   jowl rump tri-tip flank bresaola pig brisket spare ribs headcheese.
-   Swine cow bacon ball tip chuck, ribeye ham hock boudin pig jerky
-   pork rump. Turkey fatback ham strip steak cow. Meatloaf andouille
-   ball tip shoulder, ribeye venison tenderloin swine rump t-bone
-   fatback. Beef jerky turkey spare ribs short loin, pork chop hamburger
-   boudin tri-tip shank.</p>
-<p>Shoulder venison rump spare ribs. Shankle turkey bresaola, venison
-   boudin chuck beef. Shankle pork belly jowl drumstick, beef ribs
-   meatball rump. Turkey cow headcheese fatback tail biltong. Pork chop
-   shank boudin rump. Tenderloin bacon shank andouille brisket ball tip.
-   Ham hock corned beef swine sirloin biltong pig, tail boudin beef ribs
-   meatloaf.</p>
-<p>Salami ham hock jerky hamburger headcheese, pork chop jowl chuck tail
-   meatloaf beef ribs pig pork strip steak. Beef ribs ball tip
-   headcheese, jowl tongue hamburger flank fatback pastrami short ribs
-   venison tail tenderloin. Biltong swine flank, sirloin ham shoulder
-   ground round pork belly tongue beef strip steak rump. Short loin
-   venison swine, chuck bresaola tongue tail spare ribs headcheese.
-   Meatloaf flank bacon hamburger, tail short ribs biltong boudin
-   ribeye. Ribeye venison ground round, meatloaf pastrami short loin
-   strip steak bresaola andouille pork t-bone. Pork chop turkey flank,
-   headcheese andouille ham rump spare ribs tri-tip swine bresaola
-   meatloaf ground round.</p>
+<h2>Welcome!</h2>
+<p>Thank you for checking out this early early preview of Velour 2.0. Currently, only some things
+   work at all, and those that do generally have severe limitations.</p>
+<p>This page will eventually be your Velour home page. There's not enough functionality for that
+   yet. So for now it's a listing of all pages that I have at least somewhat working, as well as a
+   quick description.</p>
+<h3>Dashboard (this page)</h3>
+<p>Not much here yet. The lettered squares on the side are a style test for widgets that you can
+   add to Velour. Nothing too fancy, it's just a visual representation of things that you want to
+   keep an eye on. It'll be projects, users, that sort of thing. If anything new happens to them
+   they become hilighted, and you can hover/click to see what happened. These are incredibly
+   non-functional for now. In fact, you won't even see the test hilight style unless you're using
+   webkit (aka, Safari or Chrome).</p>
+<p>There are links above this text if, and only if, you are logged in.</p>
+<h4>Known Flaws</h4>
+<ul>
+	<li>Buttons above do nothing.</li>
+</ul>
+<h3>Register Page</h3>
+<p>The <a href="/register">register page</a> allows you to create an account on this system. It
+   does work at a basic level.</p>
+<h4>Known Flaws</h4>
+<ul>
+	<li>Does not validate email address whatsoever.</li>
+	<li>Allows multiple people to sign up with the same email address.</li>
+	<li>Stores your role preference, but that has no affect on anything yet.</li>
+	<li>Users are stored in memory. If I have to restart the server for any reason, your user will
+	    disappear.</p>
+</ul>
+<p>After registering, you may login with the login box at the top right.</p>
+<h3>User Info Page</h3>
+<p>The <a href="/user/1">user info</a> page will be where you go to find out about a user on this
+   system. You will be redirected here after you successfully register for the site.</p>
+<h4>Known Flaws</h4>
+<ul>
+	<li>Top buttons do nothing. They are merely reminders of functionality I may want to add.</li>
+	<li>Power is always Admin.</li>
+	<li>The glow behind the avatar is supposed to be just for admins. Since the user is always an
+	    admin, the icon is always glowing.</li>
+	<li>The biography text is Bacon Ipsum.</li>
+	<li>"Since" is nonsense.</li>
+	<li>Credits on the left side are also nonsense.</li>
+</ul>
+<h3>Credits Page</h3>
+<p>The <a href="/credits/">credits page</a> is actually not buggy in any functional sense. It also
+   doesn't do anything. It could be prettier...</p>
+<h4>Known Flaws</h4>
+<ul>
+	<li>Poor use of vertical space -- maybe make it narrow, too?</li>
+	<li>No links to my credited people/places.</li>
+</ul>
+<h3>New Task</h3>
+<p>Tasks are a very very important part of Velour. As such, I have started working on the
+   <a href="/task/new">new task page</a>. I stopped because the common use case is to assign a task
+   to a project, and I don't have projects yet.</p>
+<h4>Known Problems</h4>
+<ul>
+	<li>Completely non-functional.</li>
+	<li>Project list is fabricated.</li>
+	<li>User list is fabricated.</li>
+	<li>No indication of what the different states mean.</li>
+	<li>Optional should have some jQuery magic sprinkled on it eventually.</li>
+	<li>Body will eventually take markdown, but currently does nothing.</li>
+</ul>
+<h3>New Project</h3>
+<p>Projects are the most important thing on Velour. That makes the <a href="/project/new">project
+   creation page</a> one of, if not the, most important page.</p>
+<h4>Known Problems</h4>
+<ul>
+	<li>Completely non-functional.</li>
+	<li>Body does not yet take markdown.</li>
+	<li>Privacy settings are not explained.</li>
+	<li>Optional section does not have jQuery love yet.</li>
+</ul>
