@@ -59,6 +59,7 @@ digraph FeatureList {
         user_preferences [ label="User Preferences" ];
         user_roles [ label = "User Roles" ];
         user_role_icons [ label = "User Role Icons" ];
+        user_real_persistence [ label = "User Real Persistence" ];
         versioning [ label="Versioning" ];
         viki [ label="Viki" ];
         viki_design [ label = "Viki Design" ];
@@ -104,6 +105,7 @@ digraph FeatureList {
     file_planning->file_entity;
     history_design->history_tool;
     improved_signup->login;
+    improved_signup->user_real_persistence;
     live_stream_design->live_stream;
     live_stream->project_chat;
     login->user_preferences;
