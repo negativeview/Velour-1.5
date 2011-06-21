@@ -4,3 +4,5 @@ manual/
 conf/
 error/
 cgi-bin/
+bin/
+build/
