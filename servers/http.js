@@ -1,5 +1,6 @@
 // Deal with HTTP.
 var http = require('http');
+var crypt = require('bcrypt');
 
 // Create an "Express," which makes HTTP stuff easier by handling a lot for you
 var express = require('express');
@@ -24,6 +25,17 @@ app.set('view engine', 'ejs');
 //       code that makes them able to run in what is effectively parallel.
 app.param('userId', function(req, res, next, id) {
     add_required_message(req, next, 'getUser', 'user', {userId: id});
+});
+
+app.get('/task/new', function(req, res) {
+	res.render(
+		'task-new',
+		{
+			title: 'New Task',
+			bodyclass: '',
+			bodyid: 'task-new'
+		}
+	);
 });
 
 // Due to the param stuff above, this code is super easy, as user and
@@ -52,19 +64,27 @@ app.get('/register', function(req, res) {
 });
 
 app.post('/register', function(req, res) {
-    message_with_reply(
-        'addUser',
-        {
-            email: req.body.email,
-            displayname: req.body.displayname,
-            password: req.body.password1,
-            roles: req.body.role
-        },
-        function(err, reply) {
-            res.redirect('/user/' + reply.message.user.id);
-        }
-    );
-    console.log(req.body);
+	if (req.body.password1 != req.body.password2) {
+		res.redirect('/register/');
+		return;
+	}
+	crypt.gen_salt(10, function(err, salt) {
+		crypt.encrypt(req.body.password1, salt, function(err, hash) {
+			message_with_reply(
+				'addUser',
+				{
+					email: req.body.email,
+					displayname: req.body.displayname,
+					password: hash,
+					salt: salt,
+					roles: req.body.role
+				},
+				function(err, reply) {
+					res.redirect('/user/' + reply.message.user.id);
+				}
+			);
+		});
+	});
 });
 
 app.get('/user/:userId', function(req, res) {

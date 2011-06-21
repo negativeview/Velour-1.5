@@ -45,6 +45,8 @@ var sub = c.subscribe('/private', function(message) {
         user.display_name = message.message.displayname;
         user.passhash = message.message.password;
         user.roles = message.message.roles;
+        user.salt = message.message.salt;
+        user.email = message.message.email;
         users['user:' + userId] = user;
         reply(message, {user: user});
     }
