@@ -11,8 +11,8 @@ input[type="submit"] {
 }
 #content {
     background-image: url('/images/patterns/brushed_alu.png');
-    padding: 10px;
-    padding-right: 60px;
+    padding: 20px;
+    padding-right: 70px;
     padding-bottom: 25px;
     overflow: auto;
 }
@@ -21,7 +21,7 @@ body.nowatch #content {
 }
 #contentouter {
     padding: 5px;
-    width: 650px;
+    width: 750px;
     margin-left: auto;
     margin-right: auto;
     margin-top: 60px;
@@ -127,7 +127,6 @@ h2 {
     border-bottom-right-radius: 0px;
 }
 #userbio #avatar {
-    margin: 10px;
     margin-left: 0px;
     margin-top: 0px;
     float: left;
@@ -136,8 +135,10 @@ h2 {
     box-shadow: 0px 0px 10px #F00;
 }
 #biography {
-    margin-left: 170px;
-    margin-right: 10px;
+    margin-left: 180px;
+}
+#biography p {
+	margin-top: 20px;
 }
 #keyvalue {
     width: 150px;
