@@ -8,6 +8,8 @@ var express = require('express');
 var app = express.createServer();
 app.use(express.static(__dirname + '/../htdocs'));
 app.use(express.bodyParser());
+app.use(express.cookieParser());
+app.use(express.session({ secret: "foobar" }));
 
 // We need to talk to the other components via faye.
 var faye = require('faye');
@@ -28,12 +30,43 @@ app.param('userId', function(req, res, next, id) {
 });
 
 app.get('/task/new', function(req, res) {
-	res.render(
-		'task-new',
+	if (req.session.authenticatedAs) {
+		res.render(
+			'task-new',
+			{
+				title: 'New Task',
+				bodyclass: '',
+				bodyid: 'task-new',
+				flash: req.flash(),
+				authUser: req.session.authenticatedAs,
+			}
+		);
+	} else {
+		req.flash('error', 'You must be logged in to create a task');
+		res.redirect('back');
+	}
+});
+
+app.post('/login', function(req, res) {
+	message_with_reply(
+		'getUserByEmail',
 		{
-			title: 'New Task',
-			bodyclass: '',
-			bodyid: 'task-new'
+			email: req.body.email
+		},
+		function(err, reply) {
+			if (reply.message.user == null) {
+				req.flash('error', 'No such user');
+				res.redirect('back');
+			}
+			crypt.compare(req.body.password, reply.message.user.passhash, function(err, re) {
+				if (re) {
+					req.session.authenticatedAs = reply.message.user.id;
+					res.redirect('back');
+				} else {
+					req.flash('error', err);
+					res.redirect('back');
+				}
+			});
 		}
 	);
 });
@@ -47,7 +80,9 @@ app.get('/', function(req, res) {
         {
             title: 'Dashboard',
             bodyclass: '',
-            bodyid: 'dashboard'
+            bodyid: 'dashboard',
+			flash: req.flash(),
+			authUser: req.session.authenticatedAs,
         }
     );
 });
@@ -58,13 +93,29 @@ app.get('/register', function(req, res) {
         {
             title: 'Register',
             bodyclass: 'nowatch',
-            bodyid: 'register'
+            bodyid: 'register',
+			flash: req.flash(),
+			authUser: req.session.authenticatedAs,
         }
     );
 });
 
+app.get('/credits', function(req, res) {
+	res.render(
+		'credits',
+		{
+			title: 'Credits',
+			bodyclass: '',
+			bodyid: 'credits',
+			flash: req.flash(),
+			authUser: req.session.authenticatedAs,
+		}
+	);
+});
+
 app.post('/register', function(req, res) {
 	if (req.body.password1 != req.body.password2) {
+		req.flash('error', 'Your passwords did not match.');
 		res.redirect('/register/');
 		return;
 	}
@@ -76,7 +127,6 @@ app.post('/register', function(req, res) {
 					email: req.body.email,
 					displayname: req.body.displayname,
 					password: hash,
-					salt: salt,
 					roles: req.body.role
 				},
 				function(err, reply) {
@@ -95,6 +145,8 @@ app.get('/user/:userId', function(req, res) {
             user: req.user.user,
             bodyclass: '',
             bodyid: 'user-info',
+			flash: req.flash(),
+			authUser: req.session.authenticatedAs,
         }
     );
 });

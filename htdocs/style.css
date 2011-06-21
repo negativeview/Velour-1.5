@@ -17,7 +17,7 @@ input[type="submit"] {
     overflow: auto;
 }
 body.nowatch #content {
-    padding-right: 10px;
+    padding-right: 20px;
 }
 #contentouter {
     padding: 5px;
@@ -116,7 +116,7 @@ body#register #contentouter {
     bottom: 0px;
     padding: 5px;
 }
-#credits {
+#creditsfooter {
     font-size: 10px;
     position: absolute;
     right: 0px;
@@ -227,10 +227,10 @@ label {
 	margin-top: 10px;
 }
 #task-new-form input[type="text"] {
-	width: 400px;
+	width: 300px;
 }
 #task-new-form textarea {
-	width: 400px;
+	width: 300px;
 	display: block;
 }
 #task-new-form select {
@@ -239,4 +239,14 @@ label {
 .optional {
 	border: 0px solid #CCC;
 	border-top-width: 1px;
+}
+.error {
+	background-color: red;
+	font-size: 110%;
+	text-align: center;
+	color: black;
+	padding: 10px;
+}
+#task-new #contentouter {
+	width: 400px;
 }

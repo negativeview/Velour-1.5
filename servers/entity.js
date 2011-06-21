@@ -15,14 +15,13 @@ User.prototype.constructor = User;
 function User(id) {
     this.id = id;
     this.email = '';
-    this.salt = '';
     this.passhash = '';
     this.email_validated = false;
     this.display_name = 'Anonymous Coward';
 }
 
 User.prototype.toString = function() {
-    JSON.stringify(this, ['id', 'email', 'salt', 'email_validated', 'display_name', 'valid', 'created']);
+    JSON.stringify(this, ['id', 'email', 'email_validated', 'display_name', 'valid', 'created']);
 }
 
 // Keep a counter to have a unique message id.
@@ -45,10 +44,20 @@ var sub = c.subscribe('/private', function(message) {
         user.display_name = message.message.displayname;
         user.passhash = message.message.password;
         user.roles = message.message.roles;
-        user.salt = message.message.salt;
         user.email = message.message.email;
         users['user:' + userId] = user;
         reply(message, {user: user});
+    } else if (message.type == 'getUserByEmail') {
+    	var email = message.message.email;
+    	console.log("Looking up " + email);
+    	for (var i in users) {
+    		if (users[i].email == email) {
+    			reply(message, {user: users[i]});
+    			return;
+    		}
+    	}
+    	
+    	reply(message, {user: null});
     }
 });
 

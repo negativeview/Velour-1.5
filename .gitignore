@@ -1,1 +1,6 @@
 .DS_Store
+logs/
+manual/
+conf/
+error/
+cgi-bin/
