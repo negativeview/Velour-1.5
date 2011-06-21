@@ -61,7 +61,7 @@ app.post('/register', function(req, res) {
             roles: req.body.role
         },
         function(err, reply) {
-            res.end('got here');
+            res.redirect('/user/' + reply.message.user.id);
         }
     );
     console.log(req.body);
