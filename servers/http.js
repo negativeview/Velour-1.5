@@ -1,5 +1,6 @@
 // Deal with HTTP.
 var http = require('http');
+var crypt = require('bcrypt');
 
 // Create an "Express," which makes HTTP stuff easier by handling a lot for you
 var express = require('express');
@@ -7,6 +8,8 @@ var express = require('express');
 var app = express.createServer();
 app.use(express.static(__dirname + '/../htdocs'));
 app.use(express.bodyParser());
+app.use(express.cookieParser());
+app.use(express.session({ secret: "foobar" }));
 
 // We need to talk to the other components via faye.
 var faye = require('faye');
@@ -26,6 +29,66 @@ app.param('userId', function(req, res, next, id) {
     add_required_message(req, next, 'getUser', 'user', {userId: id});
 });
 
+app.get('/task/new', function(req, res) {
+	if (req.session.authenticatedAs) {
+		res.render(
+			'task-new',
+			{
+				title: 'New Task',
+				bodyclass: '',
+				bodyid: 'task-new',
+				flash: req.flash(),
+				authUser: req.session.authenticatedAs,
+			}
+		);
+	} else {
+		req.flash('error', 'You must be logged in to create a task');
+		res.redirect('back');
+	}
+});
+
+app.get('/project/new', function(req, res) {
+	if (req.session.authenticatedAs) {
+		res.render(
+			'project-new',
+			{
+				title: 'New Project',
+				bodyclass: '',
+				bodyid: 'project-new',
+				flash: req.flash(),
+				authUser: req.session.authenticatedAs,
+			}
+		);
+	} else {
+		req.flash('error', 'You must be logged in to create a project');
+		res.redirect('back');
+	}
+});
+
+app.post('/login', function(req, res) {
+	message_with_reply(
+		'getUserByEmail',
+		{
+			email: req.body.email
+		},
+		function(err, reply) {
+			if (reply.message.user == null) {
+				req.flash('error', 'No such user');
+				res.redirect('back');
+			}
+			crypt.compare(req.body.password, reply.message.user.passhash, function(err, re) {
+				if (re) {
+					req.session.authenticatedAs = reply.message.user.id;
+					res.redirect('back');
+				} else {
+					req.flash('error', err);
+					res.redirect('back');
+				}
+			});
+		}
+	);
+});
+
 // Due to the param stuff above, this code is super easy, as user and
 // anotherUser are populated from above. We just have to pass stuff to the
 // view.
@@ -35,7 +98,9 @@ app.get('/', function(req, res) {
         {
             title: 'Dashboard',
             bodyclass: '',
-            bodyid: 'dashboard'
+            bodyid: 'dashboard',
+			flash: req.flash(),
+			authUser: req.session.authenticatedAs,
         }
     );
 });
@@ -46,25 +111,48 @@ app.get('/register', function(req, res) {
         {
             title: 'Register',
             bodyclass: 'nowatch',
-            bodyid: 'register'
+            bodyid: 'register',
+			flash: req.flash(),
+			authUser: req.session.authenticatedAs,
         }
     );
 });
 
+app.get('/credits', function(req, res) {
+	res.render(
+		'credits',
+		{
+			title: 'Credits',
+			bodyclass: '',
+			bodyid: 'credits',
+			flash: req.flash(),
+			authUser: req.session.authenticatedAs,
+		}
+	);
+});
+
 app.post('/register', function(req, res) {
-    message_with_reply(
-        'addUser',
-        {
-            email: req.body.email,
-            displayname: req.body.displayname,
-            password: req.body.password1,
-            roles: req.body.role
-        },
-        function(err, reply) {
-            res.redirect('/user/' + reply.message.user.id);
-        }
-    );
-    console.log(req.body);
+	if (req.body.password1 != req.body.password2) {
+		req.flash('error', 'Your passwords did not match.');
+		res.redirect('/register/');
+		return;
+	}
+	crypt.gen_salt(10, function(err, salt) {
+		crypt.encrypt(req.body.password1, salt, function(err, hash) {
+			message_with_reply(
+				'addUser',
+				{
+					email: req.body.email,
+					displayname: req.body.displayname,
+					password: hash,
+					roles: req.body.role
+				},
+				function(err, reply) {
+					res.redirect('/user/' + reply.message.user.id);
+				}
+			);
+		});
+	});
 });
 
 app.get('/user/:userId', function(req, res) {
@@ -75,6 +163,8 @@ app.get('/user/:userId', function(req, res) {
             user: req.user.user,
             bodyclass: '',
             bodyid: 'user-info',
+			flash: req.flash(),
+			authUser: req.session.authenticatedAs,
         }
     );
 });

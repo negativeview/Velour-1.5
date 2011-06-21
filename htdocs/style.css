@@ -17,7 +17,7 @@ input[type="submit"] {
     overflow: auto;
 }
 body.nowatch #content {
-    padding-right: 10px;
+    padding-right: 20px;
 }
 #contentouter {
     padding: 5px;
@@ -73,17 +73,28 @@ body#register #contentouter {
 #actionbar {
     border: 0px solid #CCC;
     border-bottom-width: 1px;
-    height: 20px;
+    height: 36px;
 }
 #actionbar a {
     color: black;
     text-decoration: none;
     padding-left: 10px;
     font-size: 12px;
-    line-height: 20px;
+    display: block;
+    padding: 5px;
+    width: 75px;
+    float: left;
+    border: 1px solid #CCC;
+    border-radius: 3px;
+    text-align: center;
+    margin-top: 5px;
+    margin-bottom: 5px;
+    margin-right: 5px;
+    background: -webkit-linear-gradient(top, #BBB, #DDD);
+    border: 1px solid #BBB;
 }
 #actionbar a:hover {
-    color: #24A;
+	background: -webkit-linear-gradient(top, #AFA, #CFC);
 }
 #footer {
     position: absolute;
@@ -105,7 +116,7 @@ body#register #contentouter {
     bottom: 0px;
     padding: 5px;
 }
-#credits {
+#creditsfooter {
     font-size: 10px;
     position: absolute;
     right: 0px;
@@ -155,8 +166,6 @@ h2 {
     font-weight: normal;
     width: auto;
     clear: both;
-    position: relative;
-    left: -5px;
 }
 #keyvalue h2 {
     margin-bottom: 0px;
@@ -175,7 +184,6 @@ h2 {
     clear: left;
     text-align: right;
     padding-right: 5px;
-    font-weight: bold;
     padding-bottom: 5px;
     padding-top: 5px;
 }
@@ -189,15 +197,15 @@ h2 {
 #signupform h2 {
 	margin-bottom: 0px;
 }
-#signupform #mainsection label {
+label {
+	display: block;
     font-size: 90%;
-    display: block;
 }
 #signupform #mainsection .option {
     padding: 2px;
     border: 0px solid black;
 }
-#signupform #mainsection .option:hover {
+#signupform .option:hover, #signupform .option.focus {
     background-color: #DDD;
 }
 #signupform #rolesection .option {
@@ -208,4 +216,50 @@ h2 {
 	clear: both;
 	display: block;
 	margin-top: 20px;
+}
+#keyvalue a.seeall {
+	display: block;
+	padding: 5px;
+	text-align: center;
+	font-size: 90%;
+}
+#task-new-form, #project-new-form {
+	margin-top: 10px;
+}
+#task-new-form input[type="text"], #project-new-form input[type="text"] {
+	width: 300px;
+}
+#task-new-form textarea, #project-new-form textarea {
+	width: 300px;
+	height: 300px;
+	display: block;
+}
+#task-new-form select, #project-new-form select {
+	display: block;
+}
+.optional {
+	border: 0px solid #CCC;
+	border-top-width: 1px;
+}
+.error {
+	background-color: red;
+	font-size: 110%;
+	text-align: center;
+	color: black;
+	padding: 10px;
+}
+#task-new #contentouter, #project-new #contentouter {
+	width: 400px;
+}
+#rolesection .option {
+	position: relative;
+}
+#rolesection input {
+	position: absolute;
+	top: 2px;
+	left: 0px;
+}
+#rolesection label {
+	display: block;
+	padding-left: 20px;
 }
