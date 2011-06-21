@@ -27,6 +27,7 @@ User.prototype.toString = function() {
 
 // Keep a counter to have a unique message id.
 var id = 0;
+var userIds = 0;
 
 var c = new Faye.Client('http://localhost:8080/private');
 var sub = c.subscribe('/private', function(message) {
@@ -34,12 +35,18 @@ var sub = c.subscribe('/private', function(message) {
         var userId = message.message.userId;
         
         var user = users['user:' + userId];
-        if (!user) {
-            console.log('Creating new user');
-            user = new User(userId);
-            users['user:' + userId] = user;
-        }
-        reply(message, { user: user});        
+        reply(message, { user: user});
+    } else if (message.type == 'addUser') {
+        var userId = ++userIds;
+        
+        console.log(message.message);
+
+        var user = new User(userId);
+        user.display_name = message.message.displayname;
+        user.passhash = message.message.password;
+        user.roles = message.message.roles;
+        users['user:' + userId] = user;
+        reply(message, {user: user});
     }
 });
 

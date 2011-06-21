@@ -6,6 +6,7 @@ var express = require('express');
 
 var app = express.createServer();
 app.use(express.static(__dirname + '/../htdocs'));
+app.use(express.bodyParser());
 
 // We need to talk to the other components via faye.
 var faye = require('faye');
@@ -29,11 +30,41 @@ app.param('userId', function(req, res, next, id) {
 // anotherUser are populated from above. We just have to pass stuff to the
 // view.
 app.get('/', function(req, res) {
-    res.render('dashboard', { title: 'Dashboard', bodyclass: '' });
+    res.render(
+        'dashboard',
+        {
+            title: 'Dashboard',
+            bodyclass: '',
+            bodyid: 'dashboard'
+        }
+    );
 });
 
 app.get('/register', function(req, res) {
-    res.render('register', { title: 'Register', bodyclass: 'nowatch', bodyid: 'register' });
+    res.render(
+        'register',
+        {
+            title: 'Register',
+            bodyclass: 'nowatch',
+            bodyid: 'register'
+        }
+    );
+});
+
+app.post('/register', function(req, res) {
+    message_with_reply(
+        'addUser',
+        {
+            email: req.body.email,
+            displayname: req.body.displayname,
+            password: req.body.password1,
+            roles: req.body.role
+        },
+        function(err, reply) {
+            res.end('got here');
+        }
+    );
+    console.log(req.body);
 });
 
 app.get('/user/:userId', function(req, res) {
@@ -42,7 +73,8 @@ app.get('/user/:userId', function(req, res) {
         {
             title: req.user.user.display_name,
             user: req.user.user,
-            bodyclass: ''
+            bodyclass: '',
+            bodyid: 'user-info',
         }
     );
 });
