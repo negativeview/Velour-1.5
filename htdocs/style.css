@@ -11,6 +11,7 @@ body, html {
     padding: 10px;
     padding-right: 60px;
     padding-bottom: 25px;
+    overflow: auto;
 }
 body.nowatch #content {
     padding-right: 10px;
@@ -78,7 +79,7 @@ body#register #contentouter {
     line-height: 20px;
 }
 #actionbar a:hover {
-    color: #AAF;
+    color: #24A;
 }
 #footer {
     position: absolute;
@@ -134,10 +135,32 @@ h2 {
     margin-left: 160px;
 }
 #keyvalue {
-    position: absolute;
-    top: 260px;
     width: 150px;
     font-size: 12px;
+    float: left;
+    clear: left;
+}
+#keyvalue a {
+    color: black;
+    font-size: 11px;
+    text-decoration: none;
+    display: block;
+    padding: 5px;
+    font-weight: normal;
+    width: auto;
+    clear: both;
+    position: relative;
+    left: -5px;
+}
+#keyvalue h2 {
+    margin-bottom: 0px;
+    margin-top: 30px;
+    border: 0px solid #CCC;
+    border-bottom-width: 1px;
+}
+#keyvalue a:hover {
+    color: #248;
+    background-color: #FFF;
 }
 #keyvalue .key {
     width: 50px;
