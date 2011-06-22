@@ -6,3 +6,4 @@ error/
 cgi-bin/
 bin/
 build/
+*.minj.js
