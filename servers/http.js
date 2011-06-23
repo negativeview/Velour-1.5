@@ -4,6 +4,7 @@ var crypt = require('bcrypt');
 var timeout = require('connect-timeout');
 var express = require('express');
 var minj = require('minj');
+var less = require('less');
 
 var app = express.createServer();
 app.use(minj.middleware({ src: __dirname + '/../htdocs'}));
@@ -11,8 +12,23 @@ app.use(express.static(__dirname + '/../htdocs'));
 app.use(express.bodyParser());
 app.use(express.cookieParser());
 app.use(express.session({ secret: "foobar" }));
-app.use(express.logger());
+//app.use(express.logger());
 app.use(timeout());
+
+var users = {};
+var userIds = 0;
+
+function User(id) {
+    this.id = id;
+    this.email = '';
+    this.passhash = '';
+    this.email_validated = false;
+    this.display_name = 'Anonymous Coward';
+}
+
+User.prototype.toString = function() {
+    JSON.stringify(this, ['id', 'email', 'email_validated', 'display_name', 'valid', 'created']);
+}
 
 // We need to talk to the other components via faye.
 var faye = require('faye');
@@ -30,7 +46,8 @@ app.set('view options', { cache: true});
 // NOTE: Right now we're doing double the work just to debug and test the
 //       code that makes them able to run in what is effectively parallel.
 app.param('userId', function(req, res, next, id) {
-    add_required_message(req, next, 'getUser', 'user', {userId: id});
+	req.user = users['user:' + id];
+	next();
 });
 
 app.get('/task/new', function(req, res) {
@@ -143,18 +160,16 @@ app.post('/register', function(req, res) {
 	}
 	crypt.gen_salt(10, function(err, salt) {
 		crypt.encrypt(req.body.password1, salt, function(err, hash) {
-			message_with_reply(
-				'addUser',
-				{
-					email: req.body.email,
-					displayname: req.body.displayname,
-					password: hash,
-					roles: req.body.role
-				},
-				function(err, reply) {
-					res.redirect('/user/' + reply.message.user.id);
-				}
-			);
+	        var userId = ++userIds;
+        
+	        var user = new User(userId);
+	        user.display_name = req.body.displayname;
+	        user.passhash = hash;
+	        user.roles = req.body.role;
+	        user.email = req.body.email;
+	        users['user:' + userId] = user;
+
+			res.redirect('/user/' + userId);
 		});
 	});
 });
@@ -163,8 +178,8 @@ app.get('/user/:userId', function(req, res) {
     res.render(
         'user-info',
         {
-            title: req.user.user.display_name,
-            user: req.user.user,
+            title: req.user.display_name,
+            user: req.user,
             bodyclass: '',
             bodyid: 'user-info',
 			flash: req.flash(),

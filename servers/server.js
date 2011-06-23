@@ -38,8 +38,6 @@ var wellFormed = {
             console.log('Received message with no mid.');
         }
         
-        console.log(message.data);
-        
         callback(message);
     },
     outgoing: function(message, callback) {
