@@ -1,6 +1,7 @@
 <?php
 
-require_once('htdocs/database.php');
+mysql_connect('127.0.0.1', 'root', '');
+mysql_select_db('argtech');
 
 $query_count = 0;
 function db_do($q)
@@ -51,7 +52,7 @@ db_do("CREATE TABLE obj_string(id SERIAL, value VARCHAR(255))");
 db_do("CREATE TABLE obj_text(id SERIAL, value TEXT)");
 
 /* The base object table is the master table for all objects. This table will get big. */
-db_do("CREATE TABLE base_object(id serial, creator BIGINT(20) UNSIGNED, parent BIGINT(20) UNSIGNED, project BIGINT(20) UNSIGNED, title BIGINT(20) UNSIGNED, created DATETIME, description BIGINT(20) UNSIGNED, buzz DECIMAL(5, 3) UNSIGNED NOT NULL DEFAULT 0.0, buzz_date DATETIME)");
+db_do("CREATE TABLE base_object(id serial, creator BIGINT(20) UNSIGNED, parent BIGINT(20) UNSIGNED, project BIGINT(20) UNSIGNED, title BIGINT(20) UNSIGNED, created DATETIME, description BIGINT(20) UNSIGNED, buzz DECIMAL(5, 3) UNSIGNED NOT NULL DEFAULT 0.0, buzz_date DATETIME, specific_id BIGINT(20) UNSIGNED NOT NULL)");
 db_do("ALTER TABLE base_object ADD CONSTRAINT base_object_title_fk FOREIGN KEY (title) REFERENCES obj_string(id)");
 db_do("ALTER TABLE base_object ADD CONSTRAINT base_object_description_fk FOREIGN KEY (description) REFERENCES obj_text(id)");
 db_do("ALTER TABLE base_object ADD CONSTRAINT base_object_creator_fk FOREIGN KEY (creator) REFERENCES obj_static(id)");
@@ -73,7 +74,7 @@ while ($row = mysql_fetch_assoc($res)) {
 	db_do("INSERT INTO obj_text(value) VALUES('" . mysql_real_escape_string($row['bio']) . "')");
 	$bio_id = mysql_insert_id();
 	
-	db_do("INSERT INTO base_object(title, created, description, buzz, buzz_date) VALUES($title_id, '" . $row['signup'] . "', $bio_id, '" . $row['buzz'] . "', '" . $row['buzz_date'] . "')");
+	db_do("INSERT INTO base_object(title, created, description, buzz, buzz_date, specific_id) VALUES($title_id, '" . $row['signup'] . "', $bio_id, '" . $row['buzz'] . "', '" . $row['buzz_date'] . "', '" . $row['id'] . "')");
 	$ver_id = mysql_insert_id();
 	
 	db_do("INSERT INTO obj_static(type, current) VALUES(1, $ver_id)");
@@ -81,7 +82,7 @@ while ($row = mysql_fetch_assoc($res)) {
 }
 
 /* Remind ourselves that the display_name has been taken care of. */
-db_do("ALTER TABLE users DROP display_name, DROP signup, DROP bio, DROP buzz, DROP buzz_date");
+db_do("ALTER TABLE users DROP display_name, DROP signup, DROP bio, DROP buzz, DROP buzz_date, MODIFY passhash VARCHAR(60)");
 
 $project_old_to_new = array();
 $res = db_do("SELECT * FROM project");
@@ -231,5 +232,11 @@ while ($row = mysql_fetch_assoc($res)) {
 	db_do("INSERT INTO obj_static(type, current, views) VALUES(7, $ver_id, '" . $row['dl_count'] . "')");
 }
 db_do("ALTER TABLE file_version DROP shortdesc, DROP note, DROP creator_id, DROP created, DROP dl_count");
+
+$res = db_do("SELECT * FROM project_user");
+while ($row = mysql_fetch_assoc($res)) {
+	db_do("UPDATE project_user SET user_id = '" . $user_old_to_new['a' . $row['user_id']] .
+		"', project_id = '" . $project_old_to_new['a' . $row['project_id']] . "' WHERE id = '" . $row['id'] . "'");
+}
 
 echo $query_count . " queries\n";

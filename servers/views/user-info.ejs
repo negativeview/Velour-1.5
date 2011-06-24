@@ -1,42 +1,37 @@
 <div id="actionbar">
-	<a href="#">Watch</a>
-    <a href="#">Notes</a>
-    <a href="#">Message</a>
-    <a href="#">Recruit</a>
+	<% if (authUser == user.id) { %>
+		<a href="#">Edit</a>
+	<% } else { %>
+		<a href="#">Watch</a>
+	    <a href="#">Notes</a>
+	    <a href="#">Message</a>
+	    <a href="#">Recruit</a>
+	<% } %>
     <a href="#">Game History</a>
 </div>
-<div id="userbio" class="admin">
+<div id="userbio"<% if (user.power == 1) { %> class="admin"<% } %>>
     <img src="/images/anonymous.gif" id="avatar" />
     <div id="keyvalue">
         <div class="key">ID:</div>
         <div class="value"><%- user.id %></div>
         <div class="key">Power:</div>
-        <div class="value">Admin</div>
+        <div class="value"><% if (user.power == 1) { %>Admin<% } else if (user.power == 2) {%>Normal<% } %></div>
         <div class="key">Since:</div>
         <div class="value">10/10/2010</div>
-        <h2>Made</h2>
-        <a href="#">Super Monkey Ball</a>
-        <a href="#">Super Monkey Ball</a>
-        <a href="#">Super Monkey Ball</a>
-        <a href="#">Super Monkey Ball</a>
-        <a href="#">Super Monkey Ball</a>
-        <a href="/user/<%- user.id %>/made" class="seeall">- More -</a>
-        <h2>Played</h2>
-        <a href="#">Super Monkey Ball</a>
-        <a href="#">Super Monkey Ball</a>
-        <a href="#">Super Monkey Ball</a>
-        <a href="#">Super Monkey Ball</a>
-        <a href="#">Super Monkey Ball</a>
-        <a href="/user/<%- user.id %>/played" class="seeall">- More -</a>
-        <h2>Roles</h2>
-        <a href="#">Super Monkey Ball</a>
-        <a href="#">Super Monkey Ball</a>
-        <a href="#">Super Monkey Ball</a>
-        <a href="#">Super Monkey Ball</a>
-        <a href="#">Super Monkey Ball</a>
-        <a href="/user/<%- user.id %>/roles" class="seeall">- More -</a>
+        <% for (var role in projects) { %>
+        	<h2><%- role %></h2>
+        	<div class="projects">
+        	<% for (var project in projects[role]) { %>
+        		<a href="/project/<%- projects[role][project].project_id %>"><%- projects[role][project].value %></a>
+        	<% } %>
+        	</div>
+        <% } %>
     </div>
     <div id="biography">
-    	<%- user.desc %>
+    	<% if (user.desc) { %>
+	    	<%- user.desc %>
+	    <% } else { %>
+	    	<p>This user has not set up their biography.</p>
+	    <% } %>
     </div>
 </div>
