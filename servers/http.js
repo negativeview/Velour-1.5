@@ -6,246 +6,247 @@ var express = require('express');
 var minj = require('minj');
 var less = require('less');
 
-var app = express.createServer();
-app.use(minj.middleware({ src: __dirname + '/../htdocs'}));
-app.use(express.static(__dirname + '/../htdocs'));
-app.use(express.bodyParser());
-app.use(express.cookieParser());
-app.use(express.session({ secret: "foobar" }));
-//app.use(express.logger());
-app.use(timeout());
-
-var users = {};
-var userIds = 0;
-
-function User(id) {
-    this.id = id;
-    this.email = '';
-    this.passhash = '';
-    this.email_validated = false;
-    this.display_name = 'Anonymous Coward';
-}
-
-User.prototype.toString = function() {
-    JSON.stringify(this, ['id', 'email', 'email_validated', 'display_name', 'valid', 'created']);
-}
-
-// We need to talk to the other components via faye.
-var faye = require('faye');
-
-var outstanding = {};
-
-// Keep a counter to have a unique message id.
-var id = 0;
-
-// Use ejs rendering for our templates.
-app.set('view engine', 'ejs');
-app.set('view options', { cache: true});
-
-// Tell the system how to resolve the userId in a route.
-// NOTE: Right now we're doing double the work just to debug and test the
-//       code that makes them able to run in what is effectively parallel.
-app.param('userId', function(req, res, next, id) {
-	req.user = users['user:' + id];
-	next();
-});
-
-app.get('/task/new', function(req, res) {
-	if (req.session.authenticatedAs) {
-		res.render(
-			'task-new',
-			{
-				title: 'New Task',
-				bodyclass: '',
-				bodyid: 'task-new',
-				flash: req.flash(),
-				authUser: req.session.authenticatedAs,
-			}
-		);
-	} else {
-		req.flash('error', 'You must be logged in to create a task');
-		res.redirect('back');
+var mysql = require('db-mysql');
+var db = new mysql.Database(
+	{
+		hostname: 'localhost',
+		user:     'root',
+		password: '',
+		database: 'argtech'
 	}
+);
+db.on('error', function(error) {
+	console.log('ERROR: ' + error);
 });
-
-app.get('/project/new', function(req, res) {
-	if (req.session.authenticatedAs) {
-		res.render(
-			'project-new',
-			{
-				title: 'New Project',
-				bodyclass: '',
-				bodyid: 'project-new',
-				flash: req.flash(),
-				authUser: req.session.authenticatedAs,
-			}
-		);
-	} else {
-		req.flash('error', 'You must be logged in to create a project');
-		res.redirect('back');
-	}
+db.on('ready', function(server) {
+	console.log('Connected to ' + server.hostname + ' (' + server.versin + ')');
+	setupExpress();
 });
+db.connect();
 
-app.post('/login', function(req, res) {
-	message_with_reply(
-		'getUserByEmail',
-		{
-			email: req.body.email
-		},
-		function(err, reply) {
-			if (reply.message.user == null) {
-				req.flash('error', 'No such user');
-				res.redirect('back');
-			}
-			crypt.compare(req.body.password, reply.message.user.passhash, function(err, re) {
-				if (re) {
-					req.session.authenticatedAs = reply.message.user.id;
-					res.redirect('back');
+var app;
+function setupExpress() {
+	app = express.createServer();
+	app.use(minj.middleware({ src: __dirname + '/../htdocs'}));
+	app.use(express.static(__dirname + '/../htdocs'));
+	app.use(express.bodyParser());
+	app.use(express.cookieParser());
+	app.use(express.session({ secret: "foobar" }));
+	//app.use(express.logger());
+	app.use(timeout());
+
+	// Use ejs rendering for our templates.
+	app.set('view engine', 'ejs');
+	app.set('view options', { cache: true});
+	
+	// Tell the system how to resolve the userId in a route.
+	// NOTE: Right now we're doing double the work just to debug and test the
+	//       code that makes them able to run in what is effectively parallel.
+	app.param('userId', function(req, res, next, id) {
+		var q = db.query().
+			select(
+				[
+					'obj_static.id',
+					'obj_static.views',
+					'base_object.created',
+					'base_object.buzz',
+					'base_object.buzz_date',
+					{
+						'title': '(select value from obj_string where id = base_object.title)',
+						'desc': '(select value from obj_text where id = base_object.description)'
+					}
+				]
+			).
+			from('obj_static').
+			join({table: 'base_object', conditions: 'base_object.id = obj_static.current'}).
+			where('obj_static.type = 1 AND obj_static.id = ?', [id]);
+		console.log(q.sql());
+		q.execute(function(error, rows, cols) {
+				if (error) {
+					console.log('ERROR: ' + error);
 				} else {
+					req.user = rows[0];
+				}
+				next();
+			});
+	});
+	
+	app.get('/task/new', function(req, res) {
+		if (req.session.authenticatedAs) {
+			res.render(
+				'task-new',
+				{
+					title: 'New Task',
+					bodyclass: '',
+					bodyid: 'task-new',
+					flash: req.flash(),
+					authUser: req.session.authenticatedAs,
+				}
+			);
+		} else {
+			req.flash('error', 'You must be logged in to create a task');
+			res.redirect('back');
+		}
+	});
+	
+	app.get('/project/new', function(req, res) {
+		if (req.session.authenticatedAs) {
+			res.render(
+				'project-new',
+				{
+					title: 'New Project',
+					bodyclass: '',
+					bodyid: 'project-new',
+					flash: req.flash(),
+					authUser: req.session.authenticatedAs,
+				}
+			);
+		} else {
+			req.flash('error', 'You must be logged in to create a project');
+			res.redirect('back');
+		}
+	});
+	
+	app.post('/login', function(req, res) {
+		var q = db.query().
+			select('*').
+			from('users').
+			where('email = ?', [req.body.email]);
+		q.execute(
+			function(error, rows, cols) {
+				if (rows.length == 0) {
+					req.flash('error', 'No such user');
+					res.redirect('back');
+					return;
+				}
+				
+				crypt.compare(
+					req.body.password,
+					rows[0].passhash,
+					function(err, re) {
+						if (err) {
+							req.flash('error', err);
+							res.redirect('back');
+							return;
+						}
+						
+						if (re) {
+							req.session.authenticatedAs = rows[0].id;
+							res.redirect('back');
+							return;
+						}
+						
+						if (rows[0].passhash.length == 32) {
+							req.flash('error', 'Seem to be using an old password method:' + rows[0].passhash);
+							res.redirect('back');
+						} else {
+							req.flash('error', 'Incorrect username or password: ' + rows[0].passhash);
+							res.redirect('back');
+						}
+						
+						// We are using an old password management thing. TODO: Add in compat. Inline update.
+					}
+				);
+			}
+		);
+	});
+	
+	// Due to the param stuff above, this code is super easy, as user and
+	// anotherUser are populated from above. We just have to pass stuff to the
+	// view.
+	app.get('/', function(req, res) {
+		res.render(
+			'dashboard',
+			{
+				title: 'Dashboard',
+				bodyclass: '',
+				bodyid: 'dashboard',
+				flash: req.flash(),
+				authUser: req.session.authenticatedAs,
+			}
+		);
+	});
+	
+	app.get('/register', function(req, res) {
+		res.render(
+			'register',
+			{
+				title: 'Register',
+				bodyclass: 'nowatch',
+				bodyid: 'register',
+				flash: req.flash(),
+				authUser: req.session.authenticatedAs,
+			}
+		);
+	});
+	
+	app.get('/credits', function(req, res) {
+		res.render(
+			'credits',
+			{
+				title: 'Credits',
+				bodyclass: '',
+				bodyid: 'credits',
+				flash: req.flash(),
+				authUser: req.session.authenticatedAs,
+			}
+		);
+	});
+	
+	app.post('/register', function(req, res) {
+		if (req.body.password1 != req.body.password2) {
+			req.flash('error', 'Your passwords did not match.');
+			res.redirect('/register/');
+			return;
+		}
+		crypt.gen_salt(10, function(err, salt) {
+			if (err) {
+				req.flash('error', err);
+				res.redirect('back');
+				return;
+			}
+			req.flash('info', req.body.password1);
+			var s = salt;
+			crypt.encrypt(req.body.password1, s, function(err, hash) {
+				if (err) {
 					req.flash('error', err);
 					res.redirect('back');
+					return;
 				}
+				db.query().
+					insert('users',
+						['display_name', 'passhash', 'email'],
+						[req.body.displayname, hash, req.body.email]
+					).
+					execute(function(error, result) {
+						if (error) {
+							console.log('ERROR: ' + error);
+						} else {
+							console.log(result);
+							res.redirect('/user/' + result.id);
+						}
+					});
 			});
-		}
-	);
-});
-
-// Due to the param stuff above, this code is super easy, as user and
-// anotherUser are populated from above. We just have to pass stuff to the
-// view.
-app.get('/', function(req, res) {
-    res.render(
-        'dashboard',
-        {
-            title: 'Dashboard',
-            bodyclass: '',
-            bodyid: 'dashboard',
-			flash: req.flash(),
-			authUser: req.session.authenticatedAs,
-        }
-    );
-});
-
-app.get('/register', function(req, res) {
-    res.render(
-        'register',
-        {
-            title: 'Register',
-            bodyclass: 'nowatch',
-            bodyid: 'register',
-			flash: req.flash(),
-			authUser: req.session.authenticatedAs,
-        }
-    );
-});
-
-app.get('/credits', function(req, res) {
-	res.render(
-		'credits',
-		{
-			title: 'Credits',
-			bodyclass: '',
-			bodyid: 'credits',
-			flash: req.flash(),
-			authUser: req.session.authenticatedAs,
-		}
-	);
-});
-
-app.post('/register', function(req, res) {
-	if (req.body.password1 != req.body.password2) {
-		req.flash('error', 'Your passwords did not match.');
-		res.redirect('/register/');
-		return;
-	}
-	crypt.gen_salt(10, function(err, salt) {
-		crypt.encrypt(req.body.password1, salt, function(err, hash) {
-	        var userId = ++userIds;
-        
-	        var user = new User(userId);
-	        user.display_name = req.body.displayname;
-	        user.passhash = hash;
-	        user.roles = req.body.role;
-	        user.email = req.body.email;
-	        users['user:' + userId] = user;
-
-			res.redirect('/user/' + userId);
 		});
 	});
-});
-
-app.get('/user/:userId', function(req, res) {
-    res.render(
-        'user-info',
-        {
-            title: req.user.display_name,
-            user: req.user,
-            bodyclass: '',
-            bodyid: 'user-info',
-			flash: req.flash(),
-			authUser: req.session.authenticatedAs,
-        }
-    );
-});
-
-var c = new Faye.Client('http://localhost:8080/private');
-var sub = c.subscribe('/private', function(message) {
-    if (message.type == 'reply') {
-        if (outstanding[message.mid]) {
-            outstanding[message.mid](null, message);
-            outstanding[message.mid] = null;
-        } else {
-            console.log('No message named ' + message.mid);
-        }
-    }
-});
-
-sub.callback(function() {
-    console.log('Subscribed successfully');
-});
-
-app.listen(8081);
-
-function message_with_reply(message, data, callback) {
-    var msg = {};
-    msg.server = 'butler';
-    msg.type = message;
-    msg.message = data;
-    
-    var message_id = 'butler-' + (++id);
-    msg.mid = message_id;
-    outstanding[message_id] = callback;
-    c.publish('/private', msg);
-    
-    return message_id;
+	
+	app.get('/user/:userId', function(req, res) {
+		if (!req.user) {
+			res.send(404);
+			return;
+		}
+		res.render(
+			'user-info',
+			{
+				title: req.user.title,
+				user: req.user,
+				bodyclass: '',
+				bodyid: 'user-info',
+				flash: req.flash(),
+				authUser: req.session.authenticatedAs,
+			}
+		);
+	});
+	
+	app.listen(8081);
 }
-
-function add_required_message(req, next, messageName, key, data) {
-    if (!req.requiredMessages)
-        req.requiredMessages = {};
-    
-    var r = req;
-    var k = key;
-    var n = next;
-    
-    var l = 0;
-    for (var i in r.requiredMessages) {
-        l++;
-    }
-
-    var mid = message_with_reply(messageName, data, function(err, message) {
-        r[k] = message.message;
-        delete r.requiredMessages[message.mid];
-        
-        var l = 0;
-        for (var i in r.requiredMessages) {
-            console.log('i:' + i);
-            l++;
-        }
-        
-        if (l == 0) {
-            n();
-        }
-    });
-    r.requiredMessages[mid] = 1;
-};
