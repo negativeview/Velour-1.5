@@ -1,23 +1,54 @@
 <div id="actionbar">
-	<a href="#">Watch</a>
-	<a href="#">Leave</a>
-	<a href="#">Explode</a>
+	<a href="/project/<%- project.id %>/settings">Settings</a>
+	<a href="/project/<%- project.id %>/watch">Watch</a>
+	<a href="/project/<%- project.id %>/leave">Leave</a>
 </div>
 <div id="projectbio">
     <img src="/images/anonymous.gif" id="avatar" />
     <div id="keyvalue">
-        <div class="key">ID:</div>
-        <div class="value"><%- project.id %></div>
         <div class="key">Since:</div>
         <div class="value">10/10/2010</div>
+        <div class="key">Creator:</div>
+        <div class="value"></div>
+        <div class="key">Members:</div>
+        <div class="value"></div>
     </div>
     <div id="biography">
     	<% if (project.desc) { %>
     		<h2>Description</h2>
 	    	<%- project.desc %>
 	    <% } %>
-	    <h2>Files</h2>
-	    <h2>Conversations</h2>
-	    <h2>Characters</h2>
+	    <div class="twocol">
+	    	<div>
+			    <h2>Activity</h2>
+			</div>
+			<div>
+			    <h2>Tasks</h2>
+			</div>
+		</div>
+		<div class="twocol">
+			<div>
+			    <h2>Files / Wikis</h2>
+			</div>
+			<div>
+			    <h2>Conversations</h2>
+			</div>
+		</div>
+		<div class="twocol">
+			<div>
+			    <h2>Characters</h2>
+			</div>
+			<div>
+			    <h2>Viki</h2>
+			</div>
+		</div>
+		<div class="twocol">
+			<div>
+				<h2>Chat Logs</h2>
+			</div>
+			<div>
+				<h2>Roster</h2>
+			</div>
+		</div>
     </div>
 </div>

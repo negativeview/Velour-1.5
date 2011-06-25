@@ -185,7 +185,6 @@ h2 {
     width: 50px;
     height: 15px;
     float: left;
-    clear: left;
     text-align: right;
     padding-right: 5px;
     padding-bottom: 5px;
@@ -270,4 +269,18 @@ label {
 #biography h2 {
 	border: 0px solid #CCC;
 	border-bottom-width: 1px;
+}
+.twocol {
+	overflow: auto;
+	margin-right: -20px;
+	margin-top: 20px;
+}
+.twocol div {
+	width: 254px;
+	float: left;
+	margin-right: 20px;
+	height: 150px;
+}
+.twocol h2 {
+	margin-top: 0px;
 }

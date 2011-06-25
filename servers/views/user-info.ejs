@@ -12,12 +12,10 @@
 <div id="userbio"<% if (user.power == 1) { %> class="admin"<% } %>>
     <img src="/images/anonymous.gif" id="avatar" />
     <div id="keyvalue">
-        <div class="key">ID:</div>
-        <div class="value"><%- user.id %></div>
         <div class="key">Power:</div>
         <div class="value"><% if (user.power == 1) { %>Admin<% } else if (user.power == 2) {%>Normal<% } %></div>
         <div class="key">Since:</div>
-        <div class="value"><%- user.created %></div>
+        <div class="value"><%- user.created.toDateString() %></div>
         <% for (var role in projects) { %>
         	<h2><%- role %></h2>
         	<div class="projects">
