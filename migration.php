@@ -59,7 +59,7 @@ db_do("ALTER TABLE base_object ADD CONSTRAINT base_object_creator_fk FOREIGN KEY
 db_do("ALTER TABLE base_object ADD CONSTRAINT base_object_project_fk FOREIGN KEY (project) REFERENCES obj_static(id)");
 db_do("ALTER TABLE base_object ADD CONSTRAINT base_object_parent_fk FOREIGN KEY (parent) REFERENCES obj_static(id)");
 
-db_do("CREATE TABLE obj_static(id serial, type BIGINT(20) UNSIGNED NOT NULL, current BIGINT(20) UNSIGNED NOT NULL, views BIGINT(20) UNSIGNED NOT NULL DEFAULT 0)");
+db_do("CREATE TABLE obj_static(id serial, type BIGINT(20) UNSIGNED NOT NULL, current BIGINT(20) UNSIGNED NOT NULL, views BIGINT(20) UNSIGNED NOT NULL DEFAULT 0, created DATETIME)");
 db_do("ALTER TABLE obj_static ADD CONSTRAINT obj_static_current_fk FOREIGN KEY (current) REFERENCES base_obj(id)");
 db_do("ALTER TABLE obj_static ADD CONSTRAINT obj_static_obj_type_fk FOREIGN KEY(type) REFERENCES obj_types(id)");
 
@@ -77,7 +77,7 @@ while ($row = mysql_fetch_assoc($res)) {
 	db_do("INSERT INTO base_object(title, created, description, buzz, buzz_date, specific_id) VALUES($title_id, '" . $row['signup'] . "', $bio_id, '" . $row['buzz'] . "', '" . $row['buzz_date'] . "', '" . $row['id'] . "')");
 	$ver_id = mysql_insert_id();
 	
-	db_do("INSERT INTO obj_static(type, current) VALUES(1, $ver_id)");
+	db_do("INSERT INTO obj_static(type, current, created) VALUES(1, $ver_id, '" . $row['signup'] . "')");
 	$user_old_to_new['a' . $row['id']] = mysql_insert_id();
 }
 

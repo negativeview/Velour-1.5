@@ -17,7 +17,7 @@
         <div class="key">Power:</div>
         <div class="value"><% if (user.power == 1) { %>Admin<% } else if (user.power == 2) {%>Normal<% } %></div>
         <div class="key">Since:</div>
-        <div class="value">10/10/2010</div>
+        <div class="value"><%- user.created %></div>
         <% for (var role in projects) { %>
         	<h2><%- role %></h2>
         	<div class="projects">

@@ -52,6 +52,7 @@ function setupExpress() {
 					'base_object.created',
 					'base_object.buzz',
 					'base_object.buzz_date',
+					'obj_static.created',
 					{
 						'title': '(select value from obj_string where id = base_object.title)',
 						'desc': '(select value from obj_text where id = base_object.description)'
@@ -150,69 +151,7 @@ function setupExpress() {
 			res.redirect('back');
 		}
 	});
-	
-	app.post('/login', function(req, res) {
-		var q = db.query().
-			select('*').
-			from('users').
-			where('email = ?', [req.body.email]);
-		q.execute(
-			function(error, rows, cols) {
-				if (rows.length == 0) {
-					req.flash('error', 'No such user');
-					res.redirect('back');
-					return;
-				}
-				
-				crypt.compare(
-					req.body.password,
-					rows[0].passhash,
-					function(err, re) {
-						if (err) {
-							req.flash('error', err);
-							res.redirect('back');
-							return;
-						}
-						
-						// We now know which User object this is. We need our static id though.
-						if (re) {
-						
-							db.query().
-								select(['obj_static.id']).
-								from('obj_static').
-								join({table: 'base_object', conditions: 'base_object.id = obj_static.current'}).
-								where('obj_static.type = 1 AND base_object.specific_id = ?', [rows[0].id]).
-								execute(
-									function(err, result) {
-										if (err) {
-											console.log(err);
-											req.flash('error', err);
-											res.redirect('back');
-											return;
-										}
-										
-										req.session.authenticatedAs = result[0].id;
-										res.redirect('back');
-									}
-								);
-							return;
-						}
-						
-						if (rows[0].passhash.length == 32) {
-							req.flash('error', 'Seem to be using an old password method:' + rows[0].passhash);
-							res.redirect('back');
-						} else {
-							req.flash('error', 'Incorrect username or password: ' + rows[0].passhash);
-							res.redirect('back');
-						}
-						
-						// We are using an old password management thing. TODO: Add in compat. Inline update.
-					}
-				);
-			}
-		);
-	});
-	
+		
 	// Due to the param stuff above, this code is super easy, as user and
 	// anotherUser are populated from above. We just have to pass stuff to the
 	// view.
