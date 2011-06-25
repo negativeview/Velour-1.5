@@ -1,0 +1,21 @@
+<div id="actionbar">
+	<a href="#">Watch</a>
+	<a href="#">Leave</a>
+	<a href="#">Explode</a>
+</div>
+<div id="projectbio">
+    <img src="/images/anonymous.gif" id="avatar" />
+    <div id="keyvalue">
+        <div class="key">ID:</div>
+        <div class="value"><%- project.id %></div>
+        <div class="key">Since:</div>
+        <div class="value">10/10/2010</div>
+    </div>
+    <div id="biography">
+    	<% if (project.desc) { %>
+	    	<%- project.desc %>
+	    <% } else { %>
+	    	<p>This user has not set up their biography.</p>
+	    <% } %>
+    </div>
+</div>
