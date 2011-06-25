@@ -12,11 +12,11 @@ input[type="submit"] {
 #content {
     background-image: url('/images/patterns/brushed_alu.png');
     padding: 20px;
-    padding-right: 70px;
+    padding-right: 20px;
     padding-bottom: 25px;
     overflow: auto;
 }
-body.nowatch #content {
+body.watch #content {
     padding-right: 20px;
 }
 #contentouter {
@@ -25,6 +25,7 @@ body.nowatch #content {
     margin-left: auto;
     margin-right: auto;
     margin-top: 60px;
+    margin-bottom: 60px;
     border-radius: 5px;
     background-image: url('/images/patterns/black_denim.png');
     box-shadow: 2px 2px 5px #000;
@@ -137,7 +138,7 @@ h2 {
     border-top-left-radius: 0px;
     border-bottom-right-radius: 0px;
 }
-#userbio #avatar {
+#userbio #avatar, #projectbio #avatar {
     margin-left: 0px;
     margin-top: 0px;
     float: left;

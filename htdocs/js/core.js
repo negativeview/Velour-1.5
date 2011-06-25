@@ -19,6 +19,7 @@ $(document).ready(
 					hiders.css('display', 'none');
 					
 					var a = $('<a>');
+					a.css('cursor', 'pointer');
 					a.click(function() {
 						hiders.slideToggle();
 					});

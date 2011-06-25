@@ -9,7 +9,7 @@
 		<link href='http://fonts.googleapis.com/css?family=Metrophobic&v1' rel='stylesheet' type='text/css'>
 		<!-- This site is, and always will be, out of game for all client ARGs. That does not mean I can't use it for my own purposes. --> 
 	</head> 
-	<body class="<%- bodyclass %>" id="<%- bodyid %>"> 
+	<body class="<% if (typeof watches !== 'undefined') { %>watch<% } %><%- bodyclass %>" id="<%- bodyid %>"> 
 		<% if (!authUser) { %>
 	    <form id="loginbar" action="/login" method="POST">
 	        <input type="email" name="email" placeholder="Email" />
@@ -18,15 +18,13 @@
 	    </form>
 	    <% } %>
         <div id="contentouter">
-			<% if (bodyclass != 'nowatch') { %>
-				<div id="watchbar">
-					<a href="#">A</a>
-					<a href="#" class="active">B</a>
-					<a href="#" class="active">C</a>
-					<a href="#" class="active">D</a>
-					<a href="#">E</a>
-				</div>
-			<% } %>
+        	<% if (typeof watches !== 'undefined') {
+        		for (var i in watches) {
+        			%>
+        				<a href="<%- watches[i].url %>"><%- watches[i].body %></a>
+        			<%
+        		}
+        	} %>
             <div id="content">
                 <h1 id="maintitle"><%- title %></h1>
                 <% if (typeof flash != 'undefined') { %>
