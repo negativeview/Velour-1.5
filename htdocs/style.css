@@ -279,8 +279,47 @@ label {
 	width: 254px;
 	float: left;
 	margin-right: 20px;
-	height: 150px;
 }
 .twocol h2 {
 	margin-top: 0px;
+	margin-bottom: 0px;
+}
+.twocol a {
+	color: black;
+	padding: 3px;
+	text-decoration: none;
+	display: block;
+	height: 18px;
+}
+.twocol a:hover {
+    color: #248;
+    background-color: #FFF;
+}
+.paginate {
+	background-color: #CCC;
+	position: absolute;
+	bottom: 0px;
+	left: 0px;
+	border: 1px solid #CCC;
+    background: -webkit-linear-gradient(top, #BBB, #DDD);
+
+}
+.paginate a {
+	text-align: center;
+	margin: 0px;
+	margin-top: 3px;
+	margin-bottom: 3px;
+	font-size: 11px;
+	line-height: 15px;
+	color: black;
+	width: 15px;
+	height: 15px;
+	float: left;
+	padding: 2px;
+	cursor: pointer;
+}
+.paginate a.active {
+	background-color: #666;
+	font-weight: bold;
+	color: white;
 }

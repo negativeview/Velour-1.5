@@ -5,6 +5,7 @@ var express = require('express');
 var minj = require('minj');
 var less = require('less');
 var user_stuff = require('./user-stuff');
+var fs = require('fs');
 
 var mysql = require('db-mysql');
 var db = new mysql.Database(
@@ -180,6 +181,25 @@ function setupExpress() {
 			}
 		);
 	});
+
+	// Get the icon for this project.	
+	app.get('/project/:projectId/icon.png', function(req, res) {
+		// Is there an image file in the special place?
+		fs.stat('./project_icons/' + req.project.id + '.png', function(err, stats) {
+			var readStream;
+			
+			if (err) {
+				// We got an error from fstat, use the default icon.
+				readStream = fs.createReadStream('../htdocs/images/anonymous.png');
+			} else {
+				// We did not get an error. Assume that the file is good, and stream it.
+				readStream = fs.createReadStream('./project_icons/' + req.project.id + '.png');
+			}
+			
+			// Pipe the file to the result object.
+			readStream.pipe(res);
+		});
+	});
 	
 	app.get('/project/:projectId', function(req, res) {
 		if (!req.project) {
@@ -187,17 +207,41 @@ function setupExpress() {
 			return;
 		}
 		
-		res.render(
-			'project-info',
-			{
-				title: req.project.title,
-				project: req.project,
-				bodyclass: '',
-				bodyid: 'project-info',
-				flash: req.flash(),
-				authUser: req.session.authenticatedAs,
+		get_characters_for_project(req.project.id, function(err, characters) {
+			if (err) {
+				res.send(500);
+				return;
 			}
-		);
+			
+			get_todos_for_project(req.project.id, function(err, todos) {
+				if (err) {
+					res.send(500);
+					return;
+				}
+			
+				get_conversations_for_project(req.project.id, function(err, conversations) {
+					if (err) {
+						res.send(500);
+						return;
+					}
+				
+					res.render(
+						'project-info',
+						{
+							title: req.project.title,
+							project: req.project,
+							bodyclass: '',
+							characters: characters,
+							conversations: conversations,
+							todos: todos,
+							bodyid: 'project-info',
+							flash: req.flash(),
+							authUser: req.session.authenticatedAs,
+						}
+					);
+				});
+			});
+		});
 	});
 	
 	app.get('/user/:userId', function(req, res) {
@@ -242,4 +286,40 @@ function setupExpress() {
 	});
 	
 	app.listen(8081);
+}
+
+function get_sub_of_type_for_project(project_id, type_id, cb) {
+	if (!project_id) {
+		cb('No project id provided');
+		return;
+	}
+	
+	db.query().
+		select('obj_string.value AS name, obj_static.id').
+		from('obj_static').
+		join({table: 'base_object', conditions: 'obj_static.current = base_object.id'}).
+		join({table: 'obj_string', conditions: 'base_object.title = obj_string.id'}).
+		where('obj_static.type = ? AND base_object.project = ?', [type_id, project_id]).
+		execute(
+			function(err, res) {
+				if (err) {
+					cb(err);
+					return;
+				}
+				
+				cb(null, res);
+			}
+		);
+}
+
+function get_characters_for_project(project_id, cb) {
+	get_sub_of_type_for_project(project_id, 5, cb);
+}
+
+function get_todos_for_project(project_id, cb) {
+	get_sub_of_type_for_project(project_id, 4, cb);
+}
+
+function get_conversations_for_project(project_id, cb) {
+	get_sub_of_type_for_project(project_id, 6, cb);
 }

@@ -185,7 +185,7 @@ while ($row = mysql_fetch_assoc($res)) {
 		case 1:
 			// This is really a comment. I was stupid.
 			$parent = $conversation_old_to_new['a' . $row['parent_id']];
-			db_do("INSERT INTO base_object(parent, title, created, description) VALUES($parent, $title_id, '" . $row['posted'] . "', $body_id)");
+			db_do("INSERT INTO base_object(project, parent, title, created, description) VALUES('" . $project_old_to_new['a' . $row['project_id']] . "', $parent, $title_id, '" . $row['posted'] . "', $body_id)");
 			$ver_id = mysql_insert_id();
 			
 			db_do("INSERT INTO obj_static(type, current) VALUES(6, $ver_id)");
@@ -216,6 +216,7 @@ $res = db_do("SELECT * FROM file");
 $files_old_to_new = array();
 while ($row = mysql_fetch_assoc($res)) {
 	$files_old_to_new['a' . $row['id']] = $row;
+	db_do("UPDATE file SET project_id = '" . $project_old_to_new['a' . $row['project_id']] . "' WHERE id = '" . $row['id'] . "'");
 }
 
 $res = db_do("SELECT * FROM file_version");

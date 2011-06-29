@@ -1,5 +1,6 @@
 var string_stuff = require('./string_handling');
 var crypt = require('bcrypt');
+var crypto = require('crypto');
 
 var db;
 
@@ -32,17 +33,87 @@ exports.setupApp = function(app, d) {
 				// If they have a salt, they must be using the individually-salted old method.
 				// They aren't TOO out of date then...
 				if (user.salt && user.salt !== '') {
-					req.flash('error', 'Cannot login with v2 login right now.');
-					res.redirect('back');
-					return;
+					if (user.passhash == crypto.createHash('md5').update(req.body.password + user.salt).digest('hex')) {
+						get_static_from_user(user.id, function(err, static_id) {
+							if (err) {
+								req.flash('error', err);
+								res.redirect('back');
+								return;
+							}
+							
+							// This block can be done in the background. If it errors, we can just
+							// do it the next time that they log in. Whatevs.
+							gen_new_pass(req.body.password, function(err, hash) {
+								if (err) {
+									req.flash('error', err);
+									res.redirect('back');
+									return;
+								}
+								
+								db.query().
+									update('users').
+									set({passhash: hash, salt: null}).
+									where('id = ?', [user.id]).
+									execute(function(err, result) {
+										if (err) {
+											console.log(err);
+										}
+									});
+							});
+							
+							req.session.authenticatedAs = static_id;
+							res.redirect('/');
+							return;
+						});
+						return;
+					} else {
+						req.flash('error', 'Wrong username or password');
+						res.redirect('back');
+						return;
+					}
 				}
 				
 				// They don't have a salt, but their hash does look like md5. They must be using
 				// v1. They probably haven't logged in in a while!
 				if (user.passhash.length == 32) {
-					req.flash('error', 'Cannot login with v1 login right now.');
-					res.redirect('back');
-					return;
+					if (user.passhash == crypto.createHash('md5').update(req.body.password + 'argtech').digest('hex')) {
+						get_static_from_user(user.id, function(err, static_id) {
+							if (err) {
+								req.flash('error', err);
+								res.redirect('back');
+								return;
+							}
+							
+							// This block can be done in the background. If it errors, we can just
+							// do it the next time that they log in. Whatevs.
+							gen_new_pass(req.body.password, function(err, hash) {
+								if (err) {
+									req.flash('error', err);
+									res.redirect('back');
+									return;
+								}
+								
+								db.query().
+									update('users').
+									set({passhash: hash, salt: null}).
+									where('id = ?', [user.id]).
+									execute(function(err, result) {
+										if (err) {
+											console.log(err);
+										}
+									});
+							});
+							
+							req.session.authenticatedAs = static_id;
+							res.redirect('/');
+							return;
+						});
+						return;
+					} else {
+						req.flash('error', 'Wrong username or password');
+						res.redirect('back');
+						return;
+					}
 				}
 				
 				// They should be a new user, yay! Or their passhash has been auto-updated.
