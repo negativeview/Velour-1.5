@@ -1,7 +1,78 @@
 var fs = require('fs');
 var user_stuff = require('./user-stuff');
+var md = require('markdown').markdown;
 
 var db;
+
+var parallelTask = function(reqq, ress) {
+	var tasks = [];
+	var id = 0;
+
+	this.req = reqq;
+	this.res = ress;
+	
+	this.addTask = function(task, func) {
+		tasks[tasks.length] = {
+			task: task,
+			cb: func
+		};
+	};
+	
+	var m = this;
+	this.start = function(cb) {
+		for (i = 0; i < tasks.length; i++) {
+			var task = tasks[i];
+			task.task(m.req, m.res, function() {
+				if (task.cb) {
+					task.cb();
+				}
+				id++;
+				
+				if (id == tasks.length) {
+					cb();
+				}
+			});
+		}
+	}
+};
+
+var serialTask = function(reqq, ress) {
+	var tasks = [];
+	var id = 0;
+	var req = reqq;
+	var res = ress;
+	
+	this.addTask = function(task, func) {
+		tasks[tasks.length] = {
+			task: task,
+			cb: func
+		};
+	};
+	
+	var m = this;
+	this.next = function(cb) {
+		if (tasks[id]) {
+			var my_task = tasks[id];
+			tasks[id].task(
+				req,
+				res,
+				function() {
+					if (my_task.cb) {
+						my_task.cb();
+					}
+					m.next(cb);
+				}
+			);
+			id++;
+		} else {
+			cb();
+		}
+	}
+	
+	this.start = function(func) {
+		this.next(func);
+	};
+};
 
 exports.setupApp = function(app, d) {
 	db = d;
@@ -73,58 +144,66 @@ exports.setupApp = function(app, d) {
 			return;
 		}
 		
-		user_stuff.userFromStaticId(req.project.creator, function(err, owner) {
-			if (err) {
-				res.send(500);
-				return;
-			}
-			
-			get_characters_for_project(req.project.id, function(err, characters) {
-				if (err) {
-					res.send(500);
-					return;
-				}
-				
-				get_todos_for_project(req.project.id, function(err, todos) {
-					if (err) {
-						res.send(500);
-						return;
-					}
-					console.log(todos);
-				
-					get_conversations_for_project(req.project.id, function(err, conversations) {
-						if (err) {
-							res.send(500);
-							return;
-						}
-						
-						get_roster_for_project(req.project.id, function(err, roster) {
-							if (err) {
-								res.send(500);
-								return;
-							}
-							
-							req.project.roster = roster;
-						
-							res.render(
-								'project-info',
-								{
-									title: req.project.title,
-									project: req.project,
-									bodyclass: '',
-									owner: owner,
-									characters: characters,
-									conversations: conversations,
-									todos: todos,
-									bodyid: 'project-info',
-									flash: req.flash(),
-									authUser: req.session.authenticatedAs,
-								}
-							);
-						});
-					});
+		var tasks = new parallelTask(req, res);
+		tasks.addTask(
+			function(req, res, next) {
+				user_stuff.userFromStaticId(req.project.creator, function(err, owner) {
+					req.project.creator = owner;
+					next();
 				});
-			});
+			}
+		);
+		tasks.addTask(
+			function(req, res, next) {
+				get_characters_for_project(req.project.id, function(err, characters) {
+					req.project.characters = characters;
+					next();
+				});
+			}
+		);
+		tasks.addTask(
+			function(req, res, next) {
+				get_todos_for_project(req.project.id, function(err, todos) {
+					req.project.todos = todos;
+					next();
+				});
+			}
+		);
+		tasks.addTask(
+			function(req, res, next) {
+				get_conversations_for_project(req.project.id, function(err, conversations) {
+					req.project.conversations = conversations;
+					next();
+				});
+			}
+		);
+		tasks.addTask(
+			function(req, res, next) {
+				get_roster_for_project(req.project.id, function(err, roster) {
+					req.project.roster = roster;
+					next();
+				});
+			}
+		);
+		
+		tasks.start(function() {
+			req.project.desc = md.toHTML(req.project.desc);
+		
+			res.render(
+				'project-info',
+				{
+					title: req.project.title,
+					project: req.project,
+					bodyclass: '',
+					owner: req.project.creator,
+					characters: req.project.characters,
+					conversations: req.project.conversations,
+					todos: req.project.todos,
+					bodyid: 'project-info',
+					flash: req.flash(),
+					authUser: req.session.authenticatedAs,
+				}
+			);
 		});
 	});
 };
@@ -162,7 +241,6 @@ function get_sub_of_type_for_project(project_id, type_id, options, cb) {
 	}
 	
 	q.where(where, [type_id, project_id]);
-	console.log('SQL:' + q.sql());
 	
 	q.execute(
 		function(err, res) {

@@ -6,7 +6,7 @@
 		<link rel="stylesheet" href="/style.css" />
 		<script src="/js/jquery.js"></script>
 		<script src="/js/core.js"></script>
-		<link href='http://fonts.googleapis.com/css?family=Metrophobic&v1' rel='stylesheet' type='text/css'>
+		<link href='http://fonts.googleapis.com/css?family=Lato:light,lightitalic,regular,regularitalic,bold,bolditalic&v1' rel='stylesheet' type='text/css'>
 		<!-- This site is, and always will be, out of game for all client ARGs. That does not mean I can't use it for my own purposes. --> 
 	</head> 
 	<body class="<% if (typeof watches !== 'undefined') { %>watch<% } %><%- bodyclass %>" id="<%- bodyid %>"> 
@@ -16,6 +16,13 @@
 	        <input type="password" name="password" placeholder="Password" />
 	        <input type="submit" value="Login" />
 	    </form>
+	    <% } else { %>
+	    	<div id="loginbar">
+	    		<div id="innerlogin">
+		    		<a href="#">Profile</a>
+		    		<a href="#">Logout</a>
+		    	</div>
+	    	</div>
 	    <% } %>
         <div id="contentouter">
         	<% if (typeof watches !== 'undefined') {
