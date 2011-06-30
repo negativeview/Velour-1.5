@@ -4,8 +4,100 @@ var crypto = require('crypto');
 
 var db;
 
+exports.mustBeLoggedIn = function(req, res, next) {
+	if (typeof req.authenticatedAs == 'undefined') {
+		req.flash('error', 'You must be logged in to view that page.');
+		res.redirect('back');
+		return;
+	}
+	
+	next();
+};
+
 exports.setupApp = function(app, d) {
 	db = d;
+
+	var user_cache = {};
+	
+	app.param('userId', function(req, res, next, id) {
+		if (user_cache['u' + id]) {
+			req.user = user_cache['u' + id];
+			next();
+			return;
+		}
+		
+		get_user_from_static_id(id, function(err, user) {
+			if (err) {
+				console.log('ERROR: ' + error);
+				next();
+				return;
+			}
+			
+			req.user = user;
+			user_cache['u' + id] = req.user;
+			next();
+		});
+	});
+	
+	app.use(function(req, res, next) {
+		if (typeof req.session !== 'undefined') {
+			if (req.session.authenticatedAs) {
+				get_user_from_static_id(req.session.authenticatedAs, function(err, user) {
+					if (err) {
+						res.flash('error', err);
+						res.redirect('back');
+						return;
+					}
+					
+					req.loggedInUser = user;
+					next();
+				});
+				return;
+			}
+		}
+		next();
+	});
+
+	app.get('/user/:userId', function(req, res) {
+		if (!req.user) {
+			res.send(404);
+			return;
+		}
+		
+		db.query().
+			select(['project_user.project_id', 'obj_string.value', 'project_user.role_name']).
+			from('project_user').
+			join({table: 'obj_static', conditions: 'project_user.project_id = obj_static.id'}).
+			join({table: 'base_object', conditions: 'base_object.id = obj_static.current'}).
+			join({table: 'obj_string', conditions: 'obj_string.id = base_object.title'}).
+			where('user_id = ?', [req.user.id]).
+			execute(function(err, result) {
+				if (err) {
+					req.flash('error', err);
+				}
+				
+				var by_role = {};
+				for (var project in result) {
+					project = result[project];
+					
+					if (!by_role[project.role_name])
+						by_role[project.role_name] = [];
+					by_role[project.role_name][by_role[project.role_name].length] = project;
+				}
+				res.render(
+					'user-info',
+					{
+						title: req.user.title,
+						user: req.user,
+						bodyclass: '',
+						projects: by_role,
+						bodyid: 'user-info',
+						flash: req.flash(),
+						authUser: req.session.authenticatedAs,
+					}
+				);				
+			});
+	});
 
 	/**
 	 * Handle logins. After logging in, the session is stored on the request object, and we
@@ -246,6 +338,40 @@ function check_duplicate_email(email, cb) {
 		}
 	});
 }
+
+function get_user_from_static_id(id, cb) {
+	var q = db.query().
+		select(
+			[
+				'obj_static.id',
+				'obj_static.views',
+				'base_object.created',
+				'base_object.buzz',
+				'users.email',
+				'users.passhash',
+				'users.power',
+				'base_object.buzz_date',
+				{
+					'title': '(select value from obj_string where id = base_object.title)',
+					'desc': '(select value from obj_text where id = base_object.description)'
+				}
+			]
+		).
+		from('obj_static').
+		join({table: 'base_object', conditions: 'base_object.id = obj_static.current'}).
+		join({table: 'users', conditions: 'base_object.specific_id = users.id'}).
+		where('obj_static.type = 1 AND obj_static.id = ?', [id]);
+	q.execute(function(error, rows, cols) {
+			if (error) {
+				cb(error);
+			} else {
+				cb(null, rows[0]);
+			}
+		});
+}
+
+exports.userFromStaticId = get_user_from_static_id;
+
 
 function gen_new_pass(password, cb) {
 	crypt.gen_salt(10, function(err, salt) {

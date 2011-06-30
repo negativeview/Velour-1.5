@@ -29,7 +29,7 @@ $(document).ready(
 			}
 		);
 		
-		var num_elements = 6;
+		var num_elements = 10;
 		
 		var one_el_height = parseInt($('.twocol a').css('height')) + (parseInt($('.twocol a').css('paddingTop')) * 2);
 		console.log(one_el_height);

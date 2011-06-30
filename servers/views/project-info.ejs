@@ -7,11 +7,15 @@
     <img src="/project/<%- project.id %>/icon.png" id="avatar" />
     <div id="keyvalue">
         <div class="key">Since:</div>
-        <div class="value">10/10/2010</div>
+        <div class="value"><%- project.created.toDateString() %></div>
         <div class="key">Creator:</div>
-        <div class="value"></div>
-        <div class="key">Members:</div>
-        <div class="value"></div>
+        <div class="value"><a href="/user/<%- owner.id %>"><%- owner.title %></a></div>
+        <div class="key">Buzz:</div>
+        <div class="value"><%- project.buzz %></div>
+        <h2>Roster</h2>
+        <% for (var i in project.roster) { %>
+        	<a href="/user/<%- project.roster[i].id %>"><%- project.roster[i].title %></a>
+        <% } %>
     </div>
     <div id="biography">
     	<% if (project.desc) { %>

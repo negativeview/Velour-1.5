@@ -96,7 +96,7 @@ while ($row = mysql_fetch_assoc($res)) {
 	db_do("INSERT INTO base_object(creator, title, created, description, buzz, buzz_date) VALUES(" . $user_old_to_new['a' . $row['primary_contact']] . ", $title_id, '" . $row['created'] . "', $bio_id, '" . $row['buzz'] . "', '" . $row['buzz_date'] . "')");
 	$ver_id = mysql_insert_id();
 	
-	db_do("INSERT INTO obj_static(type, current, views) VALUES(2, $ver_id, '" . $row['profile_views'] . "')");
+	db_do("INSERT INTO obj_static(type, created, current, views) VALUES(2, '" . $row['created'] . "', $ver_id, '" . $row['profile_views'] . "')");
 	$project_old_to_new['a' . $row['id']] = mysql_insert_id();
 }
 db_do("ALTER TABLE project DROP public_name, DROP private_name, DROP bio, DROP buzz, DROP buzz_date, DROP created, DROP profile_views, DROP primary_contact");
@@ -127,7 +127,7 @@ while ($row = mysql_fetch_assoc($res)) {
 	db_do("INSERT INTO obj_text(value) VALUES('" . mysql_real_escape_string($row['body']) . "')");
 	$body_id = mysql_insert_id();
 	
-	db_do("INSERT INTO base_object(creator, parent, title, created, description, project) VALUES(" . $user_old_to_new['a' . $row['creator_id']] . ", " . $project_old_to_new['a' . $row['project_id']] . ", $title_id, '" . $row['created'] . "', $body_id, '" . $project_old_to_new['a' . $row['project_id']] . "')");
+	db_do("INSERT INTO base_object(creator, parent, title, created, description, project, specific_id) VALUES(" . $user_old_to_new['a' . $row['creator_id']] . ", " . $project_old_to_new['a' . $row['project_id']] . ", $title_id, '" . $row['created'] . "', $body_id, '" . $project_old_to_new['a' . $row['project_id']] . "', '" . $row['id'] . "')");
 	$ver_id = mysql_insert_id();
 	
 	db_do("INSERT INTO obj_static(type, current) VALUES(4, $ver_id)");

@@ -16,6 +16,8 @@
         <div class="value"><% if (user.power == 1) { %>Admin<% } else if (user.power == 2) {%>Normal<% } %></div>
         <div class="key">Since:</div>
         <div class="value"><%- user.created.toDateString() %></div>
+        <div class="key">Buzz:</div>
+        <div class="value"><%- user.buzz %></div>
         <% for (var role in projects) { %>
         	<h2><%- role %></h2>
         	<div class="projects">
