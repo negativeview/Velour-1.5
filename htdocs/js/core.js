@@ -10,6 +10,7 @@ $(document).ready(
 			}
 		);
 		
+		/*
 		$('.projects').each(
 			function(idx, el) {
 				var project = $(el);
@@ -28,6 +29,7 @@ $(document).ready(
 				}
 			}
 		);
+		*/
 		
 		var num_elements = 10;
 		

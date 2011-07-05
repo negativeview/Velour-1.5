@@ -22,23 +22,10 @@
     <div class="right">
 		<div id="biography">
 			<h2>Biography</h2>
-			<% if (user.desc) { %>
-				<%- user.desc %>
-			<% } else { %>
-				<p>This user has not set up their biography.</p>
-			<% } %>
-		</div>
-		<div id="roleswrapper">
-		<% for (var role in projects) { %>
-			<div class="role">
-				<h2><%- role %></h2>
-				<div class="projects">
-				<% for (var project in projects[role]) { %>
-					<a href="/project/<%- projects[role][project].project_id %>"><%- projects[role][project].value %></a>
-				<% } %>
-				</div>
-			</div>
-		<% } %>
+			<form method="POST">
+				<textarea name="bio"><%- user.desc %></textarea>
+				<input type="submit" value="Save" />
+			</form>
 		</div>
 	</div>
 </div>

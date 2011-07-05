@@ -1,8 +1,7 @@
 var string_stuff = require('./string_handling');
 var crypt = require('bcrypt');
 var crypto = require('crypto');
-
-var db;
+var md = require('markdown').markdown;
 
 exports.mustBeLoggedIn = function(req, res, next) {
 	if (typeof req.authenticatedAs == 'undefined') {
@@ -14,19 +13,9 @@ exports.mustBeLoggedIn = function(req, res, next) {
 	next();
 };
 
-exports.setupApp = function(app, d) {
-	db = d;
-
-	var user_cache = {};
-	
+exports.setupApp = function(app) {
 	app.param('userId', function(req, res, next, id) {
-		if (user_cache['u' + id]) {
-			req.user = user_cache['u' + id];
-			next();
-			return;
-		}
-		
-		get_user_from_static_id(id, function(err, user) {
+		get_user_from_static_id(id, req.db, function(err, user) {
 			if (err) {
 				console.log('ERROR: ' + error);
 				next();
@@ -34,7 +23,6 @@ exports.setupApp = function(app, d) {
 			}
 			
 			req.user = user;
-			user_cache['u' + id] = req.user;
 			next();
 		});
 	});
@@ -42,7 +30,7 @@ exports.setupApp = function(app, d) {
 	app.use(function(req, res, next) {
 		if (typeof req.session !== 'undefined') {
 			if (req.session.authenticatedAs) {
-				get_user_from_static_id(req.session.authenticatedAs, function(err, user) {
+				get_user_from_static_id(req.session.authenticatedAs, req.db, function(err, user) {
 					if (err) {
 						res.flash('error', err);
 						res.redirect('back');
@@ -57,6 +45,56 @@ exports.setupApp = function(app, d) {
 		}
 		next();
 	});
+	
+	app.post('/user/:userId/edit', isLoggedInAs, function(req, res) {
+		req.db.query().
+			select(['current']).
+			from('obj_static').
+			where('id = ?', [req.user.id]).
+			execute(function(error, rows, cols) {
+				if (error) {
+					req.error = error;
+					console.log(error);
+					return;
+				}
+				
+				var base_object_id = rows[0].current;
+				
+				req.db.query().
+					insert('obj_text', ['value'], [req.body.bio]).
+					execute(function(error, result) {
+						if (error) {
+							console.log(error);
+							res.error = error;
+							return;
+						}
+						var text_id = result.id;
+						
+						req.db.query().
+							update('base_object').
+							set({'description': text_id}).
+							where('id = ?', [base_object_id]).
+							execute(function(err, result) {
+								res.redirect('back');
+								return;
+							});
+					});
+			});
+	});
+	
+	app.get('/user/:userId/edit', isLoggedInAs, function(req, res) {
+		res.render(
+			'user-edit',
+			{
+				title: 'Edit User',
+				user: req.user,
+				bodyclass: '',
+				bodyid: 'edit-user',
+				flash: req.flash(),
+				authUser: req.session.authenticatedAs
+			}
+		);
+	});
 
 	app.get('/user/:userId', function(req, res) {
 		if (!req.user) {
@@ -64,7 +102,7 @@ exports.setupApp = function(app, d) {
 			return;
 		}
 		
-		db.query().
+		req.db.query().
 			select(['project_user.project_id', 'obj_string.value', 'project_user.role_name']).
 			from('project_user').
 			join({table: 'obj_static', conditions: 'project_user.project_id = obj_static.id'}).
@@ -84,6 +122,9 @@ exports.setupApp = function(app, d) {
 						by_role[project.role_name] = [];
 					by_role[project.role_name][by_role[project.role_name].length] = project;
 				}
+				
+				req.user.desc = md.toHTML(req.user.desc);
+
 				res.render(
 					'user-info',
 					{
@@ -105,7 +146,7 @@ exports.setupApp = function(app, d) {
 	 **/
 	app.post('/login', function(req, res) {
 		// Find the user by their email address.
-		var q = db.query().
+		var q = req.db.query().
 			select('*').
 			from('users').
 			where('email = ?', [req.body.email]);
@@ -126,7 +167,7 @@ exports.setupApp = function(app, d) {
 				// They aren't TOO out of date then...
 				if (user.salt && user.salt !== '') {
 					if (user.passhash == crypto.createHash('md5').update(req.body.password + user.salt).digest('hex')) {
-						get_static_from_user(user.id, function(err, static_id) {
+						get_static_from_user(user.id, req.db, function(err, static_id) {
 							if (err) {
 								req.flash('error', err);
 								res.redirect('back');
@@ -142,7 +183,7 @@ exports.setupApp = function(app, d) {
 									return;
 								}
 								
-								db.query().
+								req.db.query().
 									update('users').
 									set({passhash: hash, salt: null}).
 									where('id = ?', [user.id]).
@@ -169,7 +210,7 @@ exports.setupApp = function(app, d) {
 				// v1. They probably haven't logged in in a while!
 				if (user.passhash.length == 32) {
 					if (user.passhash == crypto.createHash('md5').update(req.body.password + 'argtech').digest('hex')) {
-						get_static_from_user(user.id, function(err, static_id) {
+						get_static_from_user(user.id, req.db, function(err, static_id) {
 							if (err) {
 								req.flash('error', err);
 								res.redirect('back');
@@ -185,7 +226,7 @@ exports.setupApp = function(app, d) {
 									return;
 								}
 								
-								db.query().
+								req.db.query().
 									update('users').
 									set({passhash: hash, salt: null}).
 									where('id = ?', [user.id]).
@@ -222,7 +263,7 @@ exports.setupApp = function(app, d) {
 						
 						// We now know which User object this is. We need our static id though.
 						if (re) {
-							get_static_from_user(user.id, function(err, static_id) {
+							get_static_from_user(user.id, req.db, function(err, static_id) {
 								if (err) {
 									req.flash('error', err);
 									res.redirect('back');
@@ -264,7 +305,7 @@ exports.setupApp = function(app, d) {
 			res.redirect('/register/');
 			return;
 		}
-		check_duplicate_email(req.body.email, function(err) {
+		check_duplicate_email(req.body.email, req.db, function(err) {
 			if (err) {
 				req.flash('error', err);
 				res.redirect('back');
@@ -277,7 +318,7 @@ exports.setupApp = function(app, d) {
 					res.redirect('back');
 					return;
 				}
-				db.query().
+				req.db.query().
 					insert('users',
 						['passhash', 'email', 'power', 'theme'],
 						[hash, req.body.email, 2, 'public']
@@ -288,13 +329,13 @@ exports.setupApp = function(app, d) {
 							res.redirect('back');
 							return;
 						}
-						string_stuff.getset_string(req.body.displayname, db, function(err, id) {
+						string_stuff.getset_string(req.body.displayname, req.db, function(err, id) {
 							if (err) {
 								res.flash('error', err);
 								res.redirect('back');
 								return;
 							}
-							db.query().
+							req.db.query().
 								insert('base_object',
 									['title', 'created', 'buzz', 'buzz_date', 'specific_id'],
 									[id, new Date(), 0.00, new Date(), result.id]
@@ -304,7 +345,7 @@ exports.setupApp = function(app, d) {
 										res.redirect('back');
 										return;
 									}
-									db.query().
+									req.db.query().
 										insert('obj_static',
 											['type', 'current', 'views'],
 											[1, result.id, 0]
@@ -325,7 +366,7 @@ exports.setupApp = function(app, d) {
 	});
 };
 	
-function check_duplicate_email(email, cb) {
+function check_duplicate_email(email, db, cb) {
 	db.query().select(['id']).from('users').where('email = ?', [email]).execute(function(err, res) {
 		if (err) {
 			cb(err);
@@ -339,7 +380,7 @@ function check_duplicate_email(email, cb) {
 	});
 }
 
-function get_user_from_static_id(id, cb) {
+function get_user_from_static_id(id, db, cb) {
 	var q = db.query().
 		select(
 			[
@@ -362,16 +403,15 @@ function get_user_from_static_id(id, cb) {
 		join({table: 'users', conditions: 'base_object.specific_id = users.id'}).
 		where('obj_static.type = 1 AND obj_static.id = ?', [id]);
 	q.execute(function(error, rows, cols) {
-			if (error) {
-				cb(error);
-			} else {
-				cb(null, rows[0]);
-			}
-		});
+		if (error) {
+			cb(error);
+		} else {
+			cb(null, rows[0]);
+		}
+	});
 }
 
 exports.userFromStaticId = get_user_from_static_id;
-
 
 function gen_new_pass(password, cb) {
 	crypt.gen_salt(10, function(err, salt) {
@@ -390,7 +430,7 @@ function gen_new_pass(password, cb) {
 	});
 }
 
-function get_static_from_user(user_id, cb) {
+function get_static_from_user(user_id, db, cb) {
 	db.query().
 		select(['obj_static.id']).
 		from('obj_static').
@@ -403,7 +443,28 @@ function get_static_from_user(user_id, cb) {
 					return;
 				}
 				
+				if (result.length == 0) {
+					cb('Cannot find user ' + user_id + '.');
+					return;
+				}
+				
 				cb(null, result[0].id);
 			}
 		);
+}
+
+function isLoggedInAs(req, res, next) {
+	if (!req.user) {
+		req.error = 'No such user';
+	}
+	
+	if (!req.authUser) {
+		req.error = 'Not logged in';
+	}
+	
+	if (req.authUser != req.user) {
+		req.error = 'Permission denied.';
+	}
+	
+	next();
 }

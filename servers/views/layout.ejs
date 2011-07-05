@@ -17,12 +17,10 @@
 	        <input type="submit" value="Login" />
 	    </form>
 	    <% } else { %>
-	    	<div id="loginbar">
-	    		<div id="innerlogin">
-		    		<a href="#">Profile</a>
-		    		<a href="#">Logout</a>
-		    	</div>
-	    	</div>
+			<div id="headerbar">
+				<a href="/user/<%- authUser %>">Profile</a>
+				<a href="#">Logout</a>
+			</div>
 	    <% } %>
         <div id="contentouter">
         	<% if (typeof watches !== 'undefined') {

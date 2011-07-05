@@ -2,8 +2,6 @@ var fs = require('fs');
 var user_stuff = require('./user-stuff');
 var md = require('markdown').markdown;
 
-var db;
-
 var parallelTask = function(reqq, ress) {
 	var tasks = [];
 	var id = 0;
@@ -74,11 +72,9 @@ var serialTask = function(reqq, ress) {
 	};
 };
 
-exports.setupApp = function(app, d) {
-	db = d;
-	
+exports.setupApp = function(app) {
 	app.param('projectId', function(req, res, next, id) {
-		var q = db.query().
+		var q = req.db.query().
 			select(
 				[
 					'obj_static.id',
@@ -97,13 +93,13 @@ exports.setupApp = function(app, d) {
 			join({table: 'base_object', conditions: 'base_object.id = obj_static.current'}).
 			where('obj_static.type = 2 AND obj_static.id = ?', [id]);
 		q.execute(function(error, rows, cols) {
-				if (error) {
-					console.log('ERROR: ' + error);
-				} else {
-					req.project = rows[0];
-				}
-				next();
-			});
+			if (error) {
+				console.log('ERROR: ' + error);
+			} else {
+				req.project = rows[0];
+			}
+			next();
+		});
 	});
 
 	app.get('/project/new', user_stuff.mustBeLoggedIn, function(req, res) {
@@ -143,11 +139,11 @@ exports.setupApp = function(app, d) {
 			res.send(404);
 			return;
 		}
-		
-		var tasks = new parallelTask(req, res);
+
+		var tasks = new serialTask(req, res);
 		tasks.addTask(
 			function(req, res, next) {
-				user_stuff.userFromStaticId(req.project.creator, function(err, owner) {
+				user_stuff.userFromStaticId(req.project.creator, req.db, function(err, owner) {
 					req.project.creator = owner;
 					next();
 				});
@@ -155,7 +151,7 @@ exports.setupApp = function(app, d) {
 		);
 		tasks.addTask(
 			function(req, res, next) {
-				get_characters_for_project(req.project.id, function(err, characters) {
+				get_characters_for_project(req.project.id, req, function(err, characters) {
 					req.project.characters = characters;
 					next();
 				});
@@ -163,7 +159,7 @@ exports.setupApp = function(app, d) {
 		);
 		tasks.addTask(
 			function(req, res, next) {
-				get_todos_for_project(req.project.id, function(err, todos) {
+				get_todos_for_project(req.project.id, req, function(err, todos) {
 					req.project.todos = todos;
 					next();
 				});
@@ -171,7 +167,7 @@ exports.setupApp = function(app, d) {
 		);
 		tasks.addTask(
 			function(req, res, next) {
-				get_conversations_for_project(req.project.id, function(err, conversations) {
+				get_conversations_for_project(req.project.id, req, function(err, conversations) {
 					req.project.conversations = conversations;
 					next();
 				});
@@ -179,7 +175,7 @@ exports.setupApp = function(app, d) {
 		);
 		tasks.addTask(
 			function(req, res, next) {
-				get_roster_for_project(req.project.id, function(err, roster) {
+				get_roster_for_project(req.project.id, req, function(err, roster) {
 					req.project.roster = roster;
 					next();
 				});
@@ -208,7 +204,7 @@ exports.setupApp = function(app, d) {
 	});
 };
 
-function get_sub_of_type_for_project(project_id, type_id, options, cb) {
+function get_sub_of_type_for_project(project_id, type_id, options, req, cb) {
 	if (!cb) {
 		cb = options;
 	}
@@ -218,6 +214,7 @@ function get_sub_of_type_for_project(project_id, type_id, options, cb) {
 		return;
 	}
 	
+	db = req.db;
 	var select = 'obj_string.value AS name, obj_static.id';
 	
 	if (options && typeof options == 'object' && options['extra_select']) {
@@ -248,14 +245,13 @@ function get_sub_of_type_for_project(project_id, type_id, options, cb) {
 				cb(err);
 				return;
 			}
-			
 			cb(null, res);
 		}
 	);
 }
 
-function get_roster_for_project(project_id, cb) {
-	db.query().
+function get_roster_for_project(project_id, req, cb) {
+	req.db.query().
 		select('obj_static.id, project_user.role_name, project_user.power, obj_string.value as title').
 		from('project_user').
 		join({table: 'obj_static', conditions: 'obj_static.id = project_user.user_id'}).
@@ -276,11 +272,11 @@ function get_roster_for_project(project_id, cb) {
 		);
 }
 
-function get_characters_for_project(project_id, cb) {
-	get_sub_of_type_for_project(project_id, 5, cb);
+function get_characters_for_project(project_id, req, cb) {
+	get_sub_of_type_for_project(project_id, 5, {}, req, cb);
 }
 
-function get_todos_for_project(project_id, cb) {
+function get_todos_for_project(project_id, req, cb) {
 	get_sub_of_type_for_project(
 		project_id,
 		4,
@@ -293,10 +289,11 @@ function get_todos_for_project(project_id, cb) {
 			'extra_select': 'todo.*',
 			'extra_where': 'todo.status <> 1'
 		},
+		req,
 		cb
 	);
 }
 
-function get_conversations_for_project(project_id, cb) {
-	get_sub_of_type_for_project(project_id, 6, cb);
+function get_conversations_for_project(project_id, req, cb) {
+	get_sub_of_type_for_project(project_id, 6, {}, req, cb);
 }

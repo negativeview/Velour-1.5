@@ -6,24 +6,41 @@ var minj = require('minj');
 var less = require('less');
 var user_stuff = require('./user-stuff');
 var project_stuff = require('./project-stuff');
-
+var generic_pool = require('generic-pool');
 var mysql = require('db-mysql');
-var db = new mysql.Database(
-	{
-		hostname: 'localhost',
-		user:     'root',
-		password: '',
-		database: 'argtech'
-	}
-);
-db.on('error', function(error) {
-	console.log('ERROR: ' + error);
-});
-db.on('ready', function(server) {
-	console.log('Connected to ' + server.hostname + ' (' + server.versin + ')');
+
+var db;
+
+new mysql.Database({
+	hostname: 'localhost',
+	user: 'root',
+	password: '',
+	database: 'argtech'
+}).connect(function(err, server) {
+	db = this;
 	setupExpress();
 });
-db.connect();
+
+
+var db_pool = generic_pool.Pool({
+	name: 'mysql',
+	create: function(callback) {
+		new mysql.Database({
+			hostname: 'localhost',
+			user: 'root',
+			password: '',
+			database: 'argtech'
+		}).connect(function(err, server) {
+			callback(err, this);
+		})
+	},
+	destroy: function(db) {
+		db.disconnect();
+	},
+	max: 100,
+	idleTimeoutMillis: 30000,
+	log: false
+});
 
 var app;
 function setupExpress() {
@@ -33,11 +50,15 @@ function setupExpress() {
 	app.use(express.bodyParser());
 	app.use(express.cookieParser());
 	app.use(express.session({ secret: "foobar" }));
-	//app.use(express.logger());
 	app.use(timeout());
 	
-	user_stuff.setupApp(app, db);
-	project_stuff.setupApp(app, db);
+	app.use(function(req, res, next) {
+		req.db = db;
+		next();
+	});
+	
+	user_stuff.setupApp(app);
+	project_stuff.setupApp(app);
 
 	// Use ejs rendering for our templates.
 	app.set('view engine', 'ejs');
