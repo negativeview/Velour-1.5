@@ -10,6 +10,40 @@ $(document).ready(
 			}
 		);
 		
+		$('.optional').each(
+			function(idx, el) {
+				var el = $(el);
+				el.children().css('display', 'none');
+				el.width(
+					(el.width() - 16) + 'px'
+				);
+				el.css('float', 'right');
+				el.css('marginBottom', '20px');
+				
+				var a = $('<a />');
+				a.html('&gt;');
+				a.css('display', 'block');
+				a.css('width', '16px');
+				a.css('float', 'left');
+				a.css('position', 'relative');
+				a.css('top', '-9px');
+				a.css('textAlign', 'center');
+				a.css('cursor', 'pointer');
+				a.click(function() {
+					el.children().toggle();
+					if (el.children().first().css('display') == 'none') {
+						a.html('&gt;');
+					} else {
+						a.html('v');
+					}
+				});
+				
+				a.insertBefore(el);
+				
+//				el.css('display', 'none');
+			}
+		);
+		
 		/*
 		$('.projects').each(
 			function(idx, el) {
@@ -34,7 +68,6 @@ $(document).ready(
 		var num_elements = 10;
 		
 		var one_el_height = parseInt($('.twocol a').css('height')) + (parseInt($('.twocol a').css('paddingTop')) * 2);
-		console.log(one_el_height);
 		
 		// Hide overflow links. This will show exactly four links in Chrome at least.
 		// TODO: Check the other browsers.
