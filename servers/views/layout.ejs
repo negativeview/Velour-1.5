@@ -22,33 +22,36 @@
 				<a href="#">Logout</a>
 			</div>
 	    <% } %>
-        <div id="contentouter">
-			<div id="quip"><%- quip %></div>
-        	<% if (typeof watches !== 'undefined') {
-        		for (var i in watches) {
-        			%>
-        				<a href="<%- watches[i].url %>"><%- watches[i].body %></a>
-        			<%
-        		}
-        	} %>
-            <div id="content">
-                <h1 id="maintitle"><%- title %></h1>
-                <% if (typeof flash != 'undefined') { %>
-                	<% if (flash.error) { %>
-                		<div class="error"><%- flash.error %></div>
-                	<% } %>
-                	<% if (flash.info) { %>
-                		<div class="info"><%- flash.info %></div>
-                	<% } %>
-                <% } %>
-                <%- body %>
-                <div id="footer">
-                    <div id="copyright">
-                        Copyright &copy; Daniel Grace, 2011
-                    </div>
-                    <a href="/credits" id="creditsfooter">Credits</a>
-                </div>
-            </div>
+	    <div id="outerouter">
+        	<a href="/" id="homelink"></a>
+			<div id="contentouter">
+				<div id="quip"><%- quip %></div>
+				<% if (typeof watches !== 'undefined') {
+					for (var i in watches) {
+						%>
+							<a href="<%- watches[i].url %>"><%- watches[i].body %></a>
+						<%
+					}
+				} %>
+				<div id="content">
+					<h1 id="maintitle"><%- title %></h1>
+					<% if (typeof flash != 'undefined') { %>
+						<% if (flash.error) { %>
+							<div class="error"><%- flash.error %></div>
+						<% } %>
+						<% if (flash.info) { %>
+							<div class="info"><%- flash.info %></div>
+						<% } %>
+					<% } %>
+					<%- body %>
+					<div id="footer">
+						<div id="copyright">
+							Copyright &copy; Daniel Grace, 2011
+						</div>
+						<a href="/credits" id="creditsfooter">Credits</a>
+					</div>
+				</div>
+			</div>
         </div>
     </body> 
 </html>
