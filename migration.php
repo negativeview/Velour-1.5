@@ -79,6 +79,8 @@ while ($row = mysql_fetch_assoc($res)) {
 	
 	db_do("INSERT INTO obj_static(type, current, created) VALUES(1, $ver_id, '" . $row['signup'] . "')");
 	$user_old_to_new['a' . $row['id']] = mysql_insert_id();
+	
+	db_do("UPDATE base_object SET parent = '" . $user_old_to_new['a' . $row['id']] . "' WHERE id = '" . $ver_id . "'");
 }
 
 /* Remind ourselves that the display_name has been taken care of. */

@@ -78,8 +78,34 @@ var catch_phrases = [
 ];
 catch_phrases[catch_phrases.length] = 'There are <span class="hilight">' + catch_phrases.length + '</span> random phrases.';
 
+var daily_phrases = {
+	'0201': 'Happy Velour launch day!',
+	'0204': 'Happy Lockjaw day!',
+	'0225': 'Happy birthday, Ancalime!',
+	'0229': 'Happy birthday, Daniel!',
+	'0427': 'Happy birthday, Mike Monello!',
+	'0609': 'Happy birthday, Haley Moore!',
+	'0806': 'Happy birthday, Percy!',
+	'0901': 'Happy birthday, Julia!',
+	'1001': 'Happy Metacortechs Day!',
+	'1105': 'Remember, remember the fifth of November.',
+	'1107': 'Happy birthday, Steve Diddle!',
+	'1108': 'Happy birthday, Celina!',
+	'1114': 'Happy birthday, Lairosiel!',
+	'1116': 'Happy birthday, Jane!',
+	'1120': 'Hey, you! Remind Daniel that it\'s his anniversary.',
+};
+
 exports.getQuip = function() {
+	var d = new Date();
+	
+	var key = (d.getMonth() < 10 ? '0' + d.getMonth() : d.getMonth()) +
+	          (d.getDate() < 10 ? '0' + d.getDate() : d.getDate());
+	
+	if (daily_phrases[key]) {
+		return daily_phrases[key];
+	}
+	
 	var rnd = Math.floor(Math.random() * catch_phrases.length);
-	console.log(rnd);
 	return catch_phrases[rnd];
 }

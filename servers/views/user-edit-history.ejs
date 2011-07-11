@@ -1,7 +1,6 @@
 <div id="actionbar">
 	<% if (authUser == user.id) { %>
-		<a href="/user/<%- user.id %>/edit">Edit</a>
-	    <a href="/user/<%- user.id %>/editHistory">Edit History</a>
+		<a href="/user/<%- authUser %>/edit">Edit</a>
 	<% } else { %>
 		<a href="#">Watch</a>
 	    <a href="#">Notes</a>
@@ -19,27 +18,24 @@
         <div class="value"><%- user.created.toDateString() %></div>
         <div class="key">Buzz:</div>
         <div class="value"><%- user.buzz.toFixed(2) %></div>
-		<div id="roleswrapper">
-			<div class="projects">
-				<h2>Projects</h2>
-				<% for (var project in projects) { %>
-					<div class="project">
-						<img src="/images/anonymous.gif" width="45" height="45" />
-						<a href="/project/<%- projects[project].project_id %>"><%- projects[project].value %></a>
-						<div class="rolename"><%- projects[project].role_name %></div>
-					</div>
-				<% } %>
-			</div>
-		</div>
     </div>
     <div class="right">
-		<div id="biography">
-			<h2>Biography</h2>
-			<% if (user.desc) { %>
-				<%- user.desc %>
-			<% } else { %>
-				<p>This user has not set up their biography.</p>
+    	<h2>Edit History</h2>
+    	<table cellspacing="0">
+    		<tr>
+    			<th>ID</th>
+    			<th>When</th>
+    			<th>Who</th>
+    			<th>What</th>
+    		</tr>
+			<% for (var i in history) { %>
+				<tr>
+					<td><%- history[i].id %></td>
+					<td><%- history[i].created.toDateString() %></td>
+					<td><% if (history[i].creator) { %><%- history[i].creator %><% } else { %>System<% } %></td>
+					<td><%- history[i].differences %></td>
+				</tr>
 			<% } %>
-		</div>
+		</table>
 	</div>
 </div>

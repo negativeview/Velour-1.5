@@ -21,18 +21,21 @@ input[type="submit"] {
 body.watch #content {
     padding-right: 20px;
 }
+#outerouter {
+	width: 750px;
+	margin-left: auto;
+	margin-right: auto;
+	margin-top: 60px;
+    margin-bottom: 60px;
+    position: relative;
+}
 #contentouter {
     padding: 5px;
-    width: 750px;
-    margin-left: auto;
-    margin-right: auto;
-    margin-top: 60px;
-    margin-bottom: 60px;
     border-radius: 5px;
     background-image: url('/images/patterns/black_denim.png');
     box-shadow: 2px 2px 5px #000;
-    position: relative;
     z-index: 2;
+    position: relative;
 }
 body#register #contentouter {
     width: 250px;
@@ -363,12 +366,33 @@ label {
 }
 #quip {
 	position: absolute;
-	top: 300px;
+	bottom: 300px;
 	right: -310px;
 	color: #777;
 	font-size: 80%;
 	width: 600px;
+	text-align: right;
 	
 	-webkit-transform: rotate(90deg);
 	-moz-transform: rotate(90deg);
+}
+#quip:hover {
+	color: #8AF;
+	font-weight: bold;
+	font-size: 90%;
+}
+#homelink {
+	width: 61px;
+	height: 54px;
+	background-image: url('/images/robot.png');
+	display: block;
+	position: absolute;
+	top: -20px;
+	left: 10px;
+	z-index: 1;
+}
+#edit-user-history .right table td {
+	padding: 5px;
+	border: 0px solid #CCC;
+	border-bottom-width: 1px;
 }

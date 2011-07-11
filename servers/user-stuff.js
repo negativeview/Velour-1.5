@@ -53,6 +53,29 @@ exports.setupApp = function(app) {
 		res.redirect('back');
 	});
 	
+	app.get('/user/:userId/editHistory', isLoggedInAs, function(req, res) {
+		entity_stuff.getHistory(req.db, req.user.id, function(error, re) {
+			if (error) {
+				console.log(error);
+				return;
+			}
+			
+			res.render(
+				'user-edit-history',
+				{
+					history: re,
+					quip: quips.getQuip(),
+					title: 'Edit History',
+					user: req.user,
+					bodyclass: '',
+					bodyid: 'edit-user-history',
+					flash: req.flash(),
+					authUser: req.session.authenticatedAs
+				}
+			);
+		});
+	});
+	
 	app.post('/user/:userId/edit', isLoggedInAs, function(req, res) {
 		entity_stuff.updateDescription(req.db, req.user.id, req.body.bio, function(error, re) {
 			if (error) {
