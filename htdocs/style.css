@@ -4,6 +4,8 @@ body, html {
     margin: 0px;
     padding: 0px;
     font-weight: 400;
+}
+body {
     background-image: url('/images/patterns/random_grey_variations.png');
 }
 input[type="submit"] {
@@ -157,14 +159,25 @@ h2 {
 .right {
 	margin-left: 180px;
 }
-.right .role {
-	width: 176px;
-	float: left;
+#roleswrapper .project {
+	margin-top: 5px;
+	position: relative;
 }
-.right .role a {
+.project .rolename {
+	position: absolute;
+	top: 20px;
+	left: 50px;
+	font-size: 80%;
+}
+#roleswrapper .project a {
 	display: block;
 	color: black;
 	text-decoration: none;
+	font-size: 120%;
+	position: absolute;
+	top: 0px;
+	left: 50px;
+	padding: 0px;
 }
 #biography p {
 	margin-top: 20px;
@@ -248,10 +261,10 @@ label {
 	margin-top: 10px;
 }
 #task-new-form input[type="text"], #project-new-form input[type="text"] {
-	width: 300px;
+	width: 354px;
 }
 #task-new-form textarea, #project-new-form textarea {
-	width: 300px;
+	width: 354px;
 	height: 300px;
 	display: block;
 }
@@ -347,4 +360,15 @@ label {
 #biography textarea {
 	width: 500px;
 	height: 250px;
+}
+#quip {
+	position: absolute;
+	top: 300px;
+	right: -310px;
+	color: #777;
+	font-size: 80%;
+	width: 600px;
+	
+	-webkit-transform: rotate(90deg);
+	-moz-transform: rotate(90deg);
 }

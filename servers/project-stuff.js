@@ -1,6 +1,7 @@
 var fs = require('fs');
 var user_stuff = require('./user-stuff');
 var md = require('markdown').markdown;
+var quips = require('./quip-stuff');
 
 var parallelTask = function(reqq, ress) {
 	var tasks = [];
@@ -106,6 +107,7 @@ exports.setupApp = function(app) {
 		res.render(
 			'project-new',
 			{
+				quip: quips.getQuip(),
 				title: 'New Project',
 				bodyclass: '',
 				bodyid: 'project-new',
@@ -188,6 +190,7 @@ exports.setupApp = function(app) {
 			res.render(
 				'project-info',
 				{
+					quip: quips.getQuip(),
 					title: req.project.title,
 					project: req.project,
 					bodyclass: '',

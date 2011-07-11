@@ -2,9 +2,11 @@ var string_stuff = require('./string_handling');
 var crypt = require('bcrypt');
 var crypto = require('crypto');
 var md = require('markdown').markdown;
+var entity_stuff = require('./entity-stuff');
+var quips = require('./quip-stuff');
 
 exports.mustBeLoggedIn = function(req, res, next) {
-	if (typeof req.authenticatedAs == 'undefined') {
+	if (typeof req.session.authenticatedAs == 'undefined') {
 		req.flash('error', 'You must be logged in to view that page.');
 		res.redirect('back');
 		return;
@@ -46,46 +48,27 @@ exports.setupApp = function(app) {
 		next();
 	});
 	
+	app.get('/logout', function(req, res) {
+		req.session.destroy();
+		res.redirect('back');
+	});
+	
 	app.post('/user/:userId/edit', isLoggedInAs, function(req, res) {
-		req.db.query().
-			select(['current']).
-			from('obj_static').
-			where('id = ?', [req.user.id]).
-			execute(function(error, rows, cols) {
-				if (error) {
-					req.error = error;
-					console.log(error);
-					return;
-				}
-				
-				var base_object_id = rows[0].current;
-				
-				req.db.query().
-					insert('obj_text', ['value'], [req.body.bio]).
-					execute(function(error, result) {
-						if (error) {
-							console.log(error);
-							res.error = error;
-							return;
-						}
-						var text_id = result.id;
-						
-						req.db.query().
-							update('base_object').
-							set({'description': text_id}).
-							where('id = ?', [base_object_id]).
-							execute(function(err, result) {
-								res.redirect('back');
-								return;
-							});
-					});
-			});
+		entity_stuff.updateDescription(req.db, req.user.id, req.body.bio, function(error, re) {
+			if (error) {
+				req.error = error;
+				return;
+			}
+			
+			res.redirect('/user/' + req.user.id);
+		});
 	});
 	
 	app.get('/user/:userId/edit', isLoggedInAs, function(req, res) {
 		res.render(
 			'user-edit',
 			{
+				quip: quips.getQuip(),
 				title: 'Edit User',
 				user: req.user,
 				bodyclass: '',
@@ -96,48 +79,27 @@ exports.setupApp = function(app) {
 		);
 	});
 
-	app.get('/user/:userId', function(req, res) {
+	app.get('/user/:userId', getTopProjects, function(req, res) {
 		if (!req.user) {
 			res.send(404);
 			return;
 		}
 		
-		req.db.query().
-			select(['project_user.project_id', 'obj_string.value', 'project_user.role_name']).
-			from('project_user').
-			join({table: 'obj_static', conditions: 'project_user.project_id = obj_static.id'}).
-			join({table: 'base_object', conditions: 'base_object.id = obj_static.current'}).
-			join({table: 'obj_string', conditions: 'obj_string.id = base_object.title'}).
-			where('user_id = ?', [req.user.id]).
-			execute(function(err, result) {
-				if (err) {
-					req.flash('error', err);
-				}
-				
-				var by_role = {};
-				for (var project in result) {
-					project = result[project];
-					
-					if (!by_role[project.role_name])
-						by_role[project.role_name] = [];
-					by_role[project.role_name][by_role[project.role_name].length] = project;
-				}
-				
-				req.user.desc = md.toHTML(req.user.desc);
+		req.user.desc = md.toHTML(req.user.desc);
 
-				res.render(
-					'user-info',
-					{
-						title: req.user.title,
-						user: req.user,
-						bodyclass: '',
-						projects: by_role,
-						bodyid: 'user-info',
-						flash: req.flash(),
-						authUser: req.session.authenticatedAs,
-					}
-				);				
-			});
+		res.render(
+			'user-info',
+			{
+				quip: quips.getQuip(),
+				title: req.user.title,
+				user: req.user,
+				bodyclass: '',
+				projects: req.projects,
+				bodyid: 'user-info',
+				flash: req.flash(),
+				authUser: req.session.authenticatedAs,
+			}
+		);				
 	});
 
 	/**
@@ -290,6 +252,7 @@ exports.setupApp = function(app) {
 		res.render(
 			'register',
 			{
+				quip: quips.getQuip(),
 				title: 'Register',
 				bodyclass: '',
 				bodyid: 'register',
@@ -451,6 +414,25 @@ function get_static_from_user(user_id, db, cb) {
 				cb(null, result[0].id);
 			}
 		);
+}
+
+function getTopProjects(req, res, next) {
+	req.db.query().
+		select(['base_object.buzz', 'project_user.project_id', 'obj_string.value', 'project_user.role_name']).
+		from('project_user').
+		join({table: 'obj_static', conditions: 'project_user.project_id = obj_static.id'}).
+		join({table: 'base_object', conditions: 'base_object.id = obj_static.current'}).
+		join({table: 'obj_string', conditions: 'obj_string.id = base_object.title'}).
+		where('user_id = ?', [req.user.id]).
+		order({'base_object.buzz': false}).
+		execute(function(err, result) {
+			if (err) {
+				console.log(err);
+				req.error = err;
+			}
+			req.projects = result;
+			next();
+		});
 }
 
 function isLoggedInAs(req, res, next) {

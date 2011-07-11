@@ -18,6 +18,18 @@
         <div class="value"><%- user.created.toDateString() %></div>
         <div class="key">Buzz:</div>
         <div class="value"><%- user.buzz.toFixed(2) %></div>
+		<div id="roleswrapper">
+			<div class="projects">
+				<h2>Projects</h2>
+				<% for (var project in projects) { %>
+					<div class="project">
+						<img src="/images/anonymous.gif" width="45" height="45" />
+						<a href="/project/<%- projects[project].project_id %>"><%- projects[project].value %></a>
+						<div class="rolename"><%- projects[project].role_name %></div>
+					</div>
+				<% } %>
+			</div>
+		</div>
     </div>
     <div class="right">
 		<div id="biography">
@@ -27,18 +39,6 @@
 			<% } else { %>
 				<p>This user has not set up their biography.</p>
 			<% } %>
-		</div>
-		<div id="roleswrapper">
-		<% for (var role in projects) { %>
-			<div class="role">
-				<h2><%- role %></h2>
-				<div class="projects">
-				<% for (var project in projects[role]) { %>
-					<a href="/project/<%- projects[role][project].project_id %>"><%- projects[role][project].value %></a>
-				<% } %>
-				</div>
-			</div>
-		<% } %>
 		</div>
 	</div>
 </div>

@@ -8,6 +8,7 @@ var user_stuff = require('./user-stuff');
 var project_stuff = require('./project-stuff');
 var generic_pool = require('generic-pool');
 var mysql = require('db-mysql');
+var quips = require('./quip-stuff');
 
 var db;
 
@@ -68,6 +69,7 @@ function setupExpress() {
 		res.render(
 			'task-new',
 			{
+				quip: quips.getQuip(),
 				title: 'New Task',
 				bodyclass: '',
 				bodyid: 'task-new',
@@ -81,6 +83,7 @@ function setupExpress() {
 		res.render(
 			'dashboard',
 			{
+				quip: quips.getQuip(),
 				title: 'Dashboard',
 				bodyclass: '',
 				bodyid: 'dashboard',
@@ -94,6 +97,7 @@ function setupExpress() {
 		res.render(
 			'credits',
 			{
+				quip: quips.getQuip(),
 				title: 'Credits',
 				bodyclass: '',
 				bodyid: 'credits',
