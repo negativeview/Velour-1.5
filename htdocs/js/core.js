@@ -122,5 +122,62 @@ $(document).ready(
 				$(this).parent().css('position', 'relative').css('height', height + 'px');
 			}
 		});
+		
+		$('#avatar').bind('dragenter', killEvent);
+		$('#avatar').bind('dragexit', killEvent);
+		$('#avatar').bind('dragover', killEvent);
+
+		$('#avatar').bind('drop', function(event) {
+			event.stopPropagation();
+			event.preventDefault();
+			
+			var files = event.originalEvent.dataTransfer.files;
+			var count = files.length;
+			
+			if (count) {
+				var file = files[0];
+				var fileReader = new FileReader();
+				
+				fileReader.onloadend = function(event) {
+					var img = $('#avatar');
+					
+					var img_url = img.attr('src');
+					img_url = img_url.replace(/\?.*/, '');
+					
+					$.post(
+						img_url,
+						{ data: event.target.result },
+						function(data, textStatus, jqXHR) {
+							img.attr('src', img_url + '?' + (new Date()));
+						}
+					);
+				};
+				fileReader.readAsDataURL(file);
+			}
+		});
+		$('.watchbtn').click(function() {
+			$('body').addClass('watch');
+
+			var watchBar = $('#watchbar');
+			if (!watchBar.length) {
+				watchBar = $('<div />');
+				watchBar.attr('id', 'watchbar');
+				watchBar.insertAfter($('#quip'));
+			}
+			
+			var a = $('<a />');
+			a.attr('href', '/user/1');
+			
+			var img = $('<img />');
+			img.attr('src', '/user/1/thumb.png');
+			img.appendTo(a);
+			
+			a.appendTo(watchBar);
+		});
 	}
 );
+
+function killEvent(evt) {
+	evt.stopPropagation();
+	evt.preventDefault();
+}

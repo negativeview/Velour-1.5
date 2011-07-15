@@ -19,20 +19,24 @@
 	    <% } else { %>
 			<div id="headerbar">
 				<a href="/user/<%- authUser %>">Profile</a>
-				<a href="#">Logout</a>
+				<a href="/logout/">Logout</a>
 			</div>
 	    <% } %>
 	    <div id="outerouter">
         	<a href="/" id="homelink"></a>
 			<div id="contentouter">
 				<div id="quip"><%- quip %></div>
-				<% if (typeof watches !== 'undefined') {
-					for (var i in watches) {
-						%>
-							<a href="<%- watches[i].url %>"><%- watches[i].body %></a>
+				<% if (typeof watches !== 'undefined') { %>
+					<div id="watchbar">
 						<%
-					}
-				} %>
+							for (var i in watches) {
+								%>
+									<a href="<%- watches[i].url %>"><img src="<%- watches[i].image %>" /></a>
+								<%
+							}
+						%>
+					</div>
+				<% } %>
 				<div id="content">
 					<h1 id="maintitle"><%- title %></h1>
 					<% if (typeof flash != 'undefined') { %>

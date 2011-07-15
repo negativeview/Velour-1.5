@@ -3,7 +3,7 @@
 		<a href="/user/<%- user.id %>/edit">Edit</a>
 	    <a href="/user/<%- user.id %>/editHistory">Edit History</a>
 	<% } else { %>
-		<a href="#">Watch</a>
+		<a href="#" class="watchbtn">Watch</a>
 	    <a href="#">Notes</a>
 	    <a href="#">Message</a>
 	    <a href="#">Recruit</a>
@@ -11,7 +11,7 @@
     <a href="#">Game History</a>
 </div>
 <div id="userbio"<% if (user.power == 1) { %> class="admin"<% } %>>
-    <img src="/images/anonymous.gif" id="avatar" />
+    <img src="/user/<%- user.id %>/avatar.png" id="avatar" />
     <div id="keyvalue">
         <div class="key">Power:</div>
         <div class="value"><% if (user.power == 1) { %>Admin<% } else if (user.power == 2) {%>Normal<% } %></div>
@@ -24,7 +24,7 @@
 				<h2>Projects</h2>
 				<% for (var project in projects) { %>
 					<div class="project">
-						<img src="/images/anonymous.gif" width="45" height="45" />
+						<img src="/project/<%- projects[project].project_id %>/thumb.png" />
 						<a href="/project/<%- projects[project].project_id %>"><%- projects[project].value %></a>
 						<div class="rolename"><%- projects[project].role_name %></div>
 					</div>

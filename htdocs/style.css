@@ -17,9 +17,11 @@ input[type="submit"] {
     padding-right: 20px;
     padding-bottom: 25px;
     overflow: auto;
+    width: 700px;
 }
 body.watch #content {
-    padding-right: 20px;
+    padding-right: 65px;
+    width: 720px;
 }
 #outerouter {
 	width: 750px;
@@ -29,6 +31,13 @@ body.watch #content {
     margin-bottom: 60px;
     position: relative;
 }
+body.left #outerouter {
+	width: 750px;
+}
+body.watch #outerouter {
+	width: 815px;
+}
+
 #contentouter {
     padding: 5px;
     border-radius: 5px;
@@ -37,10 +46,13 @@ body.watch #content {
     z-index: 2;
     position: relative;
 }
-body#register #contentouter {
+body#register #outerouter {
     width: 250px;
     margin-left: auto;
     margin-right: auto;
+}
+body#register #content {
+	width: 200px;
 }
 #watchbar {
     position: absolute;
@@ -62,9 +74,13 @@ body#register #contentouter {
     text-align: center;
     text-decoration: none;
 }
+#watchbar a img {
+	position: relative;
+	top: 2px;
+}
 #watchbar a:hover {
     background-color: #FFF;
-    box-shadow: 0px 0px 5px #FFF;
+    box-shadow: 0px 0px 5px #8F8;
 }
 #watchbar a.active {
     box-shadow: 0px 0px 5px #000;
@@ -153,18 +169,13 @@ h2 {
     margin-top: 0px;
     float: left;
 }
-#userbio #avatar {
-	box-shadow: 0px 0px 10px #000;
-}
-#userbio.admin #avatar {
-    box-shadow: 0px 0px 10px #F00;
-}
 .right {
 	margin-left: 180px;
 }
 #roleswrapper .project {
 	margin-top: 5px;
 	position: relative;
+	height: 48px;
 }
 .project .rolename {
 	position: absolute;
@@ -285,8 +296,11 @@ label {
 	color: black;
 	padding: 10px;
 }
-#task-new #contentouter, #project-new #contentouter {
+#task-new #outerouter, #project-new #outerouter {
 	width: 400px;
+}
+#task-new #content, #project-new #content {
+	width: 350px;
 }
 #rolesection .option {
 	position: relative;
@@ -310,7 +324,7 @@ label {
 	margin-top: 20px;
 }
 .twocol div {
-	width: 254px;
+	width: 250px;
 	float: left;
 	margin-right: 20px;
 }

@@ -2,6 +2,7 @@ var fs = require('fs');
 var user_stuff = require('./user-stuff');
 var md = require('markdown').markdown;
 var quips = require('./quip-stuff');
+var images = require('./image-stuff');
 
 var parallelTask = function(reqq, ress) {
 	var tasks = [];
@@ -116,11 +117,42 @@ exports.setupApp = function(app) {
 			}
 		);
 	});
-		
+
+	app.post('/project/:projectId/icon.png', function(req, res) {
+		fs.open('./project_icons/' + req.project.id + '.png', 'w', function(error, fd) {
+			if (error) {
+				console.log(error);
+				res.end(error);
+				return;
+			}
+			
+			var data = req.body.data.replace(/data:[^;]+;base64,/, '');
+			
+			var buff = new Buffer(data, 'base64');
+			fs.write(fd, buff, 0, buff.length, 0, function(error, r) {
+				if (error) {
+					console.log(error);
+					res.end(error);
+					return;
+				}
+				
+				images.makeImageOfSize('./project_icons/' + req.project.id, 150, function(err, metadata) {
+					if (err) throw err;
+					
+					res.send('ok');
+					
+					images.makeImageOfSize('./project_icons/' + req.project.id, 45, function(err, metadata) {
+						if (err) throw err;
+					});
+				});
+			});
+		});
+	});
+
 	// Get the icon for this project.	
-	app.get('/project/:projectId/icon.png', function(req, res) {
+	app.get('/project/:projectId/thumb.png', function(req, res) {
 		// Is there an image file in the special place?
-		fs.stat('./project_icons/' + req.project.id + '.png', function(err, stats) {
+		fs.stat('./project_icons/' + req.project.id + '-45.png', function(err, stats) {
 			var readStream;
 			
 			if (err) {
@@ -128,7 +160,26 @@ exports.setupApp = function(app) {
 				readStream = fs.createReadStream('../htdocs/images/anonymous.png');
 			} else {
 				// We did not get an error. Assume that the file is good, and stream it.
-				readStream = fs.createReadStream('./project_icons/' + req.project.id + '.png');
+				readStream = fs.createReadStream('./project_icons/' + req.project.id + '-45.png');
+			}
+			
+			// Pipe the file to the result object.
+			readStream.pipe(res);
+		});
+	});
+
+	// Get the icon for this project.	
+	app.get('/project/:projectId/icon.png', function(req, res) {
+		// Is there an image file in the special place?
+		fs.stat('./project_icons/' + req.project.id + '-150.png', function(err, stats) {
+			var readStream;
+			
+			if (err) {
+				// We got an error from fstat, use the default icon.
+				readStream = fs.createReadStream('../htdocs/images/anonymous.png');
+			} else {
+				// We did not get an error. Assume that the file is good, and stream it.
+				readStream = fs.createReadStream('./project_icons/' + req.project.id + '-150.png');
 			}
 			
 			// Pipe the file to the result object.
@@ -193,7 +244,7 @@ exports.setupApp = function(app) {
 					quip: quips.getQuip(),
 					title: req.project.title,
 					project: req.project,
-					bodyclass: '',
+					bodyclass: 'left',
 					owner: req.project.creator,
 					characters: req.project.characters,
 					conversations: req.project.conversations,

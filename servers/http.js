@@ -89,6 +89,10 @@ function setupExpress() {
 				bodyid: 'dashboard',
 				flash: req.flash(),
 				authUser: req.session.authenticatedAs,
+				watches: [
+					{'url': '/project/29/', image: '/project/29/thumb.png'},
+					{'url': '/project/33/', image: '/project/33/thumb.png'}
+				],
 			}
 		);
 	});

@@ -1,9 +1,11 @@
 var string_stuff = require('./string_handling');
 var crypt = require('bcrypt');
 var crypto = require('crypto');
+var fs = require('fs');
 var md = require('markdown').markdown;
 var entity_stuff = require('./entity-stuff');
 var quips = require('./quip-stuff');
+var images = require('./image-stuff');
 
 exports.mustBeLoggedIn = function(req, res, next) {
 	if (typeof req.session.authenticatedAs == 'undefined') {
@@ -46,6 +48,75 @@ exports.setupApp = function(app) {
 			}
 		}
 		next();
+	});
+	
+	app.post('/user/:userId/avatar.png', isLoggedInAs, function(req, res) {
+		fs.open('./user_icons/' + req.user.id + '.png', 'w', function(error, fd) {
+			if (error) {
+				console.log(error);
+				res.end(error);
+				return;
+			}
+			
+			var data = req.body.data.replace(/data:[^;]+;base64,/, '');
+			
+			var buff = new Buffer(data, 'base64');
+			fs.write(fd, buff, 0, buff.length, 0, function(error, r) {
+				if (error) {
+					console.log(error);
+					res.end(error);
+					return;
+				}
+				
+				images.makeImageOfSize('./user_icons/' + req.user.id, 150, function(err, metadata) {
+					if (err) throw err;
+					
+					res.send('ok');
+					
+					images.makeImageOfSize('./user_icons/' + req.user.id, 45, function(err, metadata) {
+						if (err) throw err;
+					});
+				});
+			});
+		});
+	});
+	
+	// Get the icon for this project.	
+	app.get('/user/:userId/avatar.png', function(req, res) {
+		// Is there an image file in the special place?
+		fs.stat('./user_icons/' + req.user.id + '-150.png', function(err, stats) {
+			var readStream;
+			
+			if (err) {
+				// We got an error from fstat, use the default icon.
+				readStream = fs.createReadStream('../htdocs/images/anonymous.png');
+			} else {
+				// We did not get an error. Assume that the file is good, and stream it.
+				readStream = fs.createReadStream('./user_icons/' + req.user.id + '-150.png');
+			}
+			
+			// Pipe the file to the result object.
+			readStream.pipe(res);
+		});
+	});
+	
+	// Get the icon for this project.	
+	app.get('/user/:userId/thumb.png', function(req, res) {
+		// Is there an image file in the special place?
+		fs.stat('./user_icons/' + req.user.id + '-45.png', function(err, stats) {
+			var readStream;
+			
+			if (err) {
+				// We got an error from fstat, use the default icon.
+				readStream = fs.createReadStream('../htdocs/images/anonymous.png');
+			} else {
+				// We did not get an error. Assume that the file is good, and stream it.
+				readStream = fs.createReadStream('./user_icons/' + req.user.id + '-45.png');
+			}
+			
+			// Pipe the file to the result object.
+			readStream.pipe(res);
+		});
 	});
 	
 	app.get('/logout', function(req, res) {
@@ -463,12 +534,18 @@ function isLoggedInAs(req, res, next) {
 		req.error = 'No such user';
 	}
 	
-	if (!req.authUser) {
+	if (!req.session.authenticatedAs) {
 		req.error = 'Not logged in';
 	}
 	
-	if (req.authUser != req.user) {
+	if (req.session.authenticatedAs != req.user.id) {
 		req.error = 'Permission denied.';
+		console.log(req.session.authenticatedAs + ' trying to edit ' + req.user);
+	}
+	
+	if (req.error) {
+		next(req.error);
+		return;
 	}
 	
 	next();
