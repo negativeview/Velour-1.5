@@ -9,6 +9,7 @@ var project_stuff = require('./project-stuff');
 var generic_pool = require('generic-pool');
 var mysql = require('db-mysql');
 var quips = require('./quip-stuff');
+var entity = require('./entity-stuff');
 
 var db;
 
@@ -57,6 +58,8 @@ function setupExpress() {
 		req.db = db;
 		next();
 	});
+	
+	entity.setup(db);
 	
 	user_stuff.setupApp(app);
 	project_stuff.setupApp(app);
@@ -111,5 +114,5 @@ function setupExpress() {
 		);
 	});
 	
-	app.listen(8081);
+	app.listen(80);
 }

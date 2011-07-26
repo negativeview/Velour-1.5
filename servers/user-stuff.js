@@ -19,10 +19,10 @@ exports.mustBeLoggedIn = function(req, res, next) {
 
 exports.setupApp = function(app) {
 	app.param('userId', function(req, res, next, id) {
-		get_user_from_static_id(id, req.db, function(err, user) {
+		entity_stuff.getObject(id, function(err, user) {
 			if (err) {
 				console.log('ERROR: ' + error);
-				next();
+				next(error);
 				return;
 			}
 			
@@ -50,54 +50,89 @@ exports.setupApp = function(app) {
 		next();
 	});
 	
+	/* Set up the icon. This will eventually be pulled out into some sort of helper function. */
 	app.post('/user/:userId/avatar.png', isLoggedInAs, function(req, res) {
-		fs.open('./user_icons/' + req.user.id + '.png', 'w', function(error, fd) {
-			if (error) {
-				console.log(error);
-				res.end(error);
-				return;
-			}
-			
-			var data = req.body.data.replace(/data:[^;]+;base64,/, '');
-			
-			var buff = new Buffer(data, 'base64');
-			fs.write(fd, buff, 0, buff.length, 0, function(error, r) {
-				if (error) {
-					console.log(error);
-					res.end(error);
-					return;
-				}
-				
-				images.makeImageOfSize('./user_icons/' + req.user.id, 150, function(err, metadata) {
-					if (err) throw err;
-					
-					res.send('ok');
-					
-					images.makeImageOfSize('./user_icons/' + req.user.id, 45, function(err, metadata) {
+	
+		/* First get the file contents. */
+
+		// Remove the base 64 header.
+		var data = req.body.data.replace(/data:[^;]+;base64,/, '');
+		
+		// Get the md5 of the contents for the file name.
+		var fileName = crypto.createHash('md5').update(data).digest('hex');
+		fileName = './user_icons/' + fileName;
+		
+		fs.stat(fileName, function(err, stats) {
+			if (err) {
+				if (err.code == 'ENOENT') {
+					string_stuff.getset_string(fileName, req.db, function(err, id) {
 						if (err) throw err;
+
+						var q = req.db.query().insert(
+							'base_object',
+							['creator', 'title', 'created'],
+							[req.session.authenticatedAs, id, {value: 'NOW()', escape: false}]
+						);
+
+						q.execute(function(error, result) {
+							if (error) throw error;
+							
+							var q = req.db.query().insert(
+								'obj_static',
+								['type', 'current', 'views', 'created'],
+								[7, result.id, 0, {value: 'NOW()', escape: false}]
+							);
+							
+							q.execute(function(error, result) {
+								if (error) throw error;
+								
+								var total_object_id = result.id;
+								
+								entity_stuff.updateImageId(req.db, req.session.authenticatedAs, total_object_id, function(err) {
+									if (err) throw err;
+								});
+								
+							});
+						});
 					});
-				});
-			});
+
+					doUpload(fileName, data, function(err) {
+						if (err)
+							throw err;
+						
+						res.send('ok');
+					});
+				}
+				return;
+			} else {
+				// This file should already exist. Find it in the database.
+			}
+			return;
 		});
 	});
 	
 	// Get the icon for this project.	
 	app.get('/user/:userId/avatar.png', function(req, res) {
 		// Is there an image file in the special place?
-		fs.stat('./user_icons/' + req.user.id + '-150.png', function(err, stats) {
-			var readStream;
+		
+		var readStream;
+
+		if (req.user.image_id) {
+			var q = req.db.query().select('obj_string.value')
+			                      .from('obj_static')
+			                      .join({table: 'base_object', conditions: 'base_object.id = obj_static.current'})
+			                      .join({table: 'obj_string', conditions: 'base_object.title = obj_string.id'})
+			                      .where('obj_static.id = ?', [req.user.image_id]);
 			
-			if (err) {
-				// We got an error from fstat, use the default icon.
-				readStream = fs.createReadStream('../htdocs/images/anonymous.png');
-			} else {
-				// We did not get an error. Assume that the file is good, and stream it.
-				readStream = fs.createReadStream('./user_icons/' + req.user.id + '-150.png');
-			}
-			
-			// Pipe the file to the result object.
-			readStream.pipe(res);
-		});
+			q.execute(function(err, res) {
+				if (err) throw err;
+				console.log(res);
+			});
+			return;
+		} else {
+			readStream = fs.createReadStream('../htdocs/images/anonymous.png');
+		}
+		readStream.pipe(res);
 	});
 	
 	// Get the icon for this project.	
@@ -173,27 +208,44 @@ exports.setupApp = function(app) {
 		);
 	});
 
-	app.get('/user/:userId', getTopProjects, function(req, res) {
+	app.get('/user/:userId', function(req, res) {
 		if (!req.user) {
 			res.send(404);
 			return;
 		}
 		
-		req.user.desc = md.toHTML(req.user.desc);
-
-		res.render(
-			'user-info',
-			{
-				quip: quips.getQuip(),
-				title: req.user.title,
-				user: req.user,
-				bodyclass: '',
-				projects: req.projects,
-				bodyid: 'user-info',
-				flash: req.flash(),
-				authUser: req.session.authenticatedAs,
+		req.user.getDescription(function(error, description) {
+			if (error) {
+				throw new Error(error);
 			}
-		);				
+			
+			req.user.desc = description;
+			
+			req.user.getProjects(function(error, projects) {
+				if (error) {
+					throw new Error(error);
+				}
+				
+				console.log('projects:');
+				console.log(projects);
+				
+				res.render(
+						'user-info',
+						{
+							quip: quips.getQuip(),
+							title: req.user.getTitle(),
+							user: req.user,
+							bodyclass: '',
+							projects: projects,
+							bodyid: 'user-info',
+							flash: req.flash(),
+							authUser: req.session.authenticatedAs,
+						}
+				);				
+			});
+	
+		});
+				
 	});
 
 	/**
@@ -445,6 +497,7 @@ function get_user_from_static_id(id, db, cb) {
 				'obj_static.views',
 				'base_object.created',
 				'base_object.buzz',
+				'base_object.image_id',
 				'users.email',
 				'users.passhash',
 				'users.power',
@@ -510,25 +563,6 @@ function get_static_from_user(user_id, db, cb) {
 		);
 }
 
-function getTopProjects(req, res, next) {
-	req.db.query().
-		select(['base_object.buzz', 'project_user.project_id', 'obj_string.value', 'project_user.role_name']).
-		from('project_user').
-		join({table: 'obj_static', conditions: 'project_user.project_id = obj_static.id'}).
-		join({table: 'base_object', conditions: 'base_object.id = obj_static.current'}).
-		join({table: 'obj_string', conditions: 'obj_string.id = base_object.title'}).
-		where('user_id = ?', [req.user.id]).
-		order({'base_object.buzz': false}).
-		execute(function(err, result) {
-			if (err) {
-				console.log(err);
-				req.error = err;
-			}
-			req.projects = result;
-			next();
-		});
-}
-
 function isLoggedInAs(req, res, next) {
 	if (!req.user) {
 		req.error = 'No such user';
@@ -549,4 +583,29 @@ function isLoggedInAs(req, res, next) {
 	}
 	
 	next();
+}
+
+function doUpload(fileName, data, cb) {
+	fs.open(fileName, 'w', function(error, fd) {
+		if (error)
+			return cb(error);
+		
+		var buff = new Buffer(data, 'base64');
+		fs.write(fd, buff, 0, buff.length, 0, function(error, r) {
+			if (error)
+				return cb(error);
+			
+			images.makeImageOfSize(fileName, 150, function(err, metadata) {
+				if (err)
+					return cb(error);
+				
+				cb();
+				
+				images.makeImageOfSize(fileName, 45, function(err, metadata) {
+					if (err)
+						return cb(error);
+				});
+			});
+		});
+	});
 }

@@ -1,7 +1,7 @@
 <div id="actionbar">
-	<% if (authUser == user.id) { %>
-		<a href="/user/<%- user.id %>/edit">Edit</a>
-	    <a href="/user/<%- user.id %>/editHistory">Edit History</a>
+	<% if (authUser == user.getId()) { %>
+		<a href="/user/<%- user.getId() %>/edit">Edit</a>
+	    <a href="/user/<%- user.getId() %>/editHistory">Edit History</a>
 	<% } else { %>
 		<a href="#" class="watchbtn">Watch</a>
 	    <a href="#">Notes</a>
@@ -10,23 +10,22 @@
 	<% } %>
     <a href="#">Game History</a>
 </div>
-<div id="userbio"<% if (user.power == 1) { %> class="admin"<% } %>>
-    <img src="/user/<%- user.id %>/avatar.png" id="avatar" />
+<div id="userbio"<% if (user.getPower() == 1) { %> class="admin"<% } %>>
+    <img src="/user/<%- user.getId() %>/avatar.png" id="avatar" />
     <div id="keyvalue">
         <div class="key">Power:</div>
-        <div class="value"><% if (user.power == 1) { %>Admin<% } else if (user.power == 2) {%>Normal<% } %></div>
+        <div class="value"><% if (user.getPower() == 1) { %>Admin<% } else if (user.getPower() == 2) {%>Normal<% } %></div>
         <div class="key">Since:</div>
-        <div class="value"><%- user.created.toDateString() %></div>
+        <div class="value"><%- user.getCreated().toDateString() %></div>
         <div class="key">Buzz:</div>
-        <div class="value"><%- user.buzz.toFixed(2) %></div>
+        <div class="value"><%- user.getBuzz().toFixed(2) %></div>
 		<div id="roleswrapper">
 			<div class="projects">
 				<h2>Projects</h2>
 				<% for (var project in projects) { %>
 					<div class="project">
-						<img src="/project/<%- projects[project].project_id %>/thumb.png" />
-						<a href="/project/<%- projects[project].project_id %>"><%- projects[project].value %></a>
-						<div class="rolename"><%- projects[project].role_name %></div>
+						<img src="/project/<%- projects[project].getId() %>/thumb.png" />
+						<a href="/project/<%- projects[project].getId() %>"><%- projects[project].getTitle() %></a>
 					</div>
 				<% } %>
 			</div>
@@ -35,8 +34,8 @@
     <div class="right">
 		<div id="biography">
 			<h2>Biography</h2>
-			<% if (user.desc) { %>
-				<%- user.desc %>
+			<% if (user.getDescription()) { %>
+				<%- user.getDescription() %>
 			<% } else { %>
 				<p>This user has not set up their biography.</p>
 			<% } %>

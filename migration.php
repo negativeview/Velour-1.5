@@ -52,7 +52,7 @@ db_do("CREATE TABLE obj_string(id SERIAL, value VARCHAR(255))");
 db_do("CREATE TABLE obj_text(id SERIAL, value TEXT)");
 
 /* The base object table is the master table for all objects. This table will get big. */
-db_do("CREATE TABLE base_object(id serial, creator BIGINT(20) UNSIGNED, parent BIGINT(20) UNSIGNED, project BIGINT(20) UNSIGNED, title BIGINT(20) UNSIGNED, created DATETIME, description BIGINT(20) UNSIGNED, buzz DECIMAL(5, 3) UNSIGNED NOT NULL DEFAULT 0.0, buzz_date DATETIME, specific_id BIGINT(20) UNSIGNED NOT NULL)");
+db_do("CREATE TABLE base_object(id serial, creator BIGINT(20) UNSIGNED, parent BIGINT(20) UNSIGNED, project BIGINT(20) UNSIGNED, title BIGINT(20) UNSIGNED, created DATETIME, description BIGINT(20) UNSIGNED, buzz DECIMAL(5, 3) UNSIGNED NOT NULL DEFAULT 0.0, buzz_date DATETIME, image_id BIGINT(20) UNSIGNED NOT NULL, specific_id BIGINT(20) UNSIGNED NOT NULL)");
 db_do("ALTER TABLE base_object ADD CONSTRAINT base_object_title_fk FOREIGN KEY (title) REFERENCES obj_string(id)");
 db_do("ALTER TABLE base_object ADD CONSTRAINT base_object_description_fk FOREIGN KEY (description) REFERENCES obj_text(id)");
 db_do("ALTER TABLE base_object ADD CONSTRAINT base_object_creator_fk FOREIGN KEY (creator) REFERENCES obj_static(id)");
