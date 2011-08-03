@@ -1,23 +1,5 @@
 $(document).ready(
 	function() {
-		$('#homelink').hover(
-			function() {
-				$('#homelink').stop().animate(
-					{
-						top: -40
-					},
-					1000
-				)
-			},
-			function() {
-				$('#homelink').stop().animate(
-					{
-						top: -20
-					},
-					1000
-				);
-			}
-		);
 		$('.option input').focusin(
 			function(event) {
 				$(event.target).parent().addClass('focus');

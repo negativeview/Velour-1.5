@@ -9,21 +9,21 @@
 	<% } %>
     <a href="#">Game History</a>
 </div>
-<div id="userbio"<% if (user.power == 1) { %> class="admin"<% } %>>
+<div id="userbio"<% if (user.getPower() == 1) { %> class="admin"<% } %>>
     <img src="/images/anonymous.gif" id="avatar" />
     <div id="keyvalue">
         <div class="key">Power:</div>
-        <div class="value"><% if (user.power == 1) { %>Admin<% } else if (user.power == 2) {%>Normal<% } %></div>
+        <div class="value"><% if (user.getPower() == 1) { %>Admin<% } else if (user.getPower() == 2) {%>Normal<% } %></div>
         <div class="key">Since:</div>
-        <div class="value"><%- user.created.toDateString() %></div>
+        <div class="value"><%- user.getCreated().toDateString() %></div>
         <div class="key">Buzz:</div>
-        <div class="value"><%- user.buzz.toFixed(2) %></div>
+        <div class="value"><%- user.getBuzz().toFixed(2) %></div>
     </div>
     <div class="right">
 		<div id="biography">
 			<h2>Biography</h2>
 			<form method="POST">
-				<textarea name="bio"><%- user.desc %></textarea>
+				<textarea name="bio"><%- user.getDescription() %></textarea>
 				<input type="submit" value="Save" />
 			</form>
 		</div>

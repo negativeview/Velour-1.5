@@ -4,24 +4,24 @@
 	<a href="/project/<%- project.id %>/leave">Leave</a>
 </div>
 <div id="projectbio">
-    <img src="/project/<%- project.id %>/icon.png" id="avatar" />
+    <img src="/project/<%- project.getId() %>/icon.png" id="avatar" />
     <div id="keyvalue">
         <div class="key">Since:</div>
-        <div class="value"><%- project.created.toDateString() %></div>
+        <div class="value"><%- project.getCreated().toDateString() %></div>
         <div class="key">Creator:</div>
-        <div class="value"><a href="/user/<%- owner.id %>"><%- owner.title %></a></div>
+        <div class="value"><a href="/user/<%- owner.getId() %>"><%- owner.getTitle() %></a></div>
         <div class="key">Buzz:</div>
-        <div class="value"><%- project.buzz.toFixed(2) %></div>
+        <div class="value"><%- project.getBuzz().toFixed(2) %></div>
         <h2>Roster</h2>
         <% for (var i in project.roster) { %>
-        	<a href="/user/<%- project.roster[i].id %>"><%- project.roster[i].title %></a>
+        	<a href="/user/<%- project.roster[i].getId() %>"><%- project.roster[i].getTitle() %></a>
         <% } %>
     </div>
     <div class="right">
 		<div id="biography">
 			<% if (project.desc) { %>
 				<h2>Description</h2>
-				<%- project.desc %>
+				<%- project.getDescription() %>
 			<% } %>
 		</div>
 		<div class="twocol">

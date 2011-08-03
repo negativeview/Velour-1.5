@@ -1,4 +1,6 @@
-var entity_stuff = require('./entity-stuff');
+var BaseEntity = require('./BaseEntity').BaseEntity;
+
+var entity_stuff = require('../entity-stuff');
 
 function User() {
 	this.setSpecificId = function(specificId) {
@@ -44,7 +46,7 @@ function User() {
 	};
 };
 
-User.prototype = new entity_stuff.BaseEntity();
+User.prototype = new BaseEntity();
 
 module.exports.registerType = function(db) {
 	User.prototype.db = db;

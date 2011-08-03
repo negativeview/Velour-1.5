@@ -11,6 +11,9 @@ var mysql = require('db-mysql');
 var quips = require('./quip-stuff');
 var entity = require('./entity-stuff');
 
+var user_controller = require('./controllers/UserController');
+var project_controller = require('./controllers/ProjectController');
+
 var db;
 
 new mysql.Database({
@@ -61,8 +64,11 @@ function setupExpress() {
 	
 	entity.setup(db);
 	
-	user_stuff.setupApp(app);
-	project_stuff.setupApp(app);
+	user_controller.setupUrlHandlers(app);
+	user_controller.setupRoutes(app);
+	
+	project_controller.setupUrlHandlers(app);
+	project_controller.setupRoutes(app);
 
 	// Use ejs rendering for our templates.
 	app.set('view engine', 'ejs');

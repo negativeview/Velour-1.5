@@ -10,6 +10,11 @@ body {
 }
 input[type="submit"] {
     font-family: 'Lato', arial, serif !important;
+    clear: left;
+    display: block;
+}
+#loginbar input[type="submit"] {
+	display: inline;
 }
 #content {
     background-image: url('/images/patterns/brushed_alu.png');
@@ -27,7 +32,7 @@ body.watch #content {
 	width: 750px;
 	margin-left: auto;
 	margin-right: auto;
-	margin-top: 60px;
+	margin-top: 50px;
     margin-bottom: 60px;
     position: relative;
 }
@@ -245,6 +250,9 @@ h2 {
 #signupform h2 {
 	margin-bottom: 0px;
 }
+label[for="privacy"] {
+	display: inline;
+}
 label {
 	display: block;
     font-size: 90%;
@@ -378,30 +386,13 @@ label {
 	width: 500px;
 	height: 250px;
 }
-#quip {
-	position: absolute;
-	bottom: 300px;
-	right: -310px;
-	color: #777;
-	font-size: 80%;
-	width: 600px;
-	text-align: right;
-	
-	-webkit-transform: rotate(90deg);
-	-moz-transform: rotate(90deg);
-}
-#quip:hover {
-	color: #8AF;
-	font-weight: bold;
-	font-size: 90%;
-}
 #homelink {
-	width: 61px;
-	height: 54px;
-	background-image: url('/images/robot.png');
+	width: 374px;
+	height: 24px;
+	background-image: url('/images/nerderyLogo.png');
 	display: block;
 	position: absolute;
-	top: -20px;
+	top: -30px;
 	left: 10px;
 	z-index: 1;
 }

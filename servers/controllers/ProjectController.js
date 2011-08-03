@@ -1,42 +1,27 @@
 var fs = require('fs');
-var user_stuff = require('./user-stuff');
+//var user_stuff = require('./user-stuff');
 var md = require('markdown').markdown;
-var quips = require('./quip-stuff');
-var images = require('./image-stuff');
-var string_handling = require('./string_handling');
-var entity_stuff = require('./entity-stuff');
+var images = require('../image-stuff');
+//var string_handling = require('./string_handling');
+var entity_stuff = require('../entity-stuff');
+var tasks = require('../helpers/Tasks');
 
-exports.setupApp = function(app) {
+var permissionHelper = require('../helpers/Permissions');
+
+exports.setupUrlHandlers = function(app) {
 	app.param('projectId', function(req, res, next, id) {
-		var q = req.db.query().
-			select(
-				[
-					'obj_static.id',
-					'obj_static.views',
-					'base_object.buzz',
-					'base_object.buzz_date',
-					'base_object.creator',
-					'obj_static.created',
-					{
-						'title': '(select value from obj_string where id = base_object.title)',
-						'desc': '(select value from obj_text where id = base_object.description)'
-					}
-				]
-			).
-			from('obj_static').
-			join({table: 'base_object', conditions: 'base_object.id = obj_static.current'}).
-			where('obj_static.type = 2 AND obj_static.id = ?', [id]);
-		q.execute(function(error, rows, cols) {
-			if (error) {
-				console.log('ERROR: ' + error);
-			} else {
-				req.project = rows[0];
-			}
+		entity_stuff.getObject(id, function(error, res) {
+			if (error)
+				return console.log('Error: ' + error);
+			
+			req.project = res;
 			next();
 		});
 	});
-	
-	app.post('/project/new', user_stuff.mustBeLoggedIn, function(req, res) {
+};
+
+exports.setupRoutes = function(app) {
+	app.post('/project/new', permissionHelper.mustBeLoggedIn, function(req, res) {
 		entity_stuff.newObject(
 			{
 				type: 2,
@@ -51,11 +36,10 @@ exports.setupApp = function(app) {
 		);
 	});
 
-	app.get('/project/new', user_stuff.mustBeLoggedIn, function(req, res) {
+	app.get('/project/new', permissionHelper.mustBeLoggedIn, function(req, res) {
 		res.render(
 			'project-new',
 			{
-				quip: quips.getQuip(),
 				title: 'New Project',
 				bodyclass: '',
 				bodyid: 'project-new',
@@ -140,16 +124,16 @@ exports.setupApp = function(app) {
 			return;
 		}
 
-		var tasks = new serialTask(req, res);
-		tasks.addTask(
+		var task = new tasks.serialTask(req, res);
+		task.addTask(
 			function(req, res, next) {
-				user_stuff.userFromStaticId(req.project.creator, req.db, function(err, owner) {
+				entity_stuff.getObject(req.project.getCreator(), function(err, owner) {
 					req.project.creator = owner;
 					next();
 				});
 			}
 		);
-		tasks.addTask(
+		task.addTask(
 			function(req, res, next) {
 				get_characters_for_project(req.project.id, req, function(err, characters) {
 					req.project.characters = characters;
@@ -157,7 +141,7 @@ exports.setupApp = function(app) {
 				});
 			}
 		);
-		tasks.addTask(
+		task.addTask(
 			function(req, res, next) {
 				get_todos_for_project(req.project.id, req, function(err, todos) {
 					req.project.todos = todos;
@@ -165,7 +149,7 @@ exports.setupApp = function(app) {
 				});
 			}
 		);
-		tasks.addTask(
+		task.addTask(
 			function(req, res, next) {
 				get_conversations_for_project(req.project.id, req, function(err, conversations) {
 					req.project.conversations = conversations;
@@ -173,23 +157,26 @@ exports.setupApp = function(app) {
 				});
 			}
 		);
-		tasks.addTask(
+		task.addTask(
 			function(req, res, next) {
-				get_roster_for_project(req.project.id, req, function(err, roster) {
+				req.project.getRoster(function(error, roster) {
+					if (error)
+						throw new Error(error);
+					console.log('roster: ' + roster);
 					req.project.roster = roster;
 					next();
 				});
 			}
 		);
 		
-		tasks.start(function() {
-			req.project.desc = md.toHTML(req.project.desc);
-		
+		task.start(function() {
+			if (req.project.desc) {
+				req.project.desc = md.toHTML(req.project.desc);
+			}
 			res.render(
 				'project-info',
 				{
-					quip: quips.getQuip(),
-					title: req.project.title,
+					title: req.project.getTitle(),
 					project: req.project,
 					bodyclass: 'left',
 					owner: req.project.creator,
@@ -249,28 +236,6 @@ function get_sub_of_type_for_project(project_id, type_id, options, req, cb) {
 			cb(null, res);
 		}
 	);
-}
-
-function get_roster_for_project(project_id, req, cb) {
-	req.db.query().
-		select('obj_static.id, project_user.role_name, project_user.power, obj_string.value as title').
-		from('project_user').
-		join({table: 'obj_static', conditions: 'obj_static.id = project_user.user_id'}).
-		join({table: 'base_object', conditions: 'base_object.id = obj_static.current'}).
-		join({table: 'obj_string', conditions: 'obj_string.id = base_object.title'}).
-		where('project_user.project_id = ?', [project_id]).
-		order({'buzz': false}).
-		execute(
-			function(err, res) {
-				if (err) {
-					console.log(err);
-					cb(err);
-					return;
-				}
-				
-				cb(null, res);
-			}
-		);
 }
 
 function get_characters_for_project(project_id, req, cb) {
